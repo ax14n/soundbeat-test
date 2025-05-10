@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 
 /**
  * Composable que implementa un BottomSheet con controles de reproducción de música.
@@ -74,18 +72,6 @@ fun MusicPlayerBottomSheet(
         sheetPeekHeight = 56.dp,
         content = {
             content()
-
-            // Botón para abrir el reproductor
-            Button(
-                onClick = {
-                    coroutineScope.launch {
-                        bottomSheetState.bottomSheetState.expand()
-                    }
-                },
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text("Abrir Reproductor")
-            }
         }
     )
 }
