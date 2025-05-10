@@ -12,7 +12,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
-const val URL_BASE = "http://10.0.2.2:8080"
+const val URL_BASE = "http://192.168.1.174:8080"
 
 /**
  * Función para hacer peticiones a la API, tanto GET como POST, con el manejo adecuado de respuestas y errores.

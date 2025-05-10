@@ -55,6 +55,11 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.9")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
+    // TopSheetScaffold
+    implementation("androidx.compose.material3:material3:1.0.0")
+    implementation("androidx.compose.foundation:foundation:1.0.0")
+    implementation("androidx.compose.ui:ui:1.0.0")
+
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

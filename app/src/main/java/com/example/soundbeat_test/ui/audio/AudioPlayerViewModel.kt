@@ -7,6 +7,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import com.example.soundbeat_test.network.URL_BASE
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -61,6 +62,7 @@ class AudioPlayerViewModel(
 
     init {
         exoPlayer.addListener(listener)
+        loadAndPlayHLS("$URL_BASE/media/Alone_-_Color_Out.m3u8")
     }
 
     /**
@@ -108,6 +110,29 @@ class AudioPlayerViewModel(
     fun seekTo(positionMs: Long) {
         exoPlayer.seekTo(positionMs)
     }
+
+    /**
+     * Agrega la pista actual a la lista de favoritos del usuario.
+     *
+     * Esta función debe implementar la lógica necesaria para marcar una canción
+     * como favorita, lo cual puede implicar persistencia en base de datos local
+     * o sincronización con un servidor.
+     */
+    fun addToFavorites() {
+        // TODO("Not implemented yet.")
+    }
+
+    /**
+     * Guarda la pista actual para su uso offline o posterior reproducción.
+     *
+     * Esta función debería implementar la lógica para almacenar una canción
+     * en almacenamiento local o en una base de datos interna, dependiendo de los
+     * requisitos de la aplicación.
+     */
+    fun saveTrack() {
+        // TODO("Not implemented yet.")
+    }
+
 
     /**
      * Libera los recursos del ExoPlayer y elimina el listener cuando el ViewModel es destruido.
