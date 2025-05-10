@@ -14,6 +14,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,17 +27,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.R
-import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.UserImage
 import com.example.soundbeat_test.ui.screens.search.VinylList
 
-@Preview
+@Preview(showSystemUi = true)
 @Composable
 fun SelectedPlaylistScreen(
     navHostController: NavHostController? = null,
-    playlist: Playlist? = Playlist.PlaylistExample
+    navController: NavHostController? = null,
+    sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
 ) {
+    val playlistState = sharedPlaylistViewModel?.selectedPlaylist?.collectAsState()
+
+    val playlist = playlistState?.value
+
+    LaunchedEffect(playlist) {
+        Log.d(
+            "SelectedPlaylistScreen",
+            "Playlist recibida: ${playlist?.name} con ${playlist?.songs!!.size} álbum(es)"
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -59,17 +71,17 @@ fun SelectedPlaylistScreen(
 
         UserImage()
 
-        playlist?.let {
+        playlist.let {
 
             Text(
-                text = playlist.name,
+                text = playlist?.name ?: "Unsigned",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 12.dp),
                 fontFamily = FontFamily.Monospace
             )
             Text(
-                text = "id = " + playlist.id.toString(),
+                text = "id = " + playlist?.id.toString(),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 12.dp),
@@ -91,11 +103,12 @@ fun SelectedPlaylistScreen(
                 )
             }
 
-            navHostController?.let {
-                VinylList(albumList = playlist.songs.toList()) {
-                    Log.d("SelectedPlaylistScreen", "Started playing a vinyl.")
-                }
+            VinylList(
+                albumList = playlist?.songs!!.toList()
+            ) {
+                Log.d("SelectedPlaylistScreen", "Started playing a vinyl.")
             }
+
         }
 
     }

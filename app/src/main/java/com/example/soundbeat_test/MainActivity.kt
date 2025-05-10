@@ -39,6 +39,7 @@ import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreen
 import com.example.soundbeat_test.ui.screens.profile.ProfileScreen
 import com.example.soundbeat_test.ui.screens.search.SearchScreen
 import com.example.soundbeat_test.ui.selected_playlist.SelectedPlaylistScreen
+import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 import com.example.soundbeat_test.ui.theme.SoundBeat_TestTheme
 
 /**
@@ -72,7 +73,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainApp() {
     val navController = rememberNavController()
-    AppNavigation(navController = navController)
+
+    val sharedPlaylistViewModel: SharedPlaylistViewModel = viewModel()
+
+    AppNavigation(
+        navController = navController, sharedPlaylistViewModel = sharedPlaylistViewModel
+    )
 }
 
 /**
@@ -83,7 +89,9 @@ fun MainApp() {
  * @param navController Controlador de navegación que gestiona el flujo de pantallas.
  */
 @Composable
-fun AppNavigation(navController: NavHostController) {
+fun AppNavigation(
+    navController: NavHostController, sharedPlaylistViewModel: SharedPlaylistViewModel
+) {
     NavHost(navController = navController, startDestination = ROUTES.LOGIN) {
         composable(ROUTES.LOGIN) {
             LoginScreen(navController)
@@ -92,13 +100,21 @@ fun AppNavigation(navController: NavHostController) {
             RegisterScreen(navController)
         }
         composable(ROUTES.HOME) {
-            MainScreen(navController)
+            MainScreen(navController, sharedPlaylistViewModel)
+        }
+        composable(ROUTES.PLAYLIST) {
+            PlaylistScreen(navController)
+        }
+        composable(ROUTES.PROFILE) {
+            ProfileScreen(navController)
         }
         composable(ROUTES.SETTINGS) {
             ConfigurationScreen(navController)
         }
         composable(ROUTES.SELECTED_PLAYLIST) {
-            SelectedPlaylistScreen(navController)
+            SelectedPlaylistScreen(
+                navController = navController, sharedPlaylistViewModel = sharedPlaylistViewModel
+            )
         }
     }
 }
@@ -109,7 +125,9 @@ fun AppNavigation(navController: NavHostController) {
  * @param navHosController Controlador de navegación necesario si se quieren realizar cambios de pantalla desde esta sección.
  */
 @Composable
-fun MainScreen(navHosController: NavHostController) {
+fun MainScreen(
+    navHosController: NavHostController, sharedPlaylistViewModel: SharedPlaylistViewModel
+) {
     val navItemList: List<NavItem> = GetNavItemList()
 
     var selectedIndex by remember {
@@ -121,7 +139,9 @@ fun MainScreen(navHosController: NavHostController) {
     }) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             ContentScreen(
-                selectedIndex = selectedIndex, navHostController = navHosController
+                selectedIndex = selectedIndex,
+                navHostController = navHosController,
+                sharedPlaylistViewModel = sharedPlaylistViewModel
             )
         }
     }
@@ -162,11 +182,14 @@ private fun BottomNavigationBar(
  */
 @Composable
 fun ContentScreen(
-    selectedIndex: Int, navHostController: NavHostController
+    selectedIndex: Int,
+    navHostController: NavHostController,
+    sharedPlaylistViewModel: SharedPlaylistViewModel
 ) {
     Log.d("MainActivity", "NavigationBar index: $selectedIndex")
+
     when (selectedIndex) {
-        0 -> HomeScreen(navHostController)
+        0 -> HomeScreen(navHostController, sharedPlaylistViewModel)
         1 -> PlaylistScreen(navHostController)
         2 -> SearchScreen(navHostController)
         3 -> ProfileScreen(navHostController)

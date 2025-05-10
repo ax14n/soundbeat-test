@@ -26,10 +26,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumHorizontalList
 import com.example.soundbeat_test.ui.components.UserImage
+import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 
 /**
  * Composable que representa la pantalla de perfil de usuario.
@@ -41,10 +43,12 @@ import com.example.soundbeat_test.ui.components.UserImage
  */
 @Preview(showSystemUi = true)
 @Composable
-fun ProfileScreen(navHostController: NavHostController? = null) {
+fun ProfileScreen(
+    navHostController: NavHostController? = null
+) {
+    val sharedPlaylistViewModel = viewModel<SharedPlaylistViewModel>()
 
     val username: String by remember { mutableStateOf("AX14N") }
-
 
     Column(
         modifier = Modifier
@@ -59,8 +63,7 @@ fun ProfileScreen(navHostController: NavHostController? = null) {
                 .padding(horizontal = 6.dp)
                 .clickable {
                     navHostController?.let { onClickConfigurationButton(navHostController) }
-                },
-            contentAlignment = Alignment.TopEnd
+                }, contentAlignment = Alignment.TopEnd
         ) {
 
             androidx.compose.material3.Icon(
@@ -83,13 +86,13 @@ fun ProfileScreen(navHostController: NavHostController? = null) {
         )
 
         SoundbeatContentRow() {
-            AlbumHorizontalList()
+            AlbumHorizontalList(sharedPlaylistViewModel = sharedPlaylistViewModel)
         }
         SoundbeatContentRow() {
-            AlbumHorizontalList()
+            AlbumHorizontalList(sharedPlaylistViewModel = sharedPlaylistViewModel)
         }
         SoundbeatContentRow() {
-            AlbumHorizontalList()
+            AlbumHorizontalList(sharedPlaylistViewModel = sharedPlaylistViewModel)
         }
     }
 }

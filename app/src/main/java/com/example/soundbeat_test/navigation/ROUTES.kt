@@ -11,6 +11,9 @@ object ROUTES {
     const val LOGIN = "LOGIN"
     const val REGISTER = "REGISTER"
     const val HOME = "HOME"
+    const val PLAYLIST = "PLAYLIST"
+    const val PROFILE = "PROFILE"
+    const val SEARCH = "SEARCH"
     const val SETTINGS = "SETTINGS"
     const val SELECTED_PLAYLIST = "SELECTED_PLAYLIST"
 }

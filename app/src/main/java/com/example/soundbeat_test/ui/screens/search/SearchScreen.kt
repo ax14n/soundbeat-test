@@ -25,7 +25,7 @@ import com.example.soundbeat_test.R
 import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumCard
-import com.example.soundbeat_test.ui.screens.search.viewmodel.SearchScreenViewModel
+import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 
 /**
  * Composable que representa la pantalla de búsqueda de álbumes.
@@ -36,17 +36,19 @@ import com.example.soundbeat_test.ui.screens.search.viewmodel.SearchScreenViewMo
  *
  * @param navHostController Controlador de navegación opcional. No se usa dentro de esta función,
  * pero está disponible para permitir navegación desde esta pantalla si es necesario.
- * @param viewmodel Instancia de [SearchScreenViewModel], inyectada por defecto mediante `viewModel()`,
+ * @param searchScreenViewModel Instancia de [SearchScreenViewModel], inyectada por defecto mediante `viewModel()`,
  * que gestiona el estado del texto de búsqueda y la lista de álbumes.
  */
 @Preview(showSystemUi = true)
 @Composable
 fun SearchScreen(
-    navHostController: NavHostController? = null, viewmodel: SearchScreenViewModel = viewModel()
+    navHostController: NavHostController? = null,
+    searchScreenViewModel: SearchScreenViewModel = viewModel()
 ) {
+    val sharedPlaylistViewModel = viewModel<SharedPlaylistViewModel>()
 
-    val queryState = viewmodel.textFieldText.collectAsState()
-    val listState = viewmodel.albumList.collectAsState()
+    val queryState = searchScreenViewModel.textFieldText.collectAsState()
+    val listState = searchScreenViewModel.albumList.collectAsState()
 
     val query = queryState.value
     val list = listState.value
@@ -57,9 +59,9 @@ fun SearchScreen(
         ) {
             SearchBarWithButton(
                 text = query,
-                onTextChange = { viewmodel.onSearchQueryChange(it) },
+                onTextChange = { searchScreenViewModel.onSearchQueryChange(it) },
                 onSearch = { query ->
-                    viewmodel.loadAlbums(query)
+                    searchScreenViewModel.loadAlbums(query)
                 })
 
             navHostController?.let {
@@ -80,8 +82,7 @@ fun SearchScreen(
  */
 @Composable
 fun VinylList(
-    albumList: List<Album>,
-    onClickedAlbumCover: () -> Unit
+    albumList: List<Album>, onClickedAlbumCover: () -> Unit
 ) {
 
     LazyColumn(
