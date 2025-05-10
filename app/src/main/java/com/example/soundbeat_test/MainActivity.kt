@@ -20,6 +20,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -27,6 +29,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.soundbeat_test.navigation.GetNavItemList
 import com.example.soundbeat_test.navigation.NavItem
 import com.example.soundbeat_test.navigation.ROUTES
+import com.example.soundbeat_test.ui.audio.AudioPlayerViewModel
+import com.example.soundbeat_test.ui.audio.MusicPlayerBottomSheet
 import com.example.soundbeat_test.ui.screens.auth.LoginScreen
 import com.example.soundbeat_test.ui.screens.auth.RegisterScreen
 import com.example.soundbeat_test.ui.screens.configuration.ConfigurationScreen
@@ -48,9 +52,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SoundBeat_TestTheme {
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                MainApp()
-//                }
+                val audioPlayerViewModel: AudioPlayerViewModel = viewModel()
+
+                MusicPlayerBottomSheet(audioPlayerViewModel = audioPlayerViewModel) {
+                    MainApp()
+                }
             }
         }
     }
@@ -133,7 +139,7 @@ fun MainScreen(navHosController: NavHostController) {
 private fun BottomNavigationBar(
     navItemList: List<NavItem>, selectedIndex: Int, onInteraction: (Int) -> Unit
 ) {
-    NavigationBar {
+    NavigationBar(Modifier.padding(bottom = 32.dp)) {
         navItemList.forEachIndexed { index, navItem ->
             NavigationBarItem(
                 selected = selectedIndex == index,
@@ -152,6 +158,7 @@ private fun BottomNavigationBar(
  * Renderiza el contenido dinámico de la pantalla dependiendo del índice seleccionado en la barra inferior.
  *
  * @param selectedIndex Índice del elemento seleccionado que define qué pantalla se muestra.
+ * @param navHostController Controlador encargado de la navegación de pantallas.
  */
 @Composable
 fun ContentScreen(
