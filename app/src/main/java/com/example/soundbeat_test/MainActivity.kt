@@ -48,9 +48,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SoundBeat_TestTheme {
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                 MainApp()
-//                }
             }
         }
     }
