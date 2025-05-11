@@ -46,14 +46,13 @@ fun MusicPlayerBottomSheet(
     val coroutineScope = rememberCoroutineScope()
 
     val isPlaying by audioPlayerViewModel.isPlaying.collectAsState()
-    val currentMediaItem by audioPlayerViewModel.currentMediaItem.collectAsState()
 
     BottomSheetScaffold(
         scaffoldState = bottomSheetState,
         sheetContent = {
             MusicPlayerControls(
                 isPlaying = isPlaying,
-                currentTrack = currentMediaItem?.mediaMetadata?.title?.toString() ?: "Sin título",
+                currentTrack = "Sin título",
                 onPlayPauseClick = {
                     audioPlayerViewModel.playPause()
                 },

@@ -1,10 +1,12 @@
 package com.example.soundbeat_test.ui.audio
 
+import android.annotation.SuppressLint
 import android.app.Application
 import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.soundbeat_test.data.Album
@@ -29,6 +31,7 @@ class AudioPlayerViewModel(
      * `AndroidViewModel(application)`. Esto permite acceder al `Context` a través
      * del método `getApplication()`, necesario para construir y configurar el ExoPlayer.
      */
+    @SuppressLint("StaticFieldLeak")
     private val context = getApplication<Application>().applicationContext
 
     /**
@@ -48,6 +51,9 @@ class AudioPlayerViewModel(
     private val _currentMediaItem = MutableStateFlow<MediaItem?>(null)
     val currentMediaItem: StateFlow<MediaItem?> = _currentMediaItem
 
+    private val _currentIndex = MutableStateFlow(0)
+    val currentIndex: StateFlow<Int> = _currentIndex
+
     /**
      * Listener para el ExoPlayer, actualiza los estados internos cuando cambia el estado de reproducción
      * o se cambia la canción.
@@ -59,11 +65,16 @@ class AudioPlayerViewModel(
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             _currentMediaItem.value = mediaItem
+            _currentIndex.value = exoPlayer.currentMediaItemIndex
         }
+
     }
 
     init {
         exoPlayer.addListener(listener)
+        // Ejemplo de reproducción de playlist que hice.
+        // val list = Album.AlbumListExample
+        // loadPlaylist(list)
     }
 
     /**
@@ -78,6 +89,16 @@ class AudioPlayerViewModel(
         exoPlayer.volume = 1.0f // Volumen máximo
     }
 
+    /**
+     * Genera la URL del recurso HLS asociado a un álbum.
+     *
+     * Dado un objeto [Album], construye la URL completa para acceder al archivo `.m3u8`
+     * correspondiente en el servidor. El nombre del álbum es codificado en UTF-8 para
+     * asegurar compatibilidad con URLs válidas.
+     *
+     * @param album Objeto que representa el álbum cuya pista se quiere reproducir.
+     * @return Cadena de texto que representa la URL codificada del archivo de audio HLS.
+     */
     fun createSongUrl(album: Album): String {
         val url = "$URL_BASE/media/${
             URLEncoder.encode(
@@ -85,6 +106,32 @@ class AudioPlayerViewModel(
             )
         }"
         return url
+    }
+
+    /**
+     * Carga y reproduce una lista de álbumes como una lista de reproducción (playlist).
+     *
+     * Convierte cada objeto [Album] en un [MediaItem] a partir de su URL, utilizando
+     * [createSongUrl]. Luego establece la lista de medios en el ExoPlayer, la prepara
+     * para reproducción y comienza a reproducir automáticamente desde la primera pista.
+     *
+     * Esta función reemplaza cualquier contenido previamente cargado en el reproductor,
+     * y permite que los métodos [skipToNext] y [skipToPrevious] funcionen correctamente,
+     * ya que ahora hay una cola de reproducción.
+     *
+     * @param albums Lista de álbumes que representan la lista de reproducción a cargar.
+     */
+    @OptIn(UnstableApi::class)
+    fun loadPlaylist(albums: List<Album>) {
+        val mediaItems = albums.map { album ->
+            val uri = createSongUrl(album)
+            Log.d("AudioPlayerViewModel", "${album.name} : $uri")
+            MediaItem.fromUri(uri)
+        }
+
+        exoPlayer.setMediaItems(mediaItems)
+        exoPlayer.prepare()
+        exoPlayer.playWhenReady = true
     }
 
     /**

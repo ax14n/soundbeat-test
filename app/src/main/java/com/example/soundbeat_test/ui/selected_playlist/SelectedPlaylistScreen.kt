@@ -94,7 +94,7 @@ fun SelectedPlaylistScreen(
 
             Button(
                 onClick = {
-                    // TODO("Start playing playlist songs")
+                    audioPlayerViewModel?.loadPlaylist(playlist?.songs?.toList() ?: listOf())
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
                 shape = RoundedCornerShape(12.dp),
