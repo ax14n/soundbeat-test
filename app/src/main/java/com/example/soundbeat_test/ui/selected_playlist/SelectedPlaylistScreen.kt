@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.R
 import com.example.soundbeat_test.navigation.ROUTES
+import com.example.soundbeat_test.ui.audio.AudioPlayerViewModel
 import com.example.soundbeat_test.ui.components.UserImage
 import com.example.soundbeat_test.ui.screens.search.VinylList
 
@@ -35,8 +36,8 @@ import com.example.soundbeat_test.ui.screens.search.VinylList
 @Composable
 fun SelectedPlaylistScreen(
     navHostController: NavHostController? = null,
-    navController: NavHostController? = null,
     sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
+    audioPlayerViewModel: AudioPlayerViewModel? = null
 ) {
     val playlistState = sharedPlaylistViewModel?.selectedPlaylist?.collectAsState()
 
@@ -66,6 +67,7 @@ fun SelectedPlaylistScreen(
                     }
                 })
                 .align(Alignment.End)
+                .padding(top = 10.dp)
         )
         Spacer(Modifier.padding(top = 20.dp))
 
@@ -105,8 +107,10 @@ fun SelectedPlaylistScreen(
 
             VinylList(
                 albumList = playlist?.songs!!.toList()
-            ) {
-                Log.d("SelectedPlaylistScreen", "Started playing a vinyl.")
+            ) { album ->
+                val url: String = audioPlayerViewModel?.createSongUrl(album).toString()
+                audioPlayerViewModel?.loadAndPlayHLS(url)
+                Log.d("SelectedPlaylistScreen", "Started playing ${album.name} by ${album.author}")
             }
 
         }

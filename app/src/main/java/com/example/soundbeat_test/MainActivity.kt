@@ -54,9 +54,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             SoundBeat_TestTheme {
                 val audioPlayerViewModel: AudioPlayerViewModel = viewModel()
+                val sharedPlaylistViewModel: SharedPlaylistViewModel = viewModel()
 
-                MusicPlayerBottomSheet(audioPlayerViewModel = audioPlayerViewModel) {
-                    MainApp()
+                MusicPlayerBottomSheet(
+                    audioPlayerViewModel = audioPlayerViewModel,
+                    sharedPlaylistViewModel = sharedPlaylistViewModel
+                ) {
+                    MainApp(
+                        audioPlayerViewModel = audioPlayerViewModel,
+                        sharedPlaylistViewModel = sharedPlaylistViewModel
+                    )
                 }
             }
         }
@@ -71,13 +78,16 @@ class MainActivity : ComponentActivity() {
  */
 @Preview(showSystemUi = true)
 @Composable
-fun MainApp() {
+fun MainApp(
+    audioPlayerViewModel: AudioPlayerViewModel? = null,
+    sharedPlaylistViewModel: SharedPlaylistViewModel? = null
+) {
     val navController = rememberNavController()
 
-    val sharedPlaylistViewModel: SharedPlaylistViewModel = viewModel()
-
     AppNavigation(
-        navController = navController, sharedPlaylistViewModel = sharedPlaylistViewModel
+        navController = navController,
+        sharedPlaylistViewModel = sharedPlaylistViewModel,
+        audioPlayerViewModel = audioPlayerViewModel
     )
 }
 
@@ -90,7 +100,9 @@ fun MainApp() {
  */
 @Composable
 fun AppNavigation(
-    navController: NavHostController, sharedPlaylistViewModel: SharedPlaylistViewModel
+    navController: NavHostController,
+    sharedPlaylistViewModel: SharedPlaylistViewModel?,
+    audioPlayerViewModel: AudioPlayerViewModel?
 ) {
     NavHost(navController = navController, startDestination = ROUTES.LOGIN) {
         composable(ROUTES.LOGIN) {
@@ -113,7 +125,9 @@ fun AppNavigation(
         }
         composable(ROUTES.SELECTED_PLAYLIST) {
             SelectedPlaylistScreen(
-                navController = navController, sharedPlaylistViewModel = sharedPlaylistViewModel
+                navHostController = navController,
+                sharedPlaylistViewModel = sharedPlaylistViewModel,
+                audioPlayerViewModel = audioPlayerViewModel
             )
         }
     }
@@ -126,7 +140,7 @@ fun AppNavigation(
  */
 @Composable
 fun MainScreen(
-    navHosController: NavHostController, sharedPlaylistViewModel: SharedPlaylistViewModel
+    navHosController: NavHostController, sharedPlaylistViewModel: SharedPlaylistViewModel?
 ) {
     val navItemList: List<NavItem> = GetNavItemList()
 
@@ -184,7 +198,7 @@ private fun BottomNavigationBar(
 fun ContentScreen(
     selectedIndex: Int,
     navHostController: NavHostController,
-    sharedPlaylistViewModel: SharedPlaylistViewModel
+    sharedPlaylistViewModel: SharedPlaylistViewModel?
 ) {
     Log.d("MainActivity", "NavigationBar index: $selectedIndex")
 

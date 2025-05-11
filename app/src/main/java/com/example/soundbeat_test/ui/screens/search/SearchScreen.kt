@@ -82,7 +82,7 @@ fun SearchScreen(
  */
 @Composable
 fun VinylList(
-    albumList: List<Album>, onClickedAlbumCover: () -> Unit
+    albumList: List<Album>, onClickedAlbumCover: (Album) -> Unit
 ) {
 
     LazyColumn(
@@ -92,7 +92,7 @@ fun VinylList(
             AlbumCard(
                 song
             ) {
-                onClickedAlbumCover()
+                onClickedAlbumCover(song)
             }
         }
     }

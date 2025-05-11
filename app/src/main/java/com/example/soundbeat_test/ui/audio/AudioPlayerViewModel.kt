@@ -7,9 +7,11 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.network.URL_BASE
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.net.URLEncoder
 
 /**
  * ViewModel que maneja la lógica de reproducción de audio usando ExoPlayer.
@@ -62,7 +64,6 @@ class AudioPlayerViewModel(
 
     init {
         exoPlayer.addListener(listener)
-        loadAndPlayHLS("$URL_BASE/media/Alone_-_Color_Out.m3u8")
     }
 
     /**
@@ -75,6 +76,15 @@ class AudioPlayerViewModel(
         exoPlayer.setMediaItem(MediaItem.fromUri(url))
         exoPlayer.prepare()
         exoPlayer.volume = 1.0f // Volumen máximo
+    }
+
+    fun createSongUrl(album: Album): String {
+        val url = "$URL_BASE/media/${
+            URLEncoder.encode(
+                album.name.trim() + ".m3u8", "UTF-8"
+            )
+        }"
+        return url
     }
 
     /**

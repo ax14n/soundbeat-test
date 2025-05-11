@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 
 /**
  * Composable que implementa un BottomSheet con controles de reproducción de música.
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun MusicPlayerBottomSheet(
     audioPlayerViewModel: AudioPlayerViewModel,
+    sharedPlaylistViewModel: SharedPlaylistViewModel,
     content: @Composable () -> Unit
 ) {
     val bottomSheetState = rememberBottomSheetScaffoldState()
@@ -109,9 +111,6 @@ fun MusicPlayerControls(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            IconButton(onClick = onSaveTrack) {
-                Icon(Icons.Default.Save, contentDescription = "Guardar Canción")
-            }
             IconButton(onClick = onAddToFavorites) {
                 Icon(Icons.Default.FavoriteBorder, contentDescription = "Añadir a Favoritos")
             }
@@ -126,6 +125,9 @@ fun MusicPlayerControls(
             }
             IconButton(onClick = onNextTrackClick) {
                 Icon(Icons.Default.FastForward, contentDescription = "Siguiente Canción")
+            }
+            IconButton(onClick = onSaveTrack) {
+                Icon(Icons.Default.Save, contentDescription = "Guardar Canción")
             }
 
         }
