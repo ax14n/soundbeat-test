@@ -13,14 +13,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumHorizontalList
 import com.example.soundbeat_test.ui.components.TopLargeBottomRowGifLayout
+import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 
 @Preview(showSystemUi = true)
 @Composable
-fun PlaylistScreen(navHostController: NavHostController? = null) {
+fun PlaylistScreen(
+    navHostController: NavHostController? = null
+) {
+    val sharedPlaylistViewModel = viewModel<SharedPlaylistViewModel>()
 
     Box {
         Scaffold { padding ->
@@ -40,12 +45,12 @@ fun PlaylistScreen(navHostController: NavHostController? = null) {
                     verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
                     Text("¡Tus playlists en línea!")
-                    AlbumHorizontalList() {
+                    AlbumHorizontalList(sharedPlaylistViewModel = sharedPlaylistViewModel) {
                         navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
                         Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
                     }
                     Text("¡Tus playlist locales!")
-                    AlbumHorizontalList() {
+                    AlbumHorizontalList(sharedPlaylistViewModel = sharedPlaylistViewModel) {
                         navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
                         Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
                     }

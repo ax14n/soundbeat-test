@@ -1,4 +1,4 @@
-package com.example.soundbeat_test.ui.screens.search.viewmodel
+package com.example.soundbeat_test.ui.screens.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

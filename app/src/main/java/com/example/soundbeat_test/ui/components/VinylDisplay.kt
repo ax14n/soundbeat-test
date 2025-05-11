@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.example.soundbeat_test.R
 import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.data.Playlist
+import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 
 /**
  * Muestra una lista horizontal de elementos que pueden ser de tipo Album o Playlist.
@@ -47,17 +48,18 @@ fun AlbumHorizontalList(
     list: List<Any> = listOf<Playlist>(
         Playlist.PlaylistExample, Playlist.PlaylistExample, Playlist.PlaylistExample
     ),
-    onPressedCover: () -> Unit = {}
+    sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
+    onPressedCover: (Any) -> Unit = {}
 ) {
     LazyRow {
         items(list) { item ->
             when (item) {
                 is Album -> {
-                    AlbumItem(album = item, onPressedCover = { onPressedCover() })
+                    AlbumItem(album = item, onPressedCover = { onPressedCover(item) })
                 }
 
                 is Playlist -> {
-                    PlaylistItem(playlist = item, onPressedCover = { onPressedCover() })
+                    PlaylistItem(playlist = item, onPressedCover = { onPressedCover(item) })
                 }
 
                 else -> {
@@ -128,9 +130,9 @@ fun AlbumCard(album: Album = Album.AlbumExample, onClickedAlbumCover: () -> Unit
  */
 @Preview
 @Composable
-fun AlbumItem(album: Album = Album.AlbumExample, onPressedCover: () -> Unit = {}) {
+fun AlbumItem(album: Album = Album.AlbumExample, onPressedCover: (Album) -> Unit = {}) {
     Column(modifier = Modifier) {
-        AlbumCover() { onPressedCover() }
+        AlbumCover() { onPressedCover(album) }
         Text(text = album.name.take(17), maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(text = "by ${album.author}".take(17), maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
@@ -145,9 +147,12 @@ fun AlbumItem(album: Album = Album.AlbumExample, onPressedCover: () -> Unit = {}
 @Preview
 @Composable
 @Preview
-fun PlaylistItem(playlist: Playlist = Playlist.PlaylistExample, onPressedCover: () -> Unit = {}) {
+fun PlaylistItem(
+    playlist: Playlist = Playlist.PlaylistExample,
+    onPressedCover: (Playlist) -> Unit = {}
+) {
     Column(modifier = Modifier) {
-        PlaylistCover() { onPressedCover() }
+        PlaylistCover() { onPressedCover(playlist) }
         Spacer(modifier = Modifier.height(5.dp))
         Text(text = playlist.name.take(17), maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(

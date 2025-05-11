@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,7 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
+import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 
 /**
  * Composable que implementa un BottomSheet con controles de reproducción de música.
@@ -40,20 +39,20 @@ import kotlinx.coroutines.launch
 @Composable
 fun MusicPlayerBottomSheet(
     audioPlayerViewModel: AudioPlayerViewModel,
+    sharedPlaylistViewModel: SharedPlaylistViewModel,
     content: @Composable () -> Unit
 ) {
     val bottomSheetState = rememberBottomSheetScaffoldState()
     val coroutineScope = rememberCoroutineScope()
 
     val isPlaying by audioPlayerViewModel.isPlaying.collectAsState()
-    val currentMediaItem by audioPlayerViewModel.currentMediaItem.collectAsState()
 
     BottomSheetScaffold(
         scaffoldState = bottomSheetState,
         sheetContent = {
             MusicPlayerControls(
                 isPlaying = isPlaying,
-                currentTrack = currentMediaItem?.mediaMetadata?.title?.toString() ?: "Sin título",
+                currentTrack = "Sin título",
                 onPlayPauseClick = {
                     audioPlayerViewModel.playPause()
                 },
@@ -74,18 +73,6 @@ fun MusicPlayerBottomSheet(
         sheetPeekHeight = 56.dp,
         content = {
             content()
-
-            // Botón para abrir el reproductor
-            Button(
-                onClick = {
-                    coroutineScope.launch {
-                        bottomSheetState.bottomSheetState.expand()
-                    }
-                },
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text("Abrir Reproductor")
-            }
         }
     )
 }
@@ -123,9 +110,6 @@ fun MusicPlayerControls(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            IconButton(onClick = onSaveTrack) {
-                Icon(Icons.Default.Save, contentDescription = "Guardar Canción")
-            }
             IconButton(onClick = onAddToFavorites) {
                 Icon(Icons.Default.FavoriteBorder, contentDescription = "Añadir a Favoritos")
             }
@@ -140,6 +124,9 @@ fun MusicPlayerControls(
             }
             IconButton(onClick = onNextTrackClick) {
                 Icon(Icons.Default.FastForward, contentDescription = "Siguiente Canción")
+            }
+            IconButton(onClick = onSaveTrack) {
+                Icon(Icons.Default.Save, contentDescription = "Guardar Canción")
             }
 
         }
