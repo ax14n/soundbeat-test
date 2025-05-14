@@ -2,8 +2,11 @@ package com.example.soundbeat_test.ui.screens.auth
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.annotation.OptIn
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.util.Log
+import androidx.media3.common.util.UnstableApi
 import com.example.soundbeat_test.network.loginUser
 import com.example.soundbeat_test.network.userExists
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +44,7 @@ class LoginViewModel : ViewModel() {
      * @param password Contraseña introducida por el usuario.
      * @param context Contexto de la aplicación, necesario para acceder a SharedPreferences.
      */
+    @OptIn(UnstableApi::class)
     fun logInUser(email: String, password: String, context: Context) {
 
         if (checkInputs(email, password)) return
@@ -49,14 +53,15 @@ class LoginViewModel : ViewModel() {
             try {
                 if (checkUserExistence(email)) return@launch
 
-                val resultadoLogin = loginUser(email, password)
+                val resultantLogin = loginUser(email, password)
+                Log.d("LoginViewModel", "Resultado Log in: $resultantLogin")
 
-                if (resultadoLogin == "Inicio de sesión exitoso!") {
+                if (resultantLogin == "Inicio de sesión exitoso!") {
                     saveUserData(context, email)
+                    _isAuthenticated.value = true
                 }
 
-                _message.value = resultadoLogin
-                _isAuthenticated.value = true
+                _message.value = resultantLogin
 
             } catch (e: Exception) {
                 _message.value = "Error de conexión: ${e.localizedMessage}"
@@ -73,10 +78,12 @@ class LoginViewModel : ViewModel() {
      * @param email Correo del usuario a verificar.
      * @return true si el usuario no está registrado (no existe), false si sí existe.
      */
+    @OptIn(UnstableApi::class)
     private suspend fun checkUserExistence(email: String): Boolean {
-        val existe = userExists(email)
+        val exist = userExists(email)
+        Log.d("LoginViewModel", "Existe \"$email?\": ${if (exist) "Sí" else "No"}")
 
-        if (!existe) {
+        if (!exist) {
             _message.value = "El usuario no está registrado."
             return true
         }

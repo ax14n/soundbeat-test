@@ -30,6 +30,12 @@ class RegisterViewModel : ViewModel() {
     val message: StateFlow<String?> = _message
 
     /**
+     * Indica si el usuario ha sido autenticado correctamente.
+     */
+    private val _isAuthenticated = MutableStateFlow(false)
+    val isAuthenticated: StateFlow<Boolean> = _isAuthenticated
+
+    /**
      * Intenta registrar un nuevo usuario usando el correo y contraseña proporcionados.
      *
      * Valida que los campos no estén vacíos antes de proceder. Si el registro es exitoso,
@@ -51,6 +57,7 @@ class RegisterViewModel : ViewModel() {
 
                 if (resultantRegistry == "Usuario registrado exitosamente!") {
                     saveUserData(context, email)
+                    _isAuthenticated.value = true
                 }
 
                 _message.value = resultantRegistry
@@ -70,9 +77,9 @@ class RegisterViewModel : ViewModel() {
      * @return true si el usuario no está registrado (no existe), false si sí existe.
      */
     private suspend fun checkUserExistence(email: String): Boolean {
-        val existe = userExists(email)
+        val exist = userExists(email)
 
-        if (existe) {
+        if (exist) {
             _message.value = "El usuario ya se encuentra registrado."
             return true
         }

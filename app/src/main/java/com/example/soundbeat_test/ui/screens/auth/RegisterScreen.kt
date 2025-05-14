@@ -20,6 +20,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,6 +31,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -36,6 +40,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.R
 import com.example.soundbeat_test.navigation.ROUTES
@@ -50,13 +55,19 @@ import com.example.soundbeat_test.navigation.ROUTES
  */
 @Preview(showSystemUi = true)
 @Composable
-fun RegisterScreen(navHostController: NavHostController? = null) {
+fun RegisterScreen(
+    navHostController: NavHostController? = null, registerViewModel: RegisterViewModel = viewModel()
+) {
+    val context = LocalContext.current
+
+    val message by registerViewModel.message.collectAsState()
+    val isAuthenticated by registerViewModel.isAuthenticated.collectAsState()
+
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         Image(
             painter = painterResource(id = R.drawable.auth_background),
@@ -123,22 +134,41 @@ fun RegisterScreen(navHostController: NavHostController? = null) {
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .align(Alignment.End)
-                        .clickable { navHostController?.let { onLoginClick(navHostController) } }
-                )
+                        .clickable { navHostController?.let { onLoginClick(navHostController) } })
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(
+                message?.let {
+                    Text(
+                        text = it,
+                        color = if (it.startsWith("Error")) Color.Red else Color.Black,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
-                    onClick = { navHostController?.let { onEnterClick(navHostController) } },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0BBE4)), // lavanda
+                Button(
+                    onClick = {
+                        registerViewModel.registerUser(
+                            email = email.value.trim(),
+                            password = password.value.trim(),
+                            context = context
+                        )
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0BBE4)),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
-                        text = "ENTER!",
-                        fontWeight = FontWeight.Bold
+                        text = "ENTER!", fontWeight = FontWeight.Bold
                     )
+                }
+
+                LaunchedEffect(isAuthenticated) {
+                    if (isAuthenticated) {
+                        navHostController?.navigate(ROUTES.HOME) {
+                            popUpTo(ROUTES.HOME) { inclusive = true }
+                        }
+                    }
                 }
             }
         }

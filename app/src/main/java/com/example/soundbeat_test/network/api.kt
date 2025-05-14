@@ -30,7 +30,9 @@ private suspend fun makeApiRequest(
         // Si es un POST, agregar el cuerpo JSON
         jsonBody?.let {
             connection.doOutput = true
-            OutputStreamWriter(connection.outputStream).use { it.write(it.toString()) }
+            OutputStreamWriter(connection.outputStream, "UTF-8").use { writer ->
+                writer.write(jsonBody.toString())
+            }
         }
 
         val responseCode = connection.responseCode
