@@ -109,7 +109,11 @@ fun SelectedPlaylistScreen(
                 albumList = playlist?.songs!!.toList()
             ) { album ->
                 val url: String = audioPlayerViewModel?.createSongUrl(album).toString()
-                audioPlayerViewModel?.loadAndPlayHLS(url)
+                audioPlayerViewModel?.loadAndPlayHLS(
+                    url = url,
+                    title = album.name,
+                    artist = album.author,
+                )
                 Log.d("SelectedPlaylistScreen", "Started playing ${album.name} by ${album.author}")
             }
 
