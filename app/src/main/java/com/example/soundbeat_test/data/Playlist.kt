@@ -12,7 +12,7 @@ import com.example.soundbeat_test.R
 data class Playlist(
     val id: Int = -1,
     val name: String = "assign name",
-    val songs: Set<Album> = emptySet<Album>()
+    var songs: Set<Album> = emptySet<Album>()
 ) {
     companion object {
         val PlaylistExample = Playlist(

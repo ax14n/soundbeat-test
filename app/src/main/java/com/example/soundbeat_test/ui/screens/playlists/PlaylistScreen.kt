@@ -10,22 +10,23 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumHorizontalList
 import com.example.soundbeat_test.ui.components.TopLargeBottomRowGifLayout
 import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 
-@Preview(showSystemUi = true)
 @Composable
 fun PlaylistScreen(
-    navHostController: NavHostController? = null
+    navHostController: NavHostController? = null,
+    playlistScreenViewModel: PlaylistScreenViewModel,
+    sharedPlaylistViewModel: SharedPlaylistViewModel
 ) {
-    val sharedPlaylistViewModel = viewModel<SharedPlaylistViewModel>()
+    val playlists = playlistScreenViewModel.userPlaylists.collectAsState().value
 
     Box {
         Scaffold { padding ->
@@ -45,7 +46,22 @@ fun PlaylistScreen(
                     verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
                     Text("¡Tus playlists en línea!")
-                    AlbumHorizontalList(sharedPlaylistViewModel = sharedPlaylistViewModel) {
+                    AlbumHorizontalList(
+                        list = playlists,
+                        sharedPlaylistViewModel = sharedPlaylistViewModel
+                    ) { item ->
+                        if (item is Playlist) {
+                            Log.d("PlaylistScreen", "Playlist: ${item.id} - ${item.name}")
+                            sharedPlaylistViewModel.updatePlaylist(item)
+                            Log.d(
+                                "PlaylistScreen",
+                                "${sharedPlaylistViewModel.selectedPlaylist.value}"
+                            )
+
+                            navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
+                            Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
+                        }
+
                         navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
                         Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
                     }

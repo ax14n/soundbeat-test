@@ -124,7 +124,6 @@ suspend fun getUserInfo(email: String): Result<Map<String, Any>> {
  */
 suspend fun getUserPlaylists(email: String): Result<List<Playlist>> {
     val url = "${URL_BASE}/api/userPlaylists?email=${URLEncoder.encode(email.trim(), "UTF-8")}"
-
     val response = makeApiRequest(url)
 
     return try {
