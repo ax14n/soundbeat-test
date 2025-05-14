@@ -13,19 +13,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.navigation.ROUTES
@@ -44,11 +40,12 @@ import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 @Preview(showSystemUi = true)
 @Composable
 fun ProfileScreen(
-    navHostController: NavHostController? = null
+    navHostController: NavHostController? = null, profileViewModel: ProfileViewModel = viewModel()
 ) {
     val sharedPlaylistViewModel = viewModel<SharedPlaylistViewModel>()
 
-    val username: String by remember { mutableStateOf("AX14N") }
+    val userInfo = profileViewModel.userInfo.collectAsState().value
+    val error = profileViewModel.error.collectAsState().value
 
     Column(
         modifier = Modifier
@@ -77,13 +74,11 @@ fun ProfileScreen(
         }
         UserImage()
 
-        Text(
-            text = username,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 12.dp),
-            fontFamily = FontFamily.Monospace
-        )
+        when {
+            error != null -> Text("Error al cargar el perfil", color = Color.Red)
+            userInfo != null -> Text(userInfo?.get("username")?.toString() ?: "[Sin nombre]")
+            else -> CircularProgressIndicator()
+        }
 
         SoundbeatContentRow() {
             AlbumHorizontalList(sharedPlaylistViewModel = sharedPlaylistViewModel)
