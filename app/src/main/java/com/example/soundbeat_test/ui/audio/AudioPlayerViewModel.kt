@@ -5,6 +5,7 @@ import android.app.Application
 import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
@@ -72,21 +73,38 @@ class AudioPlayerViewModel(
 
     init {
         exoPlayer.addListener(listener)
-        // Ejemplo de reproducción de playlist que hice.
-        // val list = Album.AlbumListExample
-        // loadPlaylist(list)
+//         Ejemplo de reproducción de playlist que hice.
+        val list = Album.AlbumListExample
+        loadPlaylist(list)
     }
 
     /**
-     * Carga y reproduce una transmisión de audio en formato HLS.
+     * Carga y reproduce una transmisión de audio en formato HLS con metadatos.
+     *
+     * Esta función reemplaza cualquier contenido anterior del reproductor y comienza a reproducir
+     * automáticamente desde el principio. Se utiliza `MediaItem.Builder` para asociar metadatos
+     * como el título y el autor de la pista.
      *
      * @param url URL de la transmisión HLS a reproducir.
+     * @param title Título de la canción (por ejemplo, el nombre del álbum).
+     * @param artist (Opcional) Nombre del autor o artista.
      */
     @OptIn(UnstableApi::class)
-    fun loadAndPlayHLS(url: String) {
-        exoPlayer.setMediaItem(MediaItem.fromUri(url))
+    fun loadAndPlayHLS(url: String, title: String, artist: String? = null) {
+        val mediaItem = MediaItem.Builder()
+            .setUri(url)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(title)
+                    .setArtist(artist ?: "Autor desconocido")
+                    .build()
+            )
+            .build()
+
+        exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
         exoPlayer.volume = 1.0f // Volumen máximo
+        exoPlayer.playWhenReady = true
     }
 
     /**
@@ -126,13 +144,25 @@ class AudioPlayerViewModel(
         val mediaItems = albums.map { album ->
             val uri = createSongUrl(album)
             Log.d("AudioPlayerViewModel", "${album.name} : $uri")
-            MediaItem.fromUri(uri)
+
+            MediaItem.Builder()
+                .setUri(uri)
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle(album.name)
+                        .setArtist(
+                            album.author ?: "Autor desconocido"
+                        ) // si tienes ese campo en Album
+                        .build()
+                )
+                .build()
         }
 
         exoPlayer.setMediaItems(mediaItems)
         exoPlayer.prepare()
         exoPlayer.playWhenReady = true
     }
+
 
     /**
      * Pausa o reanuda la reproducción del audio actual.

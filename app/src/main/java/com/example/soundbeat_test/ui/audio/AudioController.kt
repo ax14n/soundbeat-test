@@ -1,25 +1,10 @@
 package com.example.soundbeat_test.ui.audio
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FastForward
-import androidx.compose.material.icons.filled.FastRewind
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -27,6 +12,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.util.Log
+import androidx.media3.common.util.UnstableApi
+import com.example.soundbeat_test.ui.components.PlayerControls
 import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 
 /**
@@ -46,35 +34,33 @@ fun MusicPlayerBottomSheet(
     val coroutineScope = rememberCoroutineScope()
 
     val isPlaying by audioPlayerViewModel.isPlaying.collectAsState()
+    val mediaItem by audioPlayerViewModel.currentMediaItem.collectAsState()
+    val songName = mediaItem?.mediaMetadata?.title ?: "No title"
+    val author = mediaItem?.mediaMetadata?.artist ?: "No author"
 
-    BottomSheetScaffold(
-        scaffoldState = bottomSheetState,
-        sheetContent = {
-            MusicPlayerControls(
-                isPlaying = isPlaying,
-                currentTrack = "Sin título",
-                onPlayPauseClick = {
-                    audioPlayerViewModel.playPause()
-                },
-                onNextTrackClick = {
-                    audioPlayerViewModel.skipToNext()
-                },
-                onPreviousTrackClick = {
-                    audioPlayerViewModel.skipToPrevious()
-                },
-                onAddToFavorites = {
-                    audioPlayerViewModel.addToFavorites()
-                },
-                onSaveTrack = {
-                    audioPlayerViewModel.saveTrack()
-                }
-            )
-        },
-        sheetPeekHeight = 56.dp,
-        content = {
-            content()
-        }
-    )
+    BottomSheetScaffold(scaffoldState = bottomSheetState, sheetContent = {
+        MusicPlayerControls(
+            isPlaying = isPlaying,
+            currentTrack = songName.toString(),
+            author = author.toString(),
+            onPlayPauseClick = {
+                audioPlayerViewModel.playPause()
+            },
+            onNextTrackClick = {
+                audioPlayerViewModel.skipToNext()
+            },
+            onPreviousTrackClick = {
+                audioPlayerViewModel.skipToPrevious()
+            },
+            onAddToFavorites = {
+                audioPlayerViewModel.addToFavorites()
+            },
+            onSaveTrack = {
+                audioPlayerViewModel.saveTrack()
+            })
+    }, sheetPeekHeight = 56.dp, content = {
+        content()
+    })
 }
 
 /**
@@ -88,47 +74,34 @@ fun MusicPlayerBottomSheet(
  * @param onAddToFavorites Acción al pulsar el botón de favoritos.
  * @param onSaveTrack Acción al pulsar el botón de salvar.
  */
+@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun MusicPlayerControls(
     isPlaying: Boolean,
     currentTrack: String,
+    author: String,
     onPlayPauseClick: () -> Unit,
     onNextTrackClick: () -> Unit,
     onPreviousTrackClick: () -> Unit,
     onAddToFavorites: () -> Unit,
     onSaveTrack: () -> Unit
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(bottom = 20.dp)
     ) {
-        Text("Reproduciendo: $currentTrack", style = MaterialTheme.typography.bodySmall)
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            IconButton(onClick = onAddToFavorites) {
-                Icon(Icons.Default.FavoriteBorder, contentDescription = "Añadir a Favoritos")
-            }
-            IconButton(onClick = onPreviousTrackClick) {
-                Icon(Icons.Default.FastRewind, contentDescription = "Anterior Canción")
-            }
-            IconButton(onClick = onPlayPauseClick) {
-                Icon(
-                    imageVector = if (isPlaying) Icons.Default.Stop else Icons.Default.PlayArrow,
-                    contentDescription = if (isPlaying) "Pausar" else "Reproducir"
-                )
-            }
-            IconButton(onClick = onNextTrackClick) {
-                Icon(Icons.Default.FastForward, contentDescription = "Siguiente Canción")
-            }
-            IconButton(onClick = onSaveTrack) {
-                Icon(Icons.Default.Save, contentDescription = "Guardar Canción")
-            }
-
-        }
+        Log.d("AudioController", "Canción: $currentTrack by $author")
+        PlayerControls(
+            songName = currentTrack,
+            author = author,
+            isPlaying = isPlaying,
+            onPlayPauseClick = onPlayPauseClick,
+            onNextTrackClick = onNextTrackClick,
+            onPreviousTrackClick = onPreviousTrackClick,
+            onAddToFavorites = onAddToFavorites,
+            onSaveTrack = onSaveTrack
+        )
     }
 }

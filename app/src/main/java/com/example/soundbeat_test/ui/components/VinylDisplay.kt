@@ -17,6 +17,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.filled.FastRewind
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -116,6 +125,73 @@ fun AlbumCard(album: Album = Album.AlbumExample, onClickedAlbumCover: () -> Unit
                             .background(Color(0xFF7DA1C5), RoundedCornerShape(12.dp))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PlayerControls(
+    songName: String = "Unknown",
+    author: String = "Unknown",
+    isPlaying: Boolean = false,
+    onPlayPauseClick: () -> Unit = {},
+    onNextTrackClick: () -> Unit = {},
+    onPreviousTrackClick: () -> Unit = {},
+    onAddToFavorites: () -> Unit = {},
+    onSaveTrack: () -> Unit = {}
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFF0F0F0), shape = RoundedCornerShape(8.dp))
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AlbumCover()
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = songName,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                maxLines = 1
+            )
+            Text(
+                text = "by $author",
+                fontSize = 13.sp,
+                color = Color.DarkGray,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset(x = (-14).dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                IconButton(onClick = onAddToFavorites) {
+                    Icon(Icons.Default.FavoriteBorder, contentDescription = "Añadir a Favoritos")
+                }
+                IconButton(onClick = onPreviousTrackClick) {
+                    Icon(Icons.Default.FastRewind, contentDescription = "Anterior Canción")
+                }
+                IconButton(onClick = onPlayPauseClick) {
+                    Icon(
+                        imageVector = if (isPlaying) Icons.Default.Stop else Icons.Default.PlayArrow,
+                        contentDescription = if (isPlaying) "Pausar" else "Reproducir"
+                    )
+                }
+                IconButton(onClick = onNextTrackClick) {
+                    Icon(Icons.Default.FastForward, contentDescription = "Siguiente Canción")
+                }
+                IconButton(onClick = onSaveTrack) {
+                    Icon(Icons.Default.Save, contentDescription = "Guardar Canción")
                 }
             }
         }
