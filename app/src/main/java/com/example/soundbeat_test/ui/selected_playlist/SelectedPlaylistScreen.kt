@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -30,25 +29,44 @@ import com.example.soundbeat_test.R
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.audio.AudioPlayerViewModel
 import com.example.soundbeat_test.ui.components.UserImage
+import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreenViewModel
 import com.example.soundbeat_test.ui.screens.search.VinylList
 
-@Preview(showSystemUi = true)
+/**
+ * Composable que representa la pantalla de una playlist seleccionada.
+ *
+ * Esta pantalla muestra los detalles de la playlist seleccionada (nombre, ID, canciones)
+ * y permite al usuario reproducir todos los vinilos o seleccionar uno para reproducirlo individualmente.
+ *
+ * Además, obtiene las canciones asociadas a la playlist desde el ViewModel correspondiente
+ * y las muestra en una lista interactiva.
+ *
+ * @param navHostController Controlador de navegación usado para cambiar de pantalla, por ejemplo para volver al `HOME`.
+ * @param sharedPlaylistViewModel ViewModel compartido que contiene la playlist actualmente seleccionada.
+ * @param audioPlayerViewModel ViewModel responsable de gestionar la reproducción de audio.
+ * @param playlistScreenViewModel ViewModel que maneja la lógica relacionada con las playlists y sus canciones.
+ */
 @Composable
 fun SelectedPlaylistScreen(
-    navHostController: NavHostController? = null,
-    sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
-    audioPlayerViewModel: AudioPlayerViewModel? = null
+    navHostController: NavHostController?,
+    sharedPlaylistViewModel: SharedPlaylistViewModel,
+    audioPlayerViewModel: AudioPlayerViewModel,
+    playlistScreenViewModel: PlaylistScreenViewModel
 ) {
-    val playlistState = sharedPlaylistViewModel?.selectedPlaylist?.collectAsState()
+    val playlist = sharedPlaylistViewModel.selectedPlaylist.collectAsState().value
+    val songs = playlistScreenViewModel.songs.collectAsState().value
 
-    val playlist = playlistState?.value
-
-    LaunchedEffect(playlist) {
-        Log.d(
-            "SelectedPlaylistScreen",
-            "Playlist recibida: ${playlist?.name} con ${playlist?.songs!!.size} álbum(es)"
-        )
+    LaunchedEffect(playlist?.id) {
+        playlist?.let {
+            Log.d("SelectedPlaylistScreen", "Playlist ID: ${it.id}")
+            Log.d("SelectedPlaylistScreen", "Playlist canciones:  ${it.songs}")
+            playlistScreenViewModel.obtainPlaylistSongs(it.id)
+        }
     }
+
+    val reproduce = if (playlist?.songs?.toList()!!
+            .isEmpty()
+    ) songs else playlist?.songs?.toList()
 
     Column(
         modifier = Modifier
@@ -94,7 +112,8 @@ fun SelectedPlaylistScreen(
 
             Button(
                 onClick = {
-                    audioPlayerViewModel?.loadPlaylist(playlist?.songs?.toList() ?: listOf())
+
+                    audioPlayerViewModel?.loadPlaylist(reproduce!!)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
                 shape = RoundedCornerShape(12.dp),
@@ -106,7 +125,7 @@ fun SelectedPlaylistScreen(
             }
 
             VinylList(
-                albumList = playlist?.songs!!.toList()
+                albumList = reproduce!!
             ) { album ->
                 val url: String = audioPlayerViewModel?.createSongUrl(album).toString()
                 audioPlayerViewModel?.loadAndPlayHLS(
