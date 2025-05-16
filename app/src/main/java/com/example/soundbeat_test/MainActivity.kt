@@ -229,7 +229,11 @@ fun ContentScreen(
             sharedPlaylistViewModel = sharedPlaylistViewModel!!
         )
 
-        2 -> SearchScreen(navHostController)
+        2 -> SearchScreen(
+            navHostController = navHostController,
+            sharedPlaylistViewModel = sharedPlaylistViewModel!!
+        )
+
         3 -> ProfileScreen(navHostController)
     }
 }

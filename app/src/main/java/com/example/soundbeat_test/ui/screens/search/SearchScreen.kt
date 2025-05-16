@@ -23,6 +23,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.R
 import com.example.soundbeat_test.data.Album
+import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumCard
 import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
@@ -43,9 +44,9 @@ import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 @Composable
 fun SearchScreen(
     navHostController: NavHostController? = null,
-    searchScreenViewModel: SearchScreenViewModel = viewModel()
+    searchScreenViewModel: SearchScreenViewModel = viewModel(),
+    sharedPlaylistViewModel: SharedPlaylistViewModel? = null
 ) {
-    val sharedPlaylistViewModel = viewModel<SharedPlaylistViewModel>()
 
     val queryState = searchScreenViewModel.textFieldText.collectAsState()
     val listState = searchScreenViewModel.albumList.collectAsState()
@@ -67,7 +68,12 @@ fun SearchScreen(
             navHostController?.let {
                 VinylList(
                     albumList = list
-                ) {
+                ) { album ->
+                    val playlist: Playlist = Playlist(
+                        id = 1, name = album.name, songs = setOf(album)
+                    )
+                    sharedPlaylistViewModel?.updatePlaylist(playlist)
+
                     navHostController.navigate(ROUTES.SELECTED_PLAYLIST)
                     Log.d("SearchScreen", "Navigating to: SELECTED PLAYLIST")
                 }
