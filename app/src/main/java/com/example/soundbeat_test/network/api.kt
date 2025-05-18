@@ -14,7 +14,10 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
-const val URL_BASE = "http://192.168.1.174:8080"
+/**
+ * Aquí se introduce la dirección IP o dominio del servidor.
+ */
+const val URL_BASE = "http://192.168.1.175:8080"
 
 /**
  * Función para hacer peticiones a la API, tanto GET como POST, con el manejo adecuado de respuestas y errores.
@@ -237,6 +240,15 @@ suspend fun createPlaylist(playlistName: String, userEmail: String): String {
 }
 
 /**
+ * Elimina una playlits del usuario de la aplicación
+ * @param id: Identificador de la playlist.
+ */
+suspend fun deletePlaylist(id: Int): String {
+    val url = "${URL_BASE}/api/deletePlaylist?id=${id}"
+    return makeApiRequest(url, method = "POST")
+}
+
+/**
  * Agrega una o varias canciones a una playlist.
  * @param playlistId: Identificador de la playlist.
  * @param songIds: Colección que contiene los identificadores de las canciones a agregar.
@@ -248,6 +260,21 @@ suspend fun addSongsToPlaylist(playlistId: Int, songIds: List<Int>): String {
     }
 
     val url = "${URL_BASE}/api/playlists/add-songs"
+    return makeApiRequest(url, method = "POST", jsonBody = jsonBody)
+}
+
+/**
+ * Elimina una o varias canciones de una playlist.
+ * @param playlistId: Identificador de la playlist.
+ * @param songIds: Colección que contiene los identificadores de las canciones a eliminar.
+ * */
+suspend fun deleteSongsFromPlaylist(playlistId: Int, songIds: List<Int>): String {
+    val jsonBody = JSONObject().apply {
+        put("playlist_id", playlistId)
+        put("song_ids", JSONArray(songIds))
+    }
+
+    val url = "${URL_BASE}/api/playlists/delete-songs"
     return makeApiRequest(url, method = "POST", jsonBody = jsonBody)
 }
 

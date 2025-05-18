@@ -41,7 +41,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(15.dp)
 
         ) {
-            LeftColumnRightLargeGifLayout()
+            // LeftColumnRightLargeGifLayout()
             Column(
                 modifier = Modifier.padding(10.dp),
                 verticalArrangement = Arrangement.spacedBy(15.dp)
