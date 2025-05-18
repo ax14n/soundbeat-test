@@ -40,7 +40,9 @@ fun PlaylistScreen(
                 TopLargeBottomRowGifLayout(
                     bigImageOnClick = {  /* TODO("Not yet implemented") */ },
                     leftImageOnClick = { /* TODO("Not yet implemented") */ },
-                    rightImageOnClick = { /* TODO("Not yet implemented") */ })
+                    rightImageOnClick = {
+                        navHostController?.navigate(ROUTES.PLAYLIST_CREATOR)
+                    })
                 Column(
                     modifier = Modifier.padding(10.dp),
                     verticalArrangement = Arrangement.spacedBy(15.dp)

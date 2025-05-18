@@ -34,10 +34,12 @@ import com.example.soundbeat_test.ui.audio.MusicPlayerBottomSheet
 import com.example.soundbeat_test.ui.screens.auth.LoginScreen
 import com.example.soundbeat_test.ui.screens.auth.RegisterScreen
 import com.example.soundbeat_test.ui.screens.configuration.ConfigurationScreen
+import com.example.soundbeat_test.ui.screens.create_playlist.CreatePlaylistScreen
 import com.example.soundbeat_test.ui.screens.home.HomeScreen
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreen
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreenViewModel
 import com.example.soundbeat_test.ui.screens.profile.ProfileScreen
+import com.example.soundbeat_test.ui.screens.search.MODE
 import com.example.soundbeat_test.ui.screens.search.SearchScreen
 import com.example.soundbeat_test.ui.selected_playlist.SelectedPlaylistScreen
 import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
@@ -145,6 +147,28 @@ fun AppNavigation(
                 playlistScreenViewModel = playlistScreenViewModel!!
             )
         }
+        composable("SEARCH/{mode}") { backStackEntry ->
+            val modeArg = backStackEntry.arguments?.getString("mode")
+            val mode = try {
+                MODE.valueOf(modeArg ?: MODE.NORMAL.name)
+            } catch (e: IllegalArgumentException) {
+                MODE.NORMAL
+            }
+
+            SearchScreen(
+                navHostController = navController,
+                sharedPlaylistViewModel = sharedPlaylistViewModel!!,
+                mode = mode
+            )
+        }
+
+        composable(ROUTES.PLAYLIST_CREATOR) {
+            CreatePlaylistScreen(
+                navController = navController,
+                playerViewModel = audioPlayerViewModel!!,
+                sharedPlaylistViewModel = sharedPlaylistViewModel!!
+            )
+        }
     }
 }
 
@@ -231,7 +255,8 @@ fun ContentScreen(
 
         2 -> SearchScreen(
             navHostController = navHostController,
-            sharedPlaylistViewModel = sharedPlaylistViewModel!!
+            sharedPlaylistViewModel = sharedPlaylistViewModel!!,
+            mode = MODE.NORMAL
         )
 
         3 -> ProfileScreen(navHostController)

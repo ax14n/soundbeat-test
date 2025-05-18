@@ -28,6 +28,10 @@ import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumCard
 import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 
+enum class MODE {
+    NORMAL, CREATOR
+}
+
 /**
  * Composable que representa la pantalla de búsqueda de álbumes.
  *
@@ -45,7 +49,8 @@ import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 fun SearchScreen(
     navHostController: NavHostController? = null,
     searchScreenViewModel: SearchScreenViewModel = viewModel(),
-    sharedPlaylistViewModel: SharedPlaylistViewModel? = null
+    sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
+    mode: MODE = MODE.NORMAL
 ) {
 
     val queryState = searchScreenViewModel.textFieldText.collectAsState()
@@ -74,7 +79,15 @@ fun SearchScreen(
                     )
                     sharedPlaylistViewModel?.updatePlaylist(playlist)
 
-                    navHostController.navigate(ROUTES.SELECTED_PLAYLIST)
+                    when (mode) {
+                        MODE.NORMAL -> {
+                            navHostController.navigate(ROUTES.SELECTED_PLAYLIST)
+                        }
+
+                        MODE.CREATOR -> {
+                            navHostController.navigate(ROUTES.PLAYLIST_CREATOR)
+                        }
+                    }
                     Log.d("SearchScreen", "Navigating to: SELECTED PLAYLIST")
                 }
             }

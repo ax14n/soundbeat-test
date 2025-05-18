@@ -19,7 +19,26 @@ class SharedPlaylistViewModel : ViewModel() {
     private val _selectedPlaylist = MutableStateFlow<Playlist?>(null)
     val selectedPlaylist: StateFlow<Playlist?> = _selectedPlaylist
 
+    /**
+     * Actualiza la playlist seleccionada para compartirla entre pantallas.
+     *
+     * Este método se utiliza cuando el usuario selecciona una playlist que se quiere
+     * mantener accesible temporalmente desde otros componentes o pantallas de la aplicación.
+     *
+     * @param playlist La playlist que se desea guardar como seleccionada.
+     */
     fun updatePlaylist(playlist: Playlist) {
         _selectedPlaylist.value = playlist
+    }
+
+    /**
+     * Limpia la playlist seleccionada.
+     *
+     * Este método elimina la playlist actualmente almacenada para evitar
+     * mantener datos obsoletos o innecesarios en memoria.
+     * Generalmente se llama después de navegar o finalizar una operación relacionada.
+     */
+    fun clearPlaylist() {
+        _selectedPlaylist.value = null
     }
 }

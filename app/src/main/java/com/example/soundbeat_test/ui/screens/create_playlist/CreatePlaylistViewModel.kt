@@ -10,7 +10,7 @@ class CreatePlaylistViewModel : ViewModel() {
     private val _playlistName = mutableStateOf("Playlist nº1")
     val playlistName: State<String> = _playlistName
 
-    private val _songs = mutableStateOf<Set<Album>>(Album.AlbumListExample.toSet())
+    private val _songs = mutableStateOf<Set<Album>>(emptySet())
     val songs: State<Set<Album>> = _songs
 
     fun onPlaylistNameChange(newName: String) {
