@@ -22,7 +22,7 @@ import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.network.getServerSongs
 import com.example.soundbeat_test.ui.components.AlbumHorizontalList
-import com.example.soundbeat_test.ui.components.LeftColumnRightLargeGifLayout
+import com.example.soundbeat_test.ui.selected_playlist.SelectionMode
 import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 
 @Preview(showSystemUi = true)
@@ -103,9 +103,10 @@ fun ListServerSongs(
         }
     }
     Text(text)
-    AlbumHorizontalList(songsList, sharedPlaylistViewModel) { item ->
+    AlbumHorizontalList(songsList) { item ->
         when (item) {
             is Playlist -> {
+                sharedPlaylistViewModel?.setMode(SelectionMode.PLAYLIST)
                 sharedPlaylistViewModel?.updatePlaylist(item)
                 navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
             }
@@ -116,6 +117,7 @@ fun ListServerSongs(
                     name = item.name,
                     songs = setOf(item.copy())
                 )
+                sharedPlaylistViewModel?.setMode(SelectionMode.SONG)
                 sharedPlaylistViewModel?.updatePlaylist(playlist)
                 navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
             }

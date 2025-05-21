@@ -18,6 +18,7 @@ import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumHorizontalList
 import com.example.soundbeat_test.ui.components.TopLargeBottomRowGifLayout
+import com.example.soundbeat_test.ui.selected_playlist.SelectionMode
 import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 
 @Composable
@@ -49,10 +50,10 @@ fun PlaylistScreen(
                 ) {
                     Text("¡Tus playlists en línea!")
                     AlbumHorizontalList(
-                        list = playlists,
-                        sharedPlaylistViewModel = sharedPlaylistViewModel
+                        list = playlists
                     ) { item ->
                         if (item is Playlist) {
+                            sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
                             Log.d("PlaylistScreen", "Playlist: ${item.id} - ${item.name}")
                             sharedPlaylistViewModel.updatePlaylist(item)
                             Log.d(
@@ -68,9 +69,8 @@ fun PlaylistScreen(
                         Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
                     }
                     Text("¡Tus playlist locales!")
-                    AlbumHorizontalList(sharedPlaylistViewModel = sharedPlaylistViewModel) {
+                    AlbumHorizontalList {
                         navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
-                        Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
                     }
                 }
             }
