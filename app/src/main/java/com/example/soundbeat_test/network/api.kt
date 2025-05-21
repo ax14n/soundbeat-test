@@ -244,7 +244,7 @@ suspend fun createPlaylist(playlistName: String, userEmail: String): String {
  * @param id: Identificador de la playlist.
  */
 suspend fun deletePlaylist(id: Int): String {
-    val url = "${URL_BASE}/api/deletePlaylist?id=${id}"
+    val url = "${URL_BASE}/api/deletePlaylist?playlist_id=$id"
     return makeApiRequest(url, method = "POST")
 }
 

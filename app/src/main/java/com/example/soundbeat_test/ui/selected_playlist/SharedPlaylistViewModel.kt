@@ -1,9 +1,12 @@
 package com.example.soundbeat_test.ui.selected_playlist
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.soundbeat_test.data.Playlist
+import com.example.soundbeat_test.network.deletePlaylist
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 /**
  * Representa los modos posibles de operación para selección o reproducción.
@@ -93,6 +96,12 @@ class SharedPlaylistViewModel : ViewModel() {
      */
     fun setMode(selectionMode: SelectionMode) {
         _isPlaylist.value = selectionMode
+    }
+
+    fun deletePlaylist(playlist: Playlist) {
+        viewModelScope.launch {
+            deletePlaylist(playlist.id)
+        }
     }
 
 }

@@ -32,10 +32,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.R
 import com.example.soundbeat_test.navigation.ROUTES
+import com.example.soundbeat_test.network.deletePlaylist
 import com.example.soundbeat_test.ui.audio.AudioPlayerViewModel
 import com.example.soundbeat_test.ui.components.UserImage
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreenViewModel
 import com.example.soundbeat_test.ui.screens.search.VinylList
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Composable que representa la pantalla de una playlist seleccionada.
@@ -70,9 +74,7 @@ fun SelectedPlaylistScreen(
         }
     }
 
-    val reproduce = if (playlist?.songs?.toList()!!
-            .isEmpty()
-    ) songs else playlist?.songs?.toList()
+    val reproduce = if (playlist?.songs?.toList()!!.isEmpty()) songs else playlist?.songs?.toList()
 
     Column(
         modifier = Modifier
@@ -91,7 +93,9 @@ fun SelectedPlaylistScreen(
                     tint = Color(0xFFCB3813),
                     modifier = Modifier
                         .clickable(onClick = {
-
+                            CoroutineScope(Dispatchers.IO).launch {
+                                deletePlaylist(playlist.id)
+                            }
                             navHostController?.navigate(ROUTES.HOME) {
                                 popUpTo(ROUTES.HOME) { inclusive = true }
                             }
@@ -137,7 +141,6 @@ fun SelectedPlaylistScreen(
 
             Button(
                 onClick = {
-
                     audioPlayerViewModel?.loadPlaylist(reproduce!!)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
@@ -165,3 +168,4 @@ fun SelectedPlaylistScreen(
 
     }
 }
+
