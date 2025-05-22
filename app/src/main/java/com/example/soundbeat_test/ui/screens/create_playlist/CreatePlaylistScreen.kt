@@ -1,5 +1,6 @@
 package com.example.soundbeat_test.ui.screens.create_playlist
 
+import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,20 +23,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.util.Log
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.data.Album
+import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.audio.AudioPlayerViewModel
 import com.example.soundbeat_test.ui.components.AlbumCard
 import com.example.soundbeat_test.ui.components.UserImage
 import com.example.soundbeat_test.ui.screens.search.MODE
 import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 
+@OptIn(UnstableApi::class)
 @Composable
 fun CreatePlaylistScreen(
     navController: NavHostController,
-    createPlaylistViewModel: CreatePlaylistViewModel = viewModel(),
-    playerViewModel: AudioPlayerViewModel = viewModel(),
+    createPlaylistViewModel: CreatePlaylistViewModel,
+    playerViewModel: AudioPlayerViewModel,
     sharedPlaylistViewModel: SharedPlaylistViewModel
 ) {
     val sharedPlaylist = sharedPlaylistViewModel?.selectedPlaylist?.collectAsState()
@@ -45,13 +49,13 @@ fun CreatePlaylistScreen(
         if (receivedPlaylist?.songs?.isNotEmpty() == true) {
             val album: Album = receivedPlaylist.songs.last()
             createPlaylistViewModel?.addSong(album)
+            Log.d("CreatePlaylistScreen", "${createPlaylistViewModel.songs.value}")
             sharedPlaylistViewModel?.clearPlaylist()
         }
     }
 
-
     val playlistName = createPlaylistViewModel?.playlistName
-    val songsSet = createPlaylistViewModel?.songs?.value
+    val songsSet = createPlaylistViewModel?.songs?.collectAsState()?.value
 
     Column(
         modifier = Modifier
@@ -60,11 +64,14 @@ fun CreatePlaylistScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Button(
                 onClick = {
-                    println("Crear playlist: ${playlistName?.value}")
+                    createPlaylistViewModel.createPlaylist()
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
             ) {
@@ -73,7 +80,9 @@ fun CreatePlaylistScreen(
 
             Button(
                 onClick = {
-                    println("Playlist descartada")
+                    navController?.navigate(ROUTES.HOME) {
+                        popUpTo(ROUTES.HOME) { inclusive = true }
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
             ) {
@@ -135,7 +144,6 @@ fun SongsListBox(
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
             ) {
-
                 items(albums.toList()) { album ->
                     AlbumCard(album) {
                         val url: String = playerViewModel?.createSongUrl(album) ?: ""

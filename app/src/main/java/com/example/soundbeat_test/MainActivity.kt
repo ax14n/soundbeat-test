@@ -35,6 +35,7 @@ import com.example.soundbeat_test.ui.screens.auth.LoginScreen
 import com.example.soundbeat_test.ui.screens.auth.RegisterScreen
 import com.example.soundbeat_test.ui.screens.configuration.ConfigurationScreen
 import com.example.soundbeat_test.ui.screens.create_playlist.CreatePlaylistScreen
+import com.example.soundbeat_test.ui.screens.create_playlist.CreatePlaylistViewModel
 import com.example.soundbeat_test.ui.screens.home.HomeScreen
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreen
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreenViewModel
@@ -59,6 +60,7 @@ class MainActivity : ComponentActivity() {
                 val audioPlayerViewModel: AudioPlayerViewModel = viewModel()
                 val sharedPlaylistViewModel: SharedPlaylistViewModel = viewModel()
                 val playlistScreenViewModel: PlaylistScreenViewModel = viewModel()
+                val createPlaylistViewModel: CreatePlaylistViewModel = viewModel()
 
                 MusicPlayerBottomSheet(
                     audioPlayerViewModel = audioPlayerViewModel,
@@ -67,7 +69,8 @@ class MainActivity : ComponentActivity() {
                     MainApp(
                         audioPlayerViewModel = audioPlayerViewModel,
                         sharedPlaylistViewModel = sharedPlaylistViewModel,
-                        playlistScreenViewModel = playlistScreenViewModel
+                        playlistScreenViewModel = playlistScreenViewModel,
+                        createPlaylistViewModel = createPlaylistViewModel
                     )
                 }
             }
@@ -86,7 +89,8 @@ class MainActivity : ComponentActivity() {
 fun MainApp(
     audioPlayerViewModel: AudioPlayerViewModel? = null,
     sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
-    playlistScreenViewModel: PlaylistScreenViewModel? = null
+    playlistScreenViewModel: PlaylistScreenViewModel? = null,
+    createPlaylistViewModel: CreatePlaylistViewModel
 ) {
     val navController = rememberNavController()
 
@@ -94,7 +98,8 @@ fun MainApp(
         navController = navController,
         sharedPlaylistViewModel = sharedPlaylistViewModel,
         audioPlayerViewModel = audioPlayerViewModel,
-        playlistScreenViewModel = playlistScreenViewModel
+        playlistScreenViewModel = playlistScreenViewModel,
+        createPlaylistViewModel = createPlaylistViewModel,
     )
 }
 
@@ -110,7 +115,8 @@ fun AppNavigation(
     navController: NavHostController,
     sharedPlaylistViewModel: SharedPlaylistViewModel?,
     audioPlayerViewModel: AudioPlayerViewModel?,
-    playlistScreenViewModel: PlaylistScreenViewModel?
+    playlistScreenViewModel: PlaylistScreenViewModel?,
+    createPlaylistViewModel: CreatePlaylistViewModel
 ) {
     NavHost(navController = navController, startDestination = ROUTES.LOGIN) {
         composable(ROUTES.LOGIN) {
@@ -161,12 +167,12 @@ fun AppNavigation(
                 mode = mode
             )
         }
-
         composable(ROUTES.PLAYLIST_CREATOR) {
             CreatePlaylistScreen(
                 navController = navController,
                 playerViewModel = audioPlayerViewModel!!,
-                sharedPlaylistViewModel = sharedPlaylistViewModel!!
+                sharedPlaylistViewModel = sharedPlaylistViewModel!!,
+                createPlaylistViewModel = createPlaylistViewModel,
             )
         }
     }
