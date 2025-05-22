@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.sp
 import com.example.soundbeat_test.R
 import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.data.Playlist
-import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 
 /**
  * Muestra una lista horizontal de elementos que pueden ser de tipo Album o Playlist.
@@ -57,7 +56,6 @@ fun AlbumHorizontalList(
     list: List<Any> = listOf<Playlist>(
         Playlist.PlaylistExample, Playlist.PlaylistExample, Playlist.PlaylistExample
     ),
-    sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
     onPressedCover: (Any) -> Unit = {}
 ) {
     LazyRow {

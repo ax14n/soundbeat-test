@@ -18,6 +18,7 @@ import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumHorizontalList
 import com.example.soundbeat_test.ui.components.TopLargeBottomRowGifLayout
+import com.example.soundbeat_test.ui.selected_playlist.SelectionMode
 import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 
 @Composable
@@ -40,17 +41,19 @@ fun PlaylistScreen(
                 TopLargeBottomRowGifLayout(
                     bigImageOnClick = {  /* TODO("Not yet implemented") */ },
                     leftImageOnClick = { /* TODO("Not yet implemented") */ },
-                    rightImageOnClick = { /* TODO("Not yet implemented") */ })
+                    rightImageOnClick = {
+                        navHostController?.navigate(ROUTES.PLAYLIST_CREATOR)
+                    })
                 Column(
                     modifier = Modifier.padding(10.dp),
                     verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
                     Text("¡Tus playlists en línea!")
                     AlbumHorizontalList(
-                        list = playlists,
-                        sharedPlaylistViewModel = sharedPlaylistViewModel
+                        list = playlists
                     ) { item ->
                         if (item is Playlist) {
+                            sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
                             Log.d("PlaylistScreen", "Playlist: ${item.id} - ${item.name}")
                             sharedPlaylistViewModel.updatePlaylist(item)
                             Log.d(
@@ -66,9 +69,8 @@ fun PlaylistScreen(
                         Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
                     }
                     Text("¡Tus playlist locales!")
-                    AlbumHorizontalList(sharedPlaylistViewModel = sharedPlaylistViewModel) {
+                    AlbumHorizontalList {
                         navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
-                        Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
                     }
                 }
             }

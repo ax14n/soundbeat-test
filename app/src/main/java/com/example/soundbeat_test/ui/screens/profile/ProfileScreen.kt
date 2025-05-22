@@ -81,13 +81,13 @@ fun ProfileScreen(
         }
 
         SoundbeatContentRow() {
-            AlbumHorizontalList(sharedPlaylistViewModel = sharedPlaylistViewModel)
+            AlbumHorizontalList()
         }
         SoundbeatContentRow() {
-            AlbumHorizontalList(sharedPlaylistViewModel = sharedPlaylistViewModel)
+            AlbumHorizontalList()
         }
         SoundbeatContentRow() {
-            AlbumHorizontalList(sharedPlaylistViewModel = sharedPlaylistViewModel)
+            AlbumHorizontalList()
         }
     }
 }

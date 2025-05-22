@@ -4,14 +4,19 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,10 +32,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.R
 import com.example.soundbeat_test.navigation.ROUTES
+import com.example.soundbeat_test.network.deletePlaylist
 import com.example.soundbeat_test.ui.audio.AudioPlayerViewModel
 import com.example.soundbeat_test.ui.components.UserImage
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreenViewModel
 import com.example.soundbeat_test.ui.screens.search.VinylList
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Composable que representa la pantalla de una playlist seleccionada.
@@ -54,6 +63,7 @@ fun SelectedPlaylistScreen(
     playlistScreenViewModel: PlaylistScreenViewModel
 ) {
     val playlist = sharedPlaylistViewModel.selectedPlaylist.collectAsState().value
+    val screenMode = sharedPlaylistViewModel.mode.collectAsState().value
     val songs = playlistScreenViewModel.songs.collectAsState().value
 
     LaunchedEffect(playlist?.id) {
@@ -64,9 +74,7 @@ fun SelectedPlaylistScreen(
         }
     }
 
-    val reproduce = if (playlist?.songs?.toList()!!
-            .isEmpty()
-    ) songs else playlist?.songs?.toList()
+    val reproduce = if (playlist?.songs?.toList()!!.isEmpty()) songs else playlist?.songs?.toList()
 
     Column(
         modifier = Modifier
@@ -75,18 +83,39 @@ fun SelectedPlaylistScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(R.drawable.arrow_back),
-            contentDescription = "Go back",
-            modifier = Modifier
-                .clickable(onClick = {
-                    navHostController?.navigate(ROUTES.HOME) {
-                        popUpTo(ROUTES.HOME) { inclusive = true }
-                    }
-                })
-                .align(Alignment.End)
-                .padding(top = 10.dp)
-        )
+        Row(
+            Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            if (screenMode == SelectionMode.PLAYLIST) {
+                Icon(
+                    imageVector = Icons.Default.DeleteForever,
+                    contentDescription = "Go back",
+                    tint = Color(0xFFCB3813),
+                    modifier = Modifier
+                        .clickable(onClick = {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                deletePlaylist(playlist.id)
+                            }
+                            navHostController?.navigate(ROUTES.HOME) {
+                                popUpTo(ROUTES.HOME) { inclusive = true }
+                            }
+                        })
+                        .padding(top = 20.dp)
+                )
+            }
+            Image(
+                painter = painterResource(R.drawable.arrow_back),
+                contentDescription = "Go back",
+                modifier = Modifier
+                    .clickable(onClick = {
+                        navHostController?.navigate(ROUTES.HOME) {
+                            popUpTo(ROUTES.HOME) { inclusive = true }
+                        }
+                    })
+                    .padding(top = 20.dp)
+            )
+        }
+
         Spacer(Modifier.padding(top = 20.dp))
 
         UserImage()
@@ -112,7 +141,6 @@ fun SelectedPlaylistScreen(
 
             Button(
                 onClick = {
-
                     audioPlayerViewModel?.loadPlaylist(reproduce!!)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
@@ -140,3 +168,4 @@ fun SelectedPlaylistScreen(
 
     }
 }
+

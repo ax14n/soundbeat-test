@@ -34,10 +34,13 @@ import com.example.soundbeat_test.ui.audio.MusicPlayerBottomSheet
 import com.example.soundbeat_test.ui.screens.auth.LoginScreen
 import com.example.soundbeat_test.ui.screens.auth.RegisterScreen
 import com.example.soundbeat_test.ui.screens.configuration.ConfigurationScreen
+import com.example.soundbeat_test.ui.screens.create_playlist.CreatePlaylistScreen
+import com.example.soundbeat_test.ui.screens.create_playlist.CreatePlaylistViewModel
 import com.example.soundbeat_test.ui.screens.home.HomeScreen
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreen
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreenViewModel
 import com.example.soundbeat_test.ui.screens.profile.ProfileScreen
+import com.example.soundbeat_test.ui.screens.search.MODE
 import com.example.soundbeat_test.ui.screens.search.SearchScreen
 import com.example.soundbeat_test.ui.selected_playlist.SelectedPlaylistScreen
 import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
@@ -57,6 +60,7 @@ class MainActivity : ComponentActivity() {
                 val audioPlayerViewModel: AudioPlayerViewModel = viewModel()
                 val sharedPlaylistViewModel: SharedPlaylistViewModel = viewModel()
                 val playlistScreenViewModel: PlaylistScreenViewModel = viewModel()
+                val createPlaylistViewModel: CreatePlaylistViewModel = viewModel()
 
                 MusicPlayerBottomSheet(
                     audioPlayerViewModel = audioPlayerViewModel,
@@ -65,7 +69,8 @@ class MainActivity : ComponentActivity() {
                     MainApp(
                         audioPlayerViewModel = audioPlayerViewModel,
                         sharedPlaylistViewModel = sharedPlaylistViewModel,
-                        playlistScreenViewModel = playlistScreenViewModel
+                        playlistScreenViewModel = playlistScreenViewModel,
+                        createPlaylistViewModel = createPlaylistViewModel
                     )
                 }
             }
@@ -84,7 +89,8 @@ class MainActivity : ComponentActivity() {
 fun MainApp(
     audioPlayerViewModel: AudioPlayerViewModel? = null,
     sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
-    playlistScreenViewModel: PlaylistScreenViewModel? = null
+    playlistScreenViewModel: PlaylistScreenViewModel? = null,
+    createPlaylistViewModel: CreatePlaylistViewModel
 ) {
     val navController = rememberNavController()
 
@@ -92,7 +98,8 @@ fun MainApp(
         navController = navController,
         sharedPlaylistViewModel = sharedPlaylistViewModel,
         audioPlayerViewModel = audioPlayerViewModel,
-        playlistScreenViewModel = playlistScreenViewModel
+        playlistScreenViewModel = playlistScreenViewModel,
+        createPlaylistViewModel = createPlaylistViewModel,
     )
 }
 
@@ -108,7 +115,8 @@ fun AppNavigation(
     navController: NavHostController,
     sharedPlaylistViewModel: SharedPlaylistViewModel?,
     audioPlayerViewModel: AudioPlayerViewModel?,
-    playlistScreenViewModel: PlaylistScreenViewModel?
+    playlistScreenViewModel: PlaylistScreenViewModel?,
+    createPlaylistViewModel: CreatePlaylistViewModel
 ) {
     NavHost(navController = navController, startDestination = ROUTES.LOGIN) {
         composable(ROUTES.LOGIN) {
@@ -143,6 +151,28 @@ fun AppNavigation(
                 sharedPlaylistViewModel = sharedPlaylistViewModel!!,
                 audioPlayerViewModel = audioPlayerViewModel!!,
                 playlistScreenViewModel = playlistScreenViewModel!!
+            )
+        }
+        composable("SEARCH/{mode}") { backStackEntry ->
+            val modeArg = backStackEntry.arguments?.getString("mode")
+            val mode = try {
+                MODE.valueOf(modeArg ?: MODE.NORMAL.name)
+            } catch (e: IllegalArgumentException) {
+                MODE.NORMAL
+            }
+
+            SearchScreen(
+                navHostController = navController,
+                sharedPlaylistViewModel = sharedPlaylistViewModel!!,
+                mode = mode
+            )
+        }
+        composable(ROUTES.PLAYLIST_CREATOR) {
+            CreatePlaylistScreen(
+                navController = navController,
+                playerViewModel = audioPlayerViewModel!!,
+                sharedPlaylistViewModel = sharedPlaylistViewModel!!,
+                createPlaylistViewModel = createPlaylistViewModel,
             )
         }
     }
@@ -229,7 +259,12 @@ fun ContentScreen(
             sharedPlaylistViewModel = sharedPlaylistViewModel!!
         )
 
-        2 -> SearchScreen(navHostController)
+        2 -> SearchScreen(
+            navHostController = navHostController,
+            sharedPlaylistViewModel = sharedPlaylistViewModel!!,
+            mode = MODE.NORMAL
+        )
+
         3 -> ProfileScreen(navHostController)
     }
 }

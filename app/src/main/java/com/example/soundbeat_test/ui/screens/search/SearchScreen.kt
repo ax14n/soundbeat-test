@@ -23,9 +23,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.R
 import com.example.soundbeat_test.data.Album
+import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumCard
 import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
+
+enum class MODE {
+    NORMAL, CREATOR
+}
 
 /**
  * Composable que representa la pantalla de búsqueda de álbumes.
@@ -43,9 +48,10 @@ import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
 @Composable
 fun SearchScreen(
     navHostController: NavHostController? = null,
-    searchScreenViewModel: SearchScreenViewModel = viewModel()
+    searchScreenViewModel: SearchScreenViewModel = viewModel(),
+    sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
+    mode: MODE = MODE.NORMAL
 ) {
-    val sharedPlaylistViewModel = viewModel<SharedPlaylistViewModel>()
 
     val queryState = searchScreenViewModel.textFieldText.collectAsState()
     val listState = searchScreenViewModel.albumList.collectAsState()
@@ -67,8 +73,21 @@ fun SearchScreen(
             navHostController?.let {
                 VinylList(
                     albumList = list
-                ) {
-                    navHostController.navigate(ROUTES.SELECTED_PLAYLIST)
+                ) { album ->
+                    val playlist: Playlist = Playlist(
+                        id = 1, name = album.name, songs = setOf(album)
+                    )
+                    sharedPlaylistViewModel?.updatePlaylist(playlist)
+
+                    when (mode) {
+                        MODE.NORMAL -> {
+                            navHostController.navigate(ROUTES.SELECTED_PLAYLIST)
+                        }
+
+                        MODE.CREATOR -> {
+                            navHostController.navigate(ROUTES.PLAYLIST_CREATOR)
+                        }
+                    }
                     Log.d("SearchScreen", "Navigating to: SELECTED PLAYLIST")
                 }
             }

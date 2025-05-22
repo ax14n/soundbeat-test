@@ -74,8 +74,8 @@ class AudioPlayerViewModel(
     init {
         exoPlayer.addListener(listener)
 //         Ejemplo de reproducción de playlist que hice.
-        val list = Album.AlbumListExample
-        loadPlaylist(list)
+        // val list = Album.AlbumListExample
+        //loadPlaylist(list)
     }
 
     /**
