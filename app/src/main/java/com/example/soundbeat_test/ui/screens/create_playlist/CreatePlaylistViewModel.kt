@@ -34,6 +34,14 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
         _songs.value = _songs.value - album
     }
 
+    fun clearSongsList() {
+        _songs.value = emptySet()
+    }
+
+    fun clearPlaylistName() {
+        _playlistName.value = ""
+    }
+
     @OptIn(UnstableApi::class)
     fun createPlaylist() {
         viewModelScope.launch {
@@ -42,9 +50,11 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
             val userEmail = sharedPreferences.getString("email", null)
 
             if (userEmail != null) {
+                val ids = _songs.value.toList().map { it.id }
                 com.example.soundbeat_test.network.createPlaylist(
                     playlistName = playlistName.value,
-                    userEmail = userEmail
+                    userEmail = userEmail,
+                    songsId = ids,
                 )
             } else {
                 // Maneja el caso en que no hay email almacenado

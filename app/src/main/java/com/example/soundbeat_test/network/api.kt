@@ -234,12 +234,13 @@ suspend fun getServerSongs(genre: String = "null"): Result<List<Album>> {
  * @param songs: Colección de canciones que se agregarán a la playlist.
  * @param name: Nombre de la playlist a crear o modificar.
  */
-suspend fun createPlaylist(playlistName: String, userEmail: String): String {
+suspend fun createPlaylist(playlistName: String, userEmail: String, songsId: List<Int>): String {
     val url = "${URL_BASE}/api/playlists/createPlaylist"
 
     val jsonBody = JSONObject().apply {
         put("playlist_name", playlistName)
         put("user_email", userEmail)
+        put("songs_id", JSONArray(songsId))
     }
 
     return makeApiRequest(url, method = "POST", jsonBody = jsonBody)

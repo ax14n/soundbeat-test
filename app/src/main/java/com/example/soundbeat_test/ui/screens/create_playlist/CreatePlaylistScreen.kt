@@ -80,6 +80,8 @@ fun CreatePlaylistScreen(
 
             Button(
                 onClick = {
+                    createPlaylistViewModel.clearPlaylistName()
+                    createPlaylistViewModel.clearSongsList()
                     navController?.navigate(ROUTES.HOME) {
                         popUpTo(ROUTES.HOME) { inclusive = true }
                     }
