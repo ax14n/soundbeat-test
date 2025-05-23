@@ -15,6 +15,7 @@ import com.example.soundbeat_test.network.URL_BASE
  * @property author El autor o banda que interpreta la canción.
  * @property genre El género musical de la canción.
  * @property imageResId El recurso de la imagen de la portada del álbum. El valor por defecto es `R.drawable.portada1`.
+ * @property isLocal Si la canción es local (true) o remota (false)
  */
 data class Album(
     val id: Int = -1,
@@ -23,7 +24,8 @@ data class Album(
     val genre: List<String> = listOf<String>(),
     val imageResId: Int = R.drawable.default_vinyl,
     val url: String = "assign url",
-    val duration: Double = 0.0
+    val duration: Double = 0.0,
+    val isLocal: Boolean = false
 ) {
     companion object {
         val AlbumExample = Album(
@@ -45,8 +47,7 @@ data class Album(
                 imageResId = 1,
                 url = "$URL_BASE/media/Blind_girl_(feat._Dia_Yiannopoulou)_-_zero-project.m3u8",
                 duration = 2.2
-            ),
-            Album(
+            ), Album(
                 id = 0,
                 name = "Alone_-_Color_Out",
                 author = "TODO()",
@@ -54,8 +55,7 @@ data class Album(
                 imageResId = 1,
                 url = "$URL_BASE/media/Alone_-_Color_Out.m3u8",
                 duration = 2.2
-            ),
-            Album(
+            ), Album(
                 id = 0,
                 name = "Molotov_Heart_-_radionowhere",
                 author = "TODO()",

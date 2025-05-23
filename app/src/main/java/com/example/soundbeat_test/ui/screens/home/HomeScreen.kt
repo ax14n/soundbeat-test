@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.data.Playlist
+import com.example.soundbeat_test.local.listLocalAlbums
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.network.getServerSongs
 import com.example.soundbeat_test.ui.components.AlbumHorizontalList
@@ -46,29 +47,31 @@ fun HomeScreen(
                 modifier = Modifier.padding(10.dp),
                 verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
-                ListServerSongs(
+                ListSongs(
                     "¡Canciones del servidor!",
                     navHostController = navHostController,
                     genre = null,
                     sharedPlaylistViewModel = sharedPlaylistViewModel
                 )
-                ListServerSongs(
+                ListSongs(
                     "¡Tus canciones favoritas remotas!",
                     navHostController = navHostController,
                     genre = null,
                     sharedPlaylistViewModel = sharedPlaylistViewModel,
                 )
-                ListServerSongs(
+                ListSongs(
                     "¡Canciones locales!",
                     navHostController = navHostController,
                     genre = null,
-                    sharedPlaylistViewModel = sharedPlaylistViewModel
+                    sharedPlaylistViewModel = sharedPlaylistViewModel,
+                    isLocal = true
                 )
-                ListServerSongs(
+                ListSongs(
                     "¡Tus canciones favoritas locales!",
                     navHostController = navHostController,
                     genre = null,
-                    sharedPlaylistViewModel = sharedPlaylistViewModel
+                    sharedPlaylistViewModel = sharedPlaylistViewModel,
+                    isLocal = true
                 )
             }
         }
@@ -89,17 +92,25 @@ fun HomeScreen(
  */
 
 @Composable
-fun ListServerSongs(
+fun ListSongs(
     text: String,
     genre: String?,
     navHostController: NavHostController?,
-    sharedPlaylistViewModel: SharedPlaylistViewModel?
+    sharedPlaylistViewModel: SharedPlaylistViewModel?,
+    isLocal: Boolean = false
 ) {
     var songsList by remember { mutableStateOf<List<Album>>(emptyList<Album>()) }
+
     LaunchedEffect(Unit) {
-        val result = getServerSongs(genre ?: "null")
-        if (result.isSuccess) {
-            songsList = result.getOrNull() ?: emptyList()
+        songsList = if (isLocal) {
+            listLocalAlbums()
+        } else {
+            val result = getServerSongs(genre ?: "null")
+            if (result.isSuccess) {
+                result.getOrNull() ?: emptyList()
+            } else {
+                emptyList()
+            }
         }
     }
     Text(text)
