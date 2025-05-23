@@ -91,15 +91,10 @@ class AudioPlayerViewModel(
      */
     @OptIn(UnstableApi::class)
     fun loadAndPlayHLS(url: String, title: String, artist: String? = null) {
-        val mediaItem = MediaItem.Builder()
-            .setUri(url)
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setTitle(title)
-                    .setArtist(artist ?: "Autor desconocido")
-                    .build()
-            )
-            .build()
+        val mediaItem = MediaItem.Builder().setUri(url).setMediaMetadata(
+            MediaMetadata.Builder().setTitle(title).setArtist(artist ?: "Autor desconocido")
+                .build()
+        ).build()
 
         exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
@@ -110,20 +105,25 @@ class AudioPlayerViewModel(
     /**
      * Genera la URL del recurso HLS asociado a un álbum.
      *
-     * Dado un objeto [Album], construye la URL completa para acceder al archivo `.m3u8`
-     * correspondiente en el servidor. El nombre del álbum es codificado en UTF-8 para
-     * asegurar compatibilidad con URLs válidas.
+     * Si el álbum es remoto (no local), construye la URL correspondiente al archivo `.m3u8`
+     * almacenado en el servidor, codificando el nombre del archivo en UTF-8 para asegurar
+     * compatibilidad con la sintaxis de URLs. Si el álbum es local, simplemente devuelve la URI
+     * del archivo local ya contenida en el objeto [Album].
      *
-     * @param album Objeto que representa el álbum cuya pista se quiere reproducir.
-     * @return Cadena de texto que representa la URL codificada del archivo de audio HLS.
+     * @param album Álbum que contiene los datos de la canción a reproducir.
+     * @return Cadena de texto representando la URL (remota) o URI (local) del recurso de audio.
      */
+    @OptIn(UnstableApi::class)
     fun createSongUrl(album: Album): String {
-        val url = "$URL_BASE/media/${
-            URLEncoder.encode(
-                album.name.trim() + ".m3u8", "UTF-8"
-            )
-        }"
-        return url
+        val result = if (!album.isLocal) {
+            val encodedName = URLEncoder.encode(album.name.trim() + ".m3u8", "UTF-8")
+            "$URL_BASE/media/$encodedName"
+            encodedName
+        } else {
+            album.url
+        }
+        Log.d("AudioPlayerViewModel", "URL o URI: $result")
+        return result
     }
 
     /**
@@ -145,17 +145,12 @@ class AudioPlayerViewModel(
             val uri = createSongUrl(album)
             Log.d("AudioPlayerViewModel", "${album.name} : $uri")
 
-            MediaItem.Builder()
-                .setUri(uri)
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(album.name)
-                        .setArtist(
-                            album.author ?: "Autor desconocido"
-                        ) // si tienes ese campo en Album
-                        .build()
+            MediaItem.Builder().setUri(uri).setMediaMetadata(
+                MediaMetadata.Builder().setTitle(album.name).setArtist(
+                    album.author ?: "Autor desconocido"
                 )
-                .build()
+                    .build()
+            ).build()
         }
 
         exoPlayer.setMediaItems(mediaItems)

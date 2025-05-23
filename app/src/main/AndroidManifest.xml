@@ -4,6 +4,9 @@
 
     <!-- Agrego permisos de acceso a internet para la app. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Habilito los permisos de acceso a la memoria para obtener canciones locales -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
 
     <!-- Agrego reglas para permitir conexiones al servidor con HTTP. No permitido desde Android 9 -->
     <!-- La configuración de esto está en @xml/network_security_config, indicado en el manifest -->
