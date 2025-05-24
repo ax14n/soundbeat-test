@@ -19,7 +19,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -84,7 +83,6 @@ class MainActivity : ComponentActivity() {
  * Muestra toda la estructura de navegación y contenido de la app.
  * Se utiliza en el `setContent` de la actividad.
  */
-@Preview(showSystemUi = true)
 @Composable
 fun MainApp(
     audioPlayerViewModel: AudioPlayerViewModel? = null,

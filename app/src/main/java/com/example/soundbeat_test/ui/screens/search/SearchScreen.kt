@@ -67,7 +67,7 @@ fun SearchScreen(
                 text = query,
                 onTextChange = { searchScreenViewModel.onSearchQueryChange(it) },
                 onSearch = { query ->
-                    searchScreenViewModel.loadAlbums(query)
+                    searchScreenViewModel.fillSongsList(query)
                 })
 
             navHostController?.let {

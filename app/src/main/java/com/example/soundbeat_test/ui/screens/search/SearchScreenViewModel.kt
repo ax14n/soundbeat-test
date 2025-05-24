@@ -26,11 +26,6 @@ enum class SearchMode {
  */
 class SearchScreenViewModel() : ViewModel() {
 
-    init {
-        // Se establece conexión con el servidor para traer las canciones especificadas.
-        loadAlbums()
-    }
-
     /**
      * Propiedad que almacena el modo en el que se encuentra el ViewModel.
      */
@@ -41,16 +36,6 @@ class SearchScreenViewModel() : ViewModel() {
      * el ViewModel.
      */
     val searchMode: StateFlow<SearchMode> = _searchMode
-
-    /**
-     * Propiedad que almacena la información del usuario y que puede ser modificada.
-     */
-    private val _userInfo = MutableStateFlow<Map<String, Any>?>(null)
-
-    /**
-     * Propiedad de solo lectura que sirve al proposito de mostrar los datos del usuario
-     */
-    public val userInfo: StateFlow<Map<String, Any>?> = _userInfo
 
     /**
      * Propiedad que almacena la lista de canciones obtenidas del servidor.
@@ -83,47 +68,41 @@ class SearchScreenViewModel() : ViewModel() {
      */
     public val textFieldText = _textFieldText
 
-    /**
-     * Lista que almacena las canciones seleccionadas por el usuario a la hora de hacer o eliminar
-     * playlists. Usada cuando la pantalla de búsqueda se encuentra en modo `BUSQUEDA`.
-     */
-    private val _seletedAlbumList = listOf<Album>()
-
-    /**
-     * Propiedad de solo lectura que apunta a `_seletedAlbumList`. Cumple con el proposito de solo
-     * mostrar las canciones seleccionadas por el usuario.
-     */
-    public val selectedAlbumList = _seletedAlbumList
+    init {
+        fillSongsList()
+    }
 
     /**
      * Carga las canciones del servidor. Las canciones pueden ser filtradas por nombre.
      */
-    fun loadAlbums(query: String = "") {
+    fun fillSongsList(query: String = "") {
 
-        when (_searchMode.value) {
-            REMOTE -> {
-                viewModelScope.launch {
+        _searchMode.value?.let { mode ->
+            when (mode) {
+                REMOTE -> {
+                    viewModelScope.launch {
 
-                    val result = getServerSongs()
+                        val result = getServerSongs()
 
-                    if (result.isSuccess) {
-                        val fullList = result.getOrNull()
-                        _albumList.value = (if (query.isBlank()) {
-                            fullList
+                        if (result.isSuccess) {
+                            val fullList = result.getOrNull()
+                            _albumList.value = (if (query.isBlank()) {
+                                fullList
+                            } else {
+                                fullList?.filter { it.name.startsWith(query, ignoreCase = true) }
+                            })!!
                         } else {
-                            fullList?.filter { it.name.startsWith(query, ignoreCase = true) }
-                        })!!
-                    } else {
-                        _errorMessage = result.exceptionOrNull()?.message ?: "Error desconocido"
+                            _errorMessage = result.exceptionOrNull()?.message ?: "Error desconocido"
+                        }
                     }
+                }
+
+                LOCAL -> {
+                    _albumList.value = listLocalAlbums()
                 }
             }
 
-            LOCAL -> {
-                _albumList.value = listLocalAlbums()
-            }
         }
-
     }
 
     /**
