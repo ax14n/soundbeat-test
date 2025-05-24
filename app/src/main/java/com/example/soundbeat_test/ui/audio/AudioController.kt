@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import com.example.soundbeat_test.ui.components.PlayerControls
-import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
+import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
 
 /**
  * Composable que implementa un BottomSheet con controles de reproducción de música.

@@ -32,7 +32,7 @@ import com.example.soundbeat_test.ui.audio.AudioPlayerViewModel
 import com.example.soundbeat_test.ui.components.AlbumCard
 import com.example.soundbeat_test.ui.components.UserImage
 import com.example.soundbeat_test.ui.screens.search.MODE
-import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
+import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
 
 @OptIn(UnstableApi::class)
 @Composable

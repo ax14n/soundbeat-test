@@ -18,8 +18,8 @@ import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumHorizontalList
 import com.example.soundbeat_test.ui.components.TopLargeBottomRowGifLayout
-import com.example.soundbeat_test.ui.selected_playlist.SelectionMode
-import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
+import com.example.soundbeat_test.ui.screens.selected_playlist.SelectionMode
+import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
 
 @Composable
 fun PlaylistScreen(

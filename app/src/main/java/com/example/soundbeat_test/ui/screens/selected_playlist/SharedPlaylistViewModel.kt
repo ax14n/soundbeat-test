@@ -1,4 +1,4 @@
-package com.example.soundbeat_test.ui.selected_playlist
+package com.example.soundbeat_test.ui.screens.selected_playlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

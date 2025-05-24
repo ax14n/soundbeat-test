@@ -42,8 +42,8 @@ import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreenViewModel
 import com.example.soundbeat_test.ui.screens.profile.ProfileScreen
 import com.example.soundbeat_test.ui.screens.search.MODE
 import com.example.soundbeat_test.ui.screens.search.SearchScreen
-import com.example.soundbeat_test.ui.selected_playlist.SelectedPlaylistScreen
-import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
+import com.example.soundbeat_test.ui.screens.selected_playlist.SelectedPlaylistScreen
+import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
 import com.example.soundbeat_test.ui.theme.SoundBeat_TestTheme
 
 /**
