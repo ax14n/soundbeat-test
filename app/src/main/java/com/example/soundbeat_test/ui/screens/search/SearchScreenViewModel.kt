@@ -73,7 +73,8 @@ class SearchScreenViewModel() : ViewModel() {
     }
 
     /**
-     * Carga las canciones del servidor. Las canciones pueden ser filtradas por nombre.
+     * Carga canciones locales o remotas dependiendo del modo asignado en que actua el ViewModel.
+     * @see SearchMode
      */
     fun fillSongsList(query: String = "") {
 

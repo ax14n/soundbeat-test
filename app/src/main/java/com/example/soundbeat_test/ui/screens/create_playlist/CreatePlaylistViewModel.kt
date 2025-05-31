@@ -9,12 +9,29 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
+import androidx.room.Room
 import com.example.soundbeat_test.data.Album
+import com.example.soundbeat_test.local.room.AppDatabase
+import com.example.soundbeat_test.local.room.entities.Playlist
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * Modos internos que usa el ViewModel para identificar si se debe crear una playlist localmente
+ * o remotamente.
+ */
+enum class CreationMode {
+    OFFLINE_PLAYLIST, ONLINE_PLAYLIST
+}
+
 class CreatePlaylistViewModel(application: Application) : AndroidViewModel(application) {
+
+    val db = Room.databaseBuilder(
+        context = application.applicationContext,
+        AppDatabase::class.java,
+        "nombre_de_tu_base_de_datos"
+    ).build()
 
     private val _playlistName = mutableStateOf("Playlist nº1")
     val playlistName: State<String> = _playlistName
@@ -43,22 +60,42 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
     }
 
     @OptIn(UnstableApi::class)
-    fun createPlaylist() {
-        viewModelScope.launch {
-            val sharedPreferences = getApplication<Application>()
-                .getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
-            val userEmail = sharedPreferences.getString("email", null)
+    fun createPlaylist(creationMode: CreationMode) {
+        when (creationMode) {
+            CreationMode.ONLINE_PLAYLIST -> {
 
-            if (userEmail != null) {
-                val ids = _songs.value.toList().map { it.id }
-                com.example.soundbeat_test.network.createPlaylist(
-                    playlistName = playlistName.value,
-                    userEmail = userEmail,
-                    songsId = ids,
-                )
-            } else {
-                // Maneja el caso en que no hay email almacenado
-                Log.e("createPlaylist", "No se encontró el email en SharedPreferences")
+                viewModelScope.launch {
+                    val sharedPreferences = getApplication<Application>().getSharedPreferences(
+                        "UserInfo",
+                        Context.MODE_PRIVATE
+                    )
+                    val userEmail = sharedPreferences.getString("email", null)
+
+                    if (userEmail != null) {
+                        val ids = _songs.value.toList().map { it.id }
+                        com.example.soundbeat_test.network.createPlaylist(
+                            playlistName = playlistName.value,
+                            userEmail = userEmail,
+                            songsId = ids,
+                        )
+                    } else {
+                        // Maneja el caso en que no hay email almacenado
+                        Log.e("createPlaylist", "No se encontró el email en SharedPreferences")
+                    }
+                }
+            }
+
+            CreationMode.OFFLINE_PLAYLIST -> {
+                viewModelScope.launch {
+                    val playlist = Playlist(
+                        name = playlistName.value, createdAt = System.currentTimeMillis()
+                    )
+                    db.playlistDao()?.insert(playlist)
+                    db.playlistDao()?.getAllPlaylists()?.last()?.playlistId
+                    for (song in _songs.value) {
+
+                    }
+                }
             }
         }
     }

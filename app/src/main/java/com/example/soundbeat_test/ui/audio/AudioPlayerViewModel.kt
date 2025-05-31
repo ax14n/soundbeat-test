@@ -91,6 +91,7 @@ class AudioPlayerViewModel(
      */
     @OptIn(UnstableApi::class)
     fun loadAndPlayHLS(url: String, title: String, artist: String? = null) {
+        Log.d("AudioPlayerViewModel", "url: $url")
         val mediaItem = MediaItem.Builder().setUri(url).setMediaMetadata(
             MediaMetadata.Builder().setTitle(title).setArtist(artist ?: "Autor desconocido")
                 .build()
@@ -117,12 +118,12 @@ class AudioPlayerViewModel(
     fun createSongUrl(album: Album): String {
         val result = if (!album.isLocal) {
             val encodedName = URLEncoder.encode(album.name.trim() + ".m3u8", "UTF-8")
-            "$URL_BASE/media/$encodedName"
-            encodedName
+            val url = "$URL_BASE/media/$encodedName"
+            return url
         } else {
             album.url
         }
-        Log.d("AudioPlayerViewModel", "URL o URI: $result")
+        Log.d("AudioPlayerViewModel", "URL o URI: $result - isLocal: ${album.isLocal}")
         return result
     }
 

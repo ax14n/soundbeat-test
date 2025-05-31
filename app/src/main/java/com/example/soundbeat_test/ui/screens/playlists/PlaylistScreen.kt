@@ -18,6 +18,7 @@ import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumHorizontalList
 import com.example.soundbeat_test.ui.components.TopLargeBottomRowGifLayout
+import com.example.soundbeat_test.ui.screens.create_playlist.CreationMode
 import com.example.soundbeat_test.ui.screens.selected_playlist.SelectionMode
 import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
 
@@ -40,9 +41,11 @@ fun PlaylistScreen(
             ) {
                 TopLargeBottomRowGifLayout(
                     bigImageOnClick = {  /* TODO("Not yet implemented") */ },
-                    leftImageOnClick = { /* TODO("Not yet implemented") */ },
+                    leftImageOnClick = {
+                        navHostController?.navigate("PLAYLIST_CREATOR/${CreationMode.OFFLINE_PLAYLIST.name}")
+                    },
                     rightImageOnClick = {
-                        navHostController?.navigate(ROUTES.PLAYLIST_CREATOR)
+                        navHostController?.navigate("PLAYLIST_CREATOR/${CreationMode.ONLINE_PLAYLIST.name}")
                     })
                 Column(
                     modifier = Modifier.padding(10.dp),

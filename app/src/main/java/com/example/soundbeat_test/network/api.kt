@@ -17,7 +17,7 @@ import java.net.URLEncoder
 /**
  * Aquí se introduce la dirección IP o dominio del servidor.
  */
-const val URL_BASE = "http://192.168.1.175:8080"
+const val URL_BASE = "http://192.168.1.200:8080"
 
 /**
  * Función para hacer peticiones a la API, tanto GET como POST, con el manejo adecuado de respuestas y errores.

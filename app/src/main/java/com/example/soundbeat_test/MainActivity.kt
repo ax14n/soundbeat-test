@@ -35,11 +35,12 @@ import com.example.soundbeat_test.ui.screens.auth.RegisterScreen
 import com.example.soundbeat_test.ui.screens.configuration.ConfigurationScreen
 import com.example.soundbeat_test.ui.screens.create_playlist.CreatePlaylistScreen
 import com.example.soundbeat_test.ui.screens.create_playlist.CreatePlaylistViewModel
+import com.example.soundbeat_test.ui.screens.create_playlist.CreationMode
 import com.example.soundbeat_test.ui.screens.home.HomeScreen
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreen
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreenViewModel
 import com.example.soundbeat_test.ui.screens.profile.ProfileScreen
-import com.example.soundbeat_test.ui.screens.search.MODE
+import com.example.soundbeat_test.ui.screens.search.SearchInteractionMode
 import com.example.soundbeat_test.ui.screens.search.SearchScreen
 import com.example.soundbeat_test.ui.screens.selected_playlist.SelectedPlaylistScreen
 import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
@@ -60,17 +61,22 @@ class MainActivity : ComponentActivity() {
                 val sharedPlaylistViewModel: SharedPlaylistViewModel = viewModel()
                 val playlistScreenViewModel: PlaylistScreenViewModel = viewModel()
                 val createPlaylistViewModel: CreatePlaylistViewModel = viewModel()
+                Scaffold { it ->
+                    Column(Modifier.padding(it)) {
+                        MusicPlayerBottomSheet(
+                            audioPlayerViewModel = audioPlayerViewModel,
+                            sharedPlaylistViewModel = sharedPlaylistViewModel
+                        ) {
+                            MainApp(
+                                audioPlayerViewModel = audioPlayerViewModel,
+                                sharedPlaylistViewModel = sharedPlaylistViewModel,
+                                playlistScreenViewModel = playlistScreenViewModel,
+                                createPlaylistViewModel = createPlaylistViewModel
+                            )
+                        }
 
-                MusicPlayerBottomSheet(
-                    audioPlayerViewModel = audioPlayerViewModel,
-                    sharedPlaylistViewModel = sharedPlaylistViewModel
-                ) {
-                    MainApp(
-                        audioPlayerViewModel = audioPlayerViewModel,
-                        sharedPlaylistViewModel = sharedPlaylistViewModel,
-                        playlistScreenViewModel = playlistScreenViewModel,
-                        createPlaylistViewModel = createPlaylistViewModel
-                    )
+                    }
+
                 }
             }
         }
@@ -153,24 +159,36 @@ fun AppNavigation(
         }
         composable("SEARCH/{mode}") { backStackEntry ->
             val modeArg = backStackEntry.arguments?.getString("mode")
-            val mode = try {
-                MODE.valueOf(modeArg ?: MODE.NORMAL.name)
+            val searchInteractionMode = try {
+                SearchInteractionMode.valueOf(
+                    modeArg ?: SearchInteractionMode.REPRODUCE_ON_SELECT.name
+                )
             } catch (e: IllegalArgumentException) {
-                MODE.NORMAL
+                SearchInteractionMode.REPRODUCE_ON_SELECT
             }
 
             SearchScreen(
                 navHostController = navController,
                 sharedPlaylistViewModel = sharedPlaylistViewModel!!,
-                mode = mode
+                searchInteractionMode = searchInteractionMode
             )
         }
-        composable(ROUTES.PLAYLIST_CREATOR) {
+        // navController.navigate("PLAYLIST_CREATOR/${CreationMode.ONLINE_PLAYLIST.name}")
+        composable("PLAYLIST_CREATOR/{mode}") { backStackEntry ->
+            val modeArg = backStackEntry.arguments?.getString("mode")
+            val creationMode = try {
+                CreationMode.valueOf(
+                    modeArg ?: CreationMode.OFFLINE_PLAYLIST.name
+                )
+            } catch (e: IllegalArgumentException) {
+                CreationMode.OFFLINE_PLAYLIST
+            }
             CreatePlaylistScreen(
                 navController = navController,
                 playerViewModel = audioPlayerViewModel!!,
                 sharedPlaylistViewModel = sharedPlaylistViewModel!!,
                 createPlaylistViewModel = createPlaylistViewModel,
+                creationMode = creationMode
             )
         }
     }
@@ -260,7 +278,7 @@ fun ContentScreen(
         2 -> SearchScreen(
             navHostController = navHostController,
             sharedPlaylistViewModel = sharedPlaylistViewModel!!,
-            mode = MODE.NORMAL
+            searchInteractionMode = SearchInteractionMode.REPRODUCE_ON_SELECT
         )
 
         3 -> ProfileScreen(navHostController)

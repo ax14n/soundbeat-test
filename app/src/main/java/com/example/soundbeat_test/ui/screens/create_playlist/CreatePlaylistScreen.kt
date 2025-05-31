@@ -1,6 +1,7 @@
 package com.example.soundbeat_test.ui.screens.create_playlist
 
 import androidx.annotation.OptIn
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
@@ -31,7 +33,7 @@ import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.audio.AudioPlayerViewModel
 import com.example.soundbeat_test.ui.components.AlbumCard
 import com.example.soundbeat_test.ui.components.UserImage
-import com.example.soundbeat_test.ui.screens.search.MODE
+import com.example.soundbeat_test.ui.screens.search.SearchInteractionMode
 import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
 
 @OptIn(UnstableApi::class)
@@ -40,7 +42,8 @@ fun CreatePlaylistScreen(
     navController: NavHostController,
     createPlaylistViewModel: CreatePlaylistViewModel,
     playerViewModel: AudioPlayerViewModel,
-    sharedPlaylistViewModel: SharedPlaylistViewModel
+    sharedPlaylistViewModel: SharedPlaylistViewModel,
+    creationMode: CreationMode
 ) {
     val sharedPlaylist = sharedPlaylistViewModel?.selectedPlaylist?.collectAsState()
     val receivedPlaylist = sharedPlaylist?.value
@@ -64,6 +67,17 @@ fun CreatePlaylistScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
+            Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFFF5722)),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(text = "Modo: $creationMode", color = Color.White, fontStyle = FontStyle.Italic)
+        }
+
+        Spacer(modifier = Modifier.height(2.dp))
+
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 20.dp),
@@ -71,7 +85,7 @@ fun CreatePlaylistScreen(
         ) {
             Button(
                 onClick = {
-                    createPlaylistViewModel.createPlaylist()
+                    createPlaylistViewModel.createPlaylist(creationMode)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
             ) {
@@ -135,7 +149,7 @@ fun SongsListBox(
             )
             Button(
                 onClick = {
-                    navController?.navigate("search/${MODE.CREATOR.name}")
+                    navController?.navigate("search/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}")
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
