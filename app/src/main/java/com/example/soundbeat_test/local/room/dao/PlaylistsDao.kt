@@ -13,7 +13,7 @@ interface PlaylistDao {
      * Inserta una nueva playlist.
      */
     @Insert
-    suspend fun insert(playlist: Playlist)
+    suspend fun insert(playlist: Playlist): Long
 
     /**
      * Elimina una playlist (y todas sus relaciones por cascada).

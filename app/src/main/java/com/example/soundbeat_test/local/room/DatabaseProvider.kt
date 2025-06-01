@@ -2,6 +2,9 @@ package com.example.soundbeat_test.local.room
 
 import android.content.Context
 import androidx.room.Room
+import com.example.soundbeat_test.local.room.dao.PlaylistDao
+import com.example.soundbeat_test.local.room.dao.PlaylistSongDao
+import com.example.soundbeat_test.local.room.dao.SongDao
 
 object DatabaseProvider {
 
@@ -20,4 +23,15 @@ object DatabaseProvider {
         }
     }
 
+    fun getPlaylistDao(context: Context): PlaylistDao {
+        return this.getDatabase(context).playlistDao()!!
+    }
+
+    fun getSongDao(context: Context): SongDao {
+        return this.getDatabase(context).songDao()!!
+    }
+
+    fun getPlaylistSongDao(context: Context): PlaylistSongDao {
+        return this.getDatabase(context).playlistSongDao()!!
+    }
 }

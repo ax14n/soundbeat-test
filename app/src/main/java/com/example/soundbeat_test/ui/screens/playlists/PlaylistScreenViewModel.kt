@@ -2,10 +2,13 @@ package com.example.soundbeat_test.ui.screens.playlists
 
 import android.app.Application
 import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.data.Playlist
+import com.example.soundbeat_test.local.room.DatabaseProvider.getPlaylistDao
+import com.example.soundbeat_test.local.room.DatabaseProvider.getPlaylistSongDao
 import com.example.soundbeat_test.network.getPlaylistSongs
 import com.example.soundbeat_test.network.getUserPlaylists
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,8 +25,13 @@ class PlaylistScreenViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
-    private val _userPlaylists = MutableStateFlow<List<Playlist>>(emptyList())
-    val userPlaylists: StateFlow<List<Playlist>> = _userPlaylists
+    private val context = getApplication<Application>()
+
+    private val _remoteUserPlaylists = MutableStateFlow<List<Playlist>>(emptyList())
+    val remoteUserPlaylists: StateFlow<List<Playlist>> = _remoteUserPlaylists
+
+    private val _localUserPlaylist = MutableStateFlow<List<Playlist>>(emptyList())
+    val localUserPlaylist: StateFlow<List<Playlist>> = _localUserPlaylist
 
     private val _songs = MutableStateFlow<List<Album>>(emptyList<Album>())
     val songs: StateFlow<List<Album>> = _songs
@@ -32,15 +40,16 @@ class PlaylistScreenViewModel(
     val error: StateFlow<String?> = _error
 
     init {
-        obtainUserPlaylists()
+        obtainRemoteUserPlaylists()
+        obtainLocalUserPlaylists()
     }
 
     /**
      * Llama a la API para obtener las playlists del usuario actualmente autenticado.
-     * El resultado se almacena en [_userPlaylists] si es exitoso,
+     * El resultado se almacena en [_remoteUserPlaylists] si es exitoso,
      * o en [_error] si ocurre algún fallo.
      */
-    fun obtainUserPlaylists() {
+    fun obtainRemoteUserPlaylists() {
         val savedEmail = getSavedEmail()
 
         if (savedEmail != null) {
@@ -49,7 +58,7 @@ class PlaylistScreenViewModel(
 
                 if (result.isSuccess) {
                     val playlists = result.getOrNull()
-                    _userPlaylists.value = playlists ?: emptyList()
+                    _remoteUserPlaylists.value = playlists ?: emptyList()
                 } else {
                     val error = result.exceptionOrNull()?.message ?: "Error desconocido"
                     _error.value = error
@@ -57,6 +66,21 @@ class PlaylistScreenViewModel(
             }
         } else {
             _error.value = "No se encontró el email del usuario."
+            Toast.makeText(context, "$error", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * Obtiene y lista las canciones locales almacenadas dentro de la base de datos local del usuario.
+     */
+    fun obtainLocalUserPlaylists() {
+        viewModelScope.launch {
+            val playlistDao = getPlaylistDao(context)
+            _localUserPlaylist.value = playlistDao.getAllPlaylists().map { playlist ->
+                Playlist(
+                    id = playlist.playlistId, name = playlist.name, songs = setOf<Album>()
+                )
+            }
         }
     }
 
@@ -67,14 +91,33 @@ class PlaylistScreenViewModel(
      *
      * @param playlistId ID de la playlist cuyas canciones se desean obtener.
      */
-    fun obtainPlaylistSongs(playlistId: Int) {
+    fun obtainRemotePlaylistSongs(playlistId: Int) {
         viewModelScope.launch {
             val result = getPlaylistSongs(playlistId)
             if (result.isSuccess) {
                 _songs.value = result.getOrDefault(emptyList())
             } else {
                 _error.value = result.exceptionOrNull()?.message ?: "Error desconocido"
+                Toast.makeText(context, "$error", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    fun obtainLocalPlaylistSongs(playlistId: Int) {
+        viewModelScope.launch {
+            val songs = getPlaylistSongDao(
+                context = context
+            ).getSongsForPlaylist(playlistId).map { song ->
+                Album(
+                    id = song.songId,
+                    name = song.title,
+                    author = song.artist,
+                    url = song.url,
+                    duration = song.duration.toDouble(),
+                    isLocal = true
+                )
+            }
+            _songs.value = songs
         }
     }
 
@@ -84,8 +127,7 @@ class PlaylistScreenViewModel(
      * @return El correo electrónico del usuario o `null` si no existe.
      */
     private fun getSavedEmail(): String? {
-        val prefs = getApplication<Application>()
-            .getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
         return prefs.getString("email", null)
     }
 }

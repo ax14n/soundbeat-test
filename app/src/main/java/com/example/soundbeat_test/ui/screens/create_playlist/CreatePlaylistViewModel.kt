@@ -11,7 +11,9 @@ import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.data.Album.Companion.toSong
-import com.example.soundbeat_test.local.room.DatabaseProvider
+import com.example.soundbeat_test.local.room.DatabaseProvider.getPlaylistDao
+import com.example.soundbeat_test.local.room.DatabaseProvider.getPlaylistSongDao
+import com.example.soundbeat_test.local.room.DatabaseProvider.getSongDao
 import com.example.soundbeat_test.local.room.entities.Playlist
 import com.example.soundbeat_test.local.room.entities.PlaylistSong
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,12 +31,24 @@ enum class CreationMode {
 class CreatePlaylistViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
-     * Instancia de la base de datos. Necesaria para agregar y crear Playlists localmente.
+     * Contexto de la aplicación necesario para acceder a la base de datos local.
      */
-    private val db = DatabaseProvider.getDatabase(application.applicationContext)
-    private val localPlaylistDb = db.playlistDao()
-    private val localSongDb = db.songDao()
-    private val localPlaylistSongDb = db.playlistSongDao()
+    private val context = application.applicationContext
+
+    /**
+     * Instancia de acceso a `PlaylistDao`.
+     */
+    private val localPlaylistDb = getPlaylistDao(context)
+
+    /**
+     * Instancia de acceso a `SongDao`.
+     */
+    private val localSongDb = getSongDao(context)
+
+    /**
+     * Instancia de acceso a `PlaylistSongDao`.
+     */
+    private val localPlaylistSongDb = getPlaylistSongDao(context)
 
     private val _playlistName = mutableStateOf("Playlist nº1")
     val playlistName: State<String> = _playlistName
@@ -125,22 +139,43 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
      * seleccionadas. Para que las canciones puedan ser agregadas a la playlist, se obtiene
      * la información de las canciones y se agregan también a la base de datos.
      */
+    @OptIn(UnstableApi::class)
     private fun createLocalPlaylist() {
         viewModelScope.launch {
-            val playlist = Playlist(
-                name = playlistName.value, createdAt = System.currentTimeMillis()
-            )
-            localPlaylistDb?.insert(playlist)
-            val playlistId = localPlaylistDb?.getAllPlaylists()?.last()?.playlistId
-            for (song in _songs.value) {
-                localSongDb?.insert(song.toSong())
-                val songId = localSongDb?.getAllSongs()?.last()?.songId
-                var playlistSong = PlaylistSong(
-                    playlist_id = playlistId!!, song_id = songId!!
+            try {
+                Log.d("PlaylistCreation", "Inicio de creación de playlist local")
+                val playlist = Playlist(
+                    name = playlistName.value, createdAt = System.currentTimeMillis(),
+                    playlistId = 0
                 )
-                localPlaylistSongDb?.insert(playlistSong)
+
+                Log.d("PlaylistCreation", "Insertando playlist: $playlist")
+                val playlistId = localPlaylistDb?.insert(playlist)?.toInt()
+
+                Log.d("PlaylistCreation", "ID de playlist creada: $playlistId")
+
+                Log.d("PlaylistCreation", "Canciones iterar: ${_songs.value.size}")
+                for (album in _songs.value) {
+                    Log.d("PlaylistCreation", "Insertando canción: $album")
+                    val existing = localSongDb.getSongByTitleAndArtist(album.name, album.author)
+
+                    val songId = existing?.songId ?: localSongDb.insert(album.toSong()).toInt()
+
+                    Log.d("PlaylistCreation", "ID de canción insertada: $songId")
+
+                    val playlistSong = PlaylistSong(
+                        playlist_id = playlistId!!, song_id = songId!!
+                    )
+                    Log.d("PlaylistCreation", "Insertando relación Playlist-Song: $playlistSong")
+
+                    localPlaylistSongDb?.insert(playlistSong)
+                }
+                Log.d("PlaylistCreation", "Creación de playlist local finalizada correctamente")
+            } catch (e: Exception) {
+                Log.e("PlaylistCreation", "Error al crear la playlist local", e)
             }
         }
     }
+
 
 }

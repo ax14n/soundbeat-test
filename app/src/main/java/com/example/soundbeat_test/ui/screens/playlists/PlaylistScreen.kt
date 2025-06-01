@@ -21,6 +21,7 @@ import com.example.soundbeat_test.ui.components.TopLargeBottomRowGifLayout
 import com.example.soundbeat_test.ui.screens.create_playlist.CreationMode
 import com.example.soundbeat_test.ui.screens.selected_playlist.SelectionMode
 import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
+import com.example.soundbeat_test.ui.screens.selected_playlist.SongSource
 
 @Composable
 fun PlaylistScreen(
@@ -28,7 +29,8 @@ fun PlaylistScreen(
     playlistScreenViewModel: PlaylistScreenViewModel,
     sharedPlaylistViewModel: SharedPlaylistViewModel
 ) {
-    val playlists = playlistScreenViewModel.userPlaylists.collectAsState().value
+    val remotePlaylists = playlistScreenViewModel.remoteUserPlaylists.collectAsState().value
+    val localPlaylists = playlistScreenViewModel.localUserPlaylist.collectAsState().value
 
     Box {
         Scaffold { padding ->
@@ -53,10 +55,11 @@ fun PlaylistScreen(
                 ) {
                     Text("¡Tus playlists en línea!")
                     AlbumHorizontalList(
-                        list = playlists
+                        list = remotePlaylists
                     ) { item ->
                         if (item is Playlist) {
                             sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
+                            sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.REMOTES)
                             Log.d("PlaylistScreen", "Playlist: ${item.id} - ${item.name}")
                             sharedPlaylistViewModel.updatePlaylist(item)
                             Log.d(
@@ -72,8 +75,23 @@ fun PlaylistScreen(
                         Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
                     }
                     Text("¡Tus playlist locales!")
-                    AlbumHorizontalList {
+                    AlbumHorizontalList(list = localPlaylists) { item ->
+                        if (item is Playlist) {
+                            sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
+                            sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.LOCALS)
+                            Log.d("PlaylistScreen", "Playlist: ${item.id} - ${item.name}")
+                            sharedPlaylistViewModel.updatePlaylist(item)
+                            Log.d(
+                                "PlaylistScreen",
+                                "${sharedPlaylistViewModel.selectedPlaylist.value}"
+                            )
+
+                            navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
+                            Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
+                        }
+
                         navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
+                        Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
                     }
                 }
             }

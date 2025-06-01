@@ -13,7 +13,7 @@ interface SongDao {
      * Inserta una canción en la base de datos.
      */
     @Insert
-    suspend fun insert(song: Song)
+    suspend fun insert(song: Song): Long
 
     /**
      * Elimina una canción específica.
@@ -32,4 +32,7 @@ interface SongDao {
      */
     @Query("SELECT * FROM Songs WHERE artist = :artistName")
     suspend fun findByArtist(artistName: String): List<Song>
+
+    @Query("SELECT * FROM Songs WHERE title = :title AND artist = :artist LIMIT 1")
+    suspend fun getSongByTitleAndArtist(title: String, artist: String): Song?
 }
