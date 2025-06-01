@@ -27,7 +27,7 @@ import androidx.navigation.NavHostController
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumHorizontalList
 import com.example.soundbeat_test.ui.components.UserImage
-import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
+import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
 
 /**
  * Composable que representa la pantalla de perfil de usuario.

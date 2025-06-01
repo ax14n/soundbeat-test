@@ -26,10 +26,19 @@ import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumCard
-import com.example.soundbeat_test.ui.selected_playlist.SharedPlaylistViewModel
+import com.example.soundbeat_test.ui.screens.search.SearchInteractionMode.APPEND_TO_PLAYLIST
+import com.example.soundbeat_test.ui.screens.search.SearchInteractionMode.REPRODUCE_ON_SELECT
+import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
 
-enum class MODE {
-    NORMAL, CREATOR
+/**
+ * Estos son los modos en los que funciona la interfáz.
+ * @param REPRODUCE_ON_SELECT: Reproduce las canciones pinchadas por el usuario.
+ * @param APPEND_TO_PLAYLIST: Cuando `SearchScreen` es llamada para crear una playlist, usa
+ * este modo. Cambia su funcionamiento para en vez de reproducirlas, las sube a
+ * `SharedPlaylistViewModel.kt`
+ */
+enum class SearchInteractionMode {
+    REPRODUCE_ON_SELECT, APPEND_TO_PLAYLIST
 }
 
 /**
@@ -50,7 +59,7 @@ fun SearchScreen(
     navHostController: NavHostController? = null,
     searchScreenViewModel: SearchScreenViewModel = viewModel(),
     sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
-    mode: MODE = MODE.NORMAL
+    searchInteractionMode: SearchInteractionMode = REPRODUCE_ON_SELECT
 ) {
 
     val queryState = searchScreenViewModel.textFieldText.collectAsState()
@@ -67,24 +76,24 @@ fun SearchScreen(
                 text = query,
                 onTextChange = { searchScreenViewModel.onSearchQueryChange(it) },
                 onSearch = { query ->
-                    searchScreenViewModel.loadAlbums(query)
+                    searchScreenViewModel.fillSongsList(query)
                 })
 
             navHostController?.let {
                 VinylList(
                     albumList = list
                 ) { album ->
-                    val playlist: Playlist = Playlist(
+                    val playlist = Playlist(
                         id = 1, name = album.name, songs = setOf(album)
                     )
                     sharedPlaylistViewModel?.updatePlaylist(playlist)
 
-                    when (mode) {
-                        MODE.NORMAL -> {
+                    when (searchInteractionMode) {
+                        REPRODUCE_ON_SELECT -> {
                             navHostController.navigate(ROUTES.SELECTED_PLAYLIST)
                         }
 
-                        MODE.CREATOR -> {
+                        APPEND_TO_PLAYLIST -> {
                             navHostController.navigate(ROUTES.PLAYLIST_CREATOR)
                         }
                     }

@@ -1,4 +1,4 @@
-package com.example.soundbeat_test.ui.selected_playlist
+package com.example.soundbeat_test.ui.screens.selected_playlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +16,13 @@ import kotlinx.coroutines.launch
  */
 enum class SelectionMode {
     SONG, PLAYLIST
+}
+
+/**
+ * Indica la procedencia de las canciones.
+ */
+enum class SongSource {
+    LOCALS, REMOTES
 }
 
 /**
@@ -46,6 +53,16 @@ class SharedPlaylistViewModel : ViewModel() {
      * ante cambios en la selección de playlist.
      */
     val selectedPlaylist: StateFlow<Playlist?> = _selectedPlaylist
+
+    /**
+     * Almacena la procedencia de las canciones.
+     */
+    private val _songsSource = MutableStateFlow<SongSource>(SongSource.REMOTES)
+
+    /**
+     * Informa si la Playlist que contiene en su interior esta hecha de canciones locales o remotas.
+     */
+    val songsSource: StateFlow<SongSource> = _songsSource
 
     /**
      * Indica si el elemento actualmente seleccionado es una playlist.
@@ -96,6 +113,10 @@ class SharedPlaylistViewModel : ViewModel() {
      */
     fun setMode(selectionMode: SelectionMode) {
         _isPlaylist.value = selectionMode
+    }
+
+    fun setSongsSource(songsSource: SongSource) {
+        _songsSource.value = songsSource
     }
 
     fun deletePlaylist(playlist: Playlist) {

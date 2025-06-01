@@ -1,4 +1,4 @@
-package com.example.soundbeat_test.ui.selected_playlist
+package com.example.soundbeat_test.ui.screens.selected_playlist
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -64,13 +64,26 @@ fun SelectedPlaylistScreen(
 ) {
     val playlist = sharedPlaylistViewModel.selectedPlaylist.collectAsState().value
     val screenMode = sharedPlaylistViewModel.mode.collectAsState().value
+    val songSource = sharedPlaylistViewModel.songsSource.collectAsState().value
     val songs = playlistScreenViewModel.songs.collectAsState().value
 
-    LaunchedEffect(playlist?.id) {
-        playlist?.let {
-            Log.d("SelectedPlaylistScreen", "Playlist ID: ${it.id}")
-            Log.d("SelectedPlaylistScreen", "Playlist canciones:  ${it.songs}")
-            playlistScreenViewModel.obtainPlaylistSongs(it.id)
+    LaunchedEffect(songSource, playlist?.id) {
+        when (songSource) {
+            SongSource.LOCALS -> {
+                playlist?.let {
+                    Log.d("SelectedPlaylistScreen", "Playlist ID: ${playlist.id}")
+                    Log.d("SelectedPlaylistScreen", "Playlist canciones:  ${playlist.songs}")
+                    playlistScreenViewModel.obtainLocalPlaylistSongs(playlist.id)
+                }
+            }
+
+            SongSource.REMOTES -> {
+                playlist?.let {
+                    Log.d("SelectedPlaylistScreen", "Playlist ID: ${playlist.id}")
+                    Log.d("SelectedPlaylistScreen", "Playlist canciones:  ${playlist.songs}")
+                    playlistScreenViewModel.obtainRemotePlaylistSongs(playlist.id)
+                }
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package com.example.soundbeat_test.data
 
 import com.example.soundbeat_test.R
+import com.example.soundbeat_test.local.room.entities.Song
 import com.example.soundbeat_test.network.URL_BASE
 
 /**
@@ -64,7 +65,20 @@ data class Album(
                 url = "$URL_BASE/media/Molotov_Heart_-_radionowhere.m3u8",
                 duration = 2.2
             )
-
         )
+
+        /**
+         * Convierte un Album a Song para ser subida a la base de datos.
+         */
+        fun Album.toSong(): Song {
+            return Song(
+                songId = this.id,
+                title = this.name,
+                artist = this.author,
+                duration = (this.duration * 60).toInt(),
+                url = this.url,
+                createdAt = System.currentTimeMillis()
+            )
+        }
     }
 }

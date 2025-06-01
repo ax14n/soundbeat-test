@@ -14,7 +14,7 @@ object ROUTES {
     const val PLAYLIST = "PLAYLIST"
     const val PROFILE = "PROFILE"
     const val SEARCH = "SEARCH/{mode}"
-    const val PLAYLIST_CREATOR = "PLAYLIST_CREATOR"
+    const val PLAYLIST_CREATOR = "PLAYLIST_CREATOR/{mode}"
     const val SETTINGS = "SETTINGS"
     const val SELECTED_PLAYLIST = "SELECTED_PLAYLIST"
 }
