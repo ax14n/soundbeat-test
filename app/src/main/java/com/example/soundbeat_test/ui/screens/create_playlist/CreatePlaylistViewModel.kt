@@ -34,6 +34,7 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
     private val db = DatabaseProvider.getDatabase(application.applicationContext)
     private val localPlaylistDb = db.playlistDao()
     private val localSongDb = db.songDao()
+    private val localPlaylistSongDb = db.playlistSongDao()
 
     private val _playlistName = mutableStateOf("Playlist nº1")
     val playlistName: State<String> = _playlistName
@@ -129,16 +130,15 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
             val playlist = Playlist(
                 name = playlistName.value, createdAt = System.currentTimeMillis()
             )
-            db.playlistDao()?.insert(playlist)
-            val playlistId = db.playlistDao()?.getAllPlaylists()?.last()?.playlistId
+            localPlaylistDb?.insert(playlist)
+            val playlistId = localPlaylistDb?.getAllPlaylists()?.last()?.playlistId
             for (song in _songs.value) {
-                db.songDao()?.insert(song.toSong())
-                val songId = db.songDao()?.getAllSongs()?.last()?.songId
+                localSongDb?.insert(song.toSong())
+                val songId = localSongDb?.getAllSongs()?.last()?.songId
                 var playlistSong = PlaylistSong(
-                    playlist_id = playlistId!!,
-                    song_id = songId!!
+                    playlist_id = playlistId!!, song_id = songId!!
                 )
-                db.playlistSongDao()?.insert(playlistSong)
+                localPlaylistSongDb?.insert(playlistSong)
             }
         }
     }
