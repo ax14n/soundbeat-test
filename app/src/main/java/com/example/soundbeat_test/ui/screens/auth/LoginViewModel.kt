@@ -9,10 +9,16 @@ import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import com.example.soundbeat_test.network.loginUser
 import com.example.soundbeat_test.network.userExists
+import com.example.soundbeat_test.ui.screens.auth.LoginModes.OFFLINE_MODE
+import com.example.soundbeat_test.ui.screens.auth.LoginModes.ONLINE_MODE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+
+enum class LoginModes {
+    OFFLINE_MODE, ONLINE_MODE
+}
 
 /**
  * ViewModel encargado de gestionar el proceso de inicio de sesión de usuarios.
@@ -45,28 +51,38 @@ class LoginViewModel : ViewModel() {
      * @param context Contexto de la aplicación, necesario para acceder a SharedPreferences.
      */
     @OptIn(UnstableApi::class)
-    fun logInUser(email: String, password: String, context: Context) {
+    fun logInUser(email: String, password: String, context: Context, loginModes: LoginModes) {
+        // Si el dato es diferente al email del usuario entonces significa
+        when (loginModes) {
+            OFFLINE_MODE -> {
+                saveUserData(context, "OFFLINE")
+                _isAuthenticated.value = true
+            }
 
-        if (checkInputs(email, password)) return
+            ONLINE_MODE -> {
+                if (checkInputs(email, password)) return
 
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                if (checkUserExistence(email)) return@launch
+                viewModelScope.launch(Dispatchers.IO) {
+                    try {
+                        if (checkUserExistence(email)) return@launch
 
-                val resultantLogin = loginUser(email, password)
-                Log.d("LoginViewModel", "Resultado Log in: $resultantLogin")
+                        val resultantLogin = loginUser(email, password)
+                        Log.d("LoginViewModel", "Resultado Log in: $resultantLogin")
 
-                if (resultantLogin == "Inicio de sesión exitoso!") {
-                    saveUserData(context, email)
-                    _isAuthenticated.value = true
+                        if (resultantLogin == "Inicio de sesión exitoso!") {
+                            saveUserData(context, email)
+                            _isAuthenticated.value = true
+                        }
+
+                        _message.value = resultantLogin
+
+                    } catch (e: Exception) {
+                        _message.value = "Error de conexión: ${e.localizedMessage}"
+                    }
                 }
-
-                _message.value = resultantLogin
-
-            } catch (e: Exception) {
-                _message.value = "Error de conexión: ${e.localizedMessage}"
             }
         }
+
     }
 
     /**
@@ -124,5 +140,6 @@ class LoginViewModel : ViewModel() {
         editor.putString("email", email)
         editor.apply()
     }
+
 
 }

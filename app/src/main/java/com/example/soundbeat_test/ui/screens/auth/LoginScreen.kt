@@ -54,8 +54,7 @@ import com.example.soundbeat_test.navigation.ROUTES
 @Preview(showSystemUi = true)
 @Composable
 fun LoginScreen(
-    navHostController: NavHostController? = null,
-    loginViewModel: LoginViewModel = viewModel()
+    navHostController: NavHostController? = null, loginViewModel: LoginViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val isAuthenticated by loginViewModel.isAuthenticated.collectAsState()
@@ -148,17 +147,39 @@ fun LoginScreen(
                     onClick = {
                         navHostController?.let {
                             loginViewModel.logInUser(
-                                email = email.value.trim(), password = password.value.trim(),
-                                context = context
+                                email = email.value.trim(),
+                                password = password.value.trim(),
+                                context = context,
+                                loginModes = LoginModes.ONLINE_MODE
                             )
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF94ACD5)), // lavanda
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDE7028)), // lavanda
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
                         text = "ENTER!", fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        navHostController?.let {
+                            loginViewModel.logInUser(
+                                email = email.value.trim(),
+                                password = password.value.trim(),
+                                context = context,
+                                loginModes = LoginModes.OFFLINE_MODE
+                            )
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF013603)), // lavanda
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = "Offline Mode", fontWeight = FontWeight.Bold
                     )
                 }
 
