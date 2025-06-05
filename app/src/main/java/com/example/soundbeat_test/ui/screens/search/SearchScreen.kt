@@ -11,10 +11,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -68,6 +70,8 @@ fun SearchScreen(
     val query = queryState.value
     val list = listState.value
 
+    val isChecked = searchScreenViewModel.isChecked.collectAsState().value
+
     Scaffold { padding ->
         Column(
             modifier = Modifier.padding(padding), verticalArrangement = Arrangement.spacedBy(15.dp)
@@ -78,6 +82,19 @@ fun SearchScreen(
                 onSearch = { query ->
                     searchScreenViewModel.fillSongsList(query)
                 })
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Switch(
+                    checked = isChecked,
+                    onCheckedChange = {
+                        searchScreenViewModel.alternateSwitch()
+                        searchScreenViewModel.fillSongsList()
+                    }
+                )
+                Text(if (isChecked) "Local" else "Remoto")
+            }
 
             navHostController?.let {
                 VinylList(
