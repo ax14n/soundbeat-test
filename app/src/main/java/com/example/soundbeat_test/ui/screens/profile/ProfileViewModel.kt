@@ -52,8 +52,8 @@ class ProfileViewModel(
      * @return El correo electrónico del usuario o `null` si no existe.
      */
     private fun getSavedEmail(): String? {
-        val prefs = getApplication<Application>()
-            .getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
+        val prefs =
+            getApplication<Application>().getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
         return prefs.getString("email", null)
     }
 
@@ -65,16 +65,25 @@ class ProfileViewModel(
     fun getProfile(email: String) {
         viewModelScope.launch {
             try {
-                val result = getUserInfo(email)
+                when (email) {
+                    "OFFLINE" -> {
+                        _userInfo.value = mapOf<String, Any>(
+                            "username" to "OFFLINE USER"
+                        )
+                    }
 
-                if (result.isSuccess) {
-                    val data = result.getOrNull()
-                    _userInfo.value = data
-                } else {
-                    val errorMsg = result.exceptionOrNull()?.message ?: "Error desconocido"
-                    _error.value = errorMsg
+                    else -> {
+                        val result = getUserInfo(email)
+
+                        if (result.isSuccess) {
+                            val data = result.getOrNull()
+                            _userInfo.value = data
+                        } else {
+                            val errorMsg = result.exceptionOrNull()?.message ?: "Error desconocido"
+                            _error.value = errorMsg
+                        }
+                    }
                 }
-
             } catch (e: Exception) {
                 _error.value = "Error de conexión: ${e.message}"
             }

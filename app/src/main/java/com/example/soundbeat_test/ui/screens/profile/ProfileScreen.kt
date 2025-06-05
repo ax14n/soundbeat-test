@@ -8,12 +8,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,9 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.navigation.ROUTES
-import com.example.soundbeat_test.ui.components.AlbumHorizontalList
 import com.example.soundbeat_test.ui.components.UserImage
-import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
 
 /**
  * Composable que representa la pantalla de perfil de usuario.
@@ -42,7 +39,6 @@ import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistVie
 fun ProfileScreen(
     navHostController: NavHostController? = null, profileViewModel: ProfileViewModel = viewModel()
 ) {
-    val sharedPlaylistViewModel = viewModel<SharedPlaylistViewModel>()
 
     val userInfo = profileViewModel.userInfo.collectAsState().value
     val error = profileViewModel.error.collectAsState().value
@@ -54,62 +50,42 @@ fun ProfileScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 6.dp)
-                .clickable {
-                    navHostController?.let { onClickConfigurationButton(navHostController) }
-                }, contentAlignment = Alignment.TopEnd
-        ) {
-
-            androidx.compose.material3.Icon(
-                imageVector = Icons.Filled.Settings,
-                contentDescription = "Settings",
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(24.dp),
-            )
-
-        }
+        SettingsIcon(navHostController)
         UserImage()
-
+        Spacer(Modifier.padding(10.dp))
         when {
-            error != null -> Text("Error al cargar el perfil", color = Color.Red)
-            userInfo != null -> Text(userInfo?.get("username")?.toString() ?: "[Sin nombre]")
-            else -> CircularProgressIndicator()
+            error != null -> {
+                Text("Error al cargar el perfil", color = Color.Red)
+            }
+
+            userInfo != null -> {
+                val name = userInfo?.get("username")?.toString() ?: "[Sin nombre]"
+                Text(name)
+            }
         }
 
-        SoundbeatContentRow() {
-            AlbumHorizontalList()
-        }
-        SoundbeatContentRow() {
-            AlbumHorizontalList()
-        }
-        SoundbeatContentRow() {
-            AlbumHorizontalList()
-        }
     }
 }
 
-/**
- * Composable que representa una fila contenedora de contenido relacionado con Soundbeat,
- * como listas de álbumes o playlists.
- *
- * @param content Contenido que se colocará dentro de la fila.
- */
 @Composable
-private fun SoundbeatContentRow(content: @Composable () -> Unit) {
-    Spacer(modifier = Modifier.height(24.dp))
-
+private fun SettingsIcon(navHostController: NavHostController?) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(175.dp)
-            .background(Color(0xFFDCDCDC)),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = 6.dp)
+            .clickable {
+                navHostController?.let { onClickConfigurationButton(navHostController) }
+            }, contentAlignment = Alignment.TopEnd
     ) {
-        content()
+
+        Icon(
+            imageVector = Icons.Filled.Settings,
+            contentDescription = "Settings",
+            modifier = Modifier
+                .padding(8.dp)
+                .size(24.dp),
+        )
+
     }
 }
 
