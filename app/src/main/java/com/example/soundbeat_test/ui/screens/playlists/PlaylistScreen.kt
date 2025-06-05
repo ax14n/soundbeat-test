@@ -1,9 +1,12 @@
 package com.example.soundbeat_test.ui.screens.playlists
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.data.Playlist
@@ -30,6 +34,8 @@ fun PlaylistScreen(
     sharedPlaylistViewModel: SharedPlaylistViewModel
 ) {
     val remotePlaylists = playlistScreenViewModel.remoteUserPlaylists.collectAsState().value
+    val remoteError = playlistScreenViewModel.error.collectAsState().value
+
     val localPlaylists = playlistScreenViewModel.localUserPlaylist.collectAsState().value
 
     Box {
@@ -54,26 +60,42 @@ fun PlaylistScreen(
                     verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
                     Text("¡Tus playlists en línea!")
-                    AlbumHorizontalList(
-                        list = remotePlaylists
-                    ) { item ->
-                        if (item is Playlist) {
-                            sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
-                            sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.REMOTES)
-                            Log.d("PlaylistScreen", "Playlist: ${item.id} - ${item.name}")
-                            sharedPlaylistViewModel.updatePlaylist(item)
-                            Log.d(
-                                "PlaylistScreen",
-                                "${sharedPlaylistViewModel.selectedPlaylist.value}"
-                            )
+                    if (remotePlaylists.isNotEmpty()) {
+                        AlbumHorizontalList(
+                            list = remotePlaylists
+                        ) { item ->
+                            if (item is Playlist) {
+                                sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
+                                sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.REMOTES)
+                                Log.d("PlaylistScreen", "Playlist: ${item.id} - ${item.name}")
+                                sharedPlaylistViewModel.updatePlaylist(item)
+                                Log.d(
+                                    "PlaylistScreen",
+                                    "${sharedPlaylistViewModel.selectedPlaylist.value}"
+                                )
+
+                                navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
+                                Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
+                            }
 
                             navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
                             Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
                         }
-
-                        navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
-                        Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.Red),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                "Sin conexión",
+                                color = (Color.White),
+                                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
+                            )
+                        }
                     }
+
                     Text("¡Tus playlist locales!")
                     AlbumHorizontalList(list = localPlaylists) { item ->
                         if (item is Playlist) {
