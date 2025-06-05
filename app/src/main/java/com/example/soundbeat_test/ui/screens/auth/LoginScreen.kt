@@ -185,9 +185,7 @@ fun LoginScreen(
 
                 LaunchedEffect(isAuthenticated) {
                     if (isAuthenticated) {
-                        navHostController?.navigate(ROUTES.HOME) {
-                            popUpTo(ROUTES.LOGIN) { inclusive = true }
-                        }
+                        onEnterClick(navHostController!!)
                     }
                 }
 
@@ -202,7 +200,9 @@ fun LoginScreen(
  * @param navHostController Controlador de navegación usado para redirigir al registro.
  */
 private fun ColumnScope.onLoginClick(navHostController: NavHostController) {
-    navHostController.navigate(ROUTES.REGISTER)
+    navHostController.navigate(ROUTES.REGISTER) {
+        popUpTo(ROUTES.LOGIN) { inclusive = true }
+    }
     Log.d("LoginScreen", "Navigating to: REGISTER SCREEN")
 }
 
@@ -212,6 +212,8 @@ private fun ColumnScope.onLoginClick(navHostController: NavHostController) {
  * @param navHostController Controlador de navegación usado para redirigir al home.
  */
 private fun ColumnScope.onEnterClick(navHostController: NavHostController) {
-    navHostController.navigate(ROUTES.HOME)
+    navHostController.navigate(ROUTES.HOME) {
+        popUpTo(ROUTES.LOGIN) { inclusive = true }
+    }
     Log.d("LoginScreen", "Navigating to: HOME SCREEN")
 }
