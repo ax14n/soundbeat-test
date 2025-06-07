@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.example.soundbeat_test.R
 import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.data.Playlist
@@ -254,9 +255,12 @@ fun AlbumCover(
             .padding(end = 50.dp)
     ) {
 
+
         Box(contentAlignment = Alignment.Center) {
+            val diskPainter = rememberAsyncImagePainter(model = disk) // o cover
+            val coverPainter = rememberAsyncImagePainter(model = cover) // o cover
             Image(
-                painter = painterResource(id = disk),
+                painter = diskPainter,
                 contentDescription = "Disco",
                 modifier = Modifier
                     .offset(x = 50.dp)
@@ -264,7 +268,7 @@ fun AlbumCover(
             )
 
             Image(
-                painter = painterResource(id = cover),
+                painter = coverPainter,
                 contentDescription = "Portada del álbum",
                 modifier = Modifier
                     .size(100.dp)

@@ -10,9 +10,11 @@ import com.example.soundbeat_test.local.listLocalAlbums
 import com.example.soundbeat_test.network.getServerSongs
 import com.example.soundbeat_test.ui.screens.search.SearchMode.LOCAL
 import com.example.soundbeat_test.ui.screens.search.SearchMode.REMOTE
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Lista de géneros disponibles para el filtrado.
@@ -131,6 +133,19 @@ class SearchScreenViewModel() : ViewModel() {
      */
     val isFilterVisible: StateFlow<Boolean> = _isFilterVisible
 
+    /**
+     * Esta propiedad determina si el interruptor de alternancia debe estar oculto.
+     * Tiene sentido ocultarlo dependiendo de desde qué pantalla se accede al buscador,
+     * por ejemplo al añadir canciones a una playlist.
+     */
+    private val _alternationSwitchIsHidden = MutableStateFlow<Boolean>(false)
+
+    /**
+     * Propiedad de solo lectura que consulta si el Switch de búsqueda en remoto o local se
+     * encuentra visible o no.
+     */
+    val alternationSwitchIsHidden: StateFlow<Boolean> = _alternationSwitchIsHidden
+
     init {
         // Carga las canciones una vez mostrada la pantalla de búsqueda.
         fillSongsList()
@@ -172,10 +187,18 @@ class SearchScreenViewModel() : ViewModel() {
             }
 
             LOCAL -> {
-                val localAlbums = listLocalAlbums()
-                val filteredLocalAlbums =
-                    if (shouldFilterByGenre) filterAlbumsByGenre(localAlbums) else localAlbums
-                _albumList.value = filterAlbumsByQuery(filteredLocalAlbums, query)
+                viewModelScope.launch(Dispatchers.IO) {
+                    val localAlbums = listLocalAlbums()
+
+                    val filteredLocalAlbums = if (shouldFilterByGenre)
+                        filterAlbumsByGenre(localAlbums) else localAlbums
+
+                    val finalAlbums = filterAlbumsByQuery(filteredLocalAlbums, query)
+
+                    withContext(Dispatchers.Main) {
+                        _albumList.value = finalAlbums
+                    }
+                }
             }
         }
     }
@@ -226,6 +249,10 @@ class SearchScreenViewModel() : ViewModel() {
             _selectedGenres.value + genre
         }
         Log.d("SearchScreenViewModel", "the filter has: ${_selectedGenres.value}")
+    }
+
+    fun switchHidden() {
+        _alternationSwitchIsHidden.value = !_alternationSwitchIsHidden.value
     }
 
 }

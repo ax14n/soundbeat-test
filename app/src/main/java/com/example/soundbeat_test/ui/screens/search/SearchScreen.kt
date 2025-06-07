@@ -149,11 +149,15 @@ fun SearchScreen(
 
                     when (searchInteractionMode) {
                         REPRODUCE_ON_SELECT -> {
-                            navHostController.navigate(ROUTES.SELECTED_PLAYLIST)
+                            navHostController.navigate(ROUTES.SELECTED_PLAYLIST) {
+                                popUpTo(ROUTES.SEARCH) { inclusive = true }
+                            }
                         }
 
                         APPEND_TO_PLAYLIST -> {
-                            navHostController.navigate(ROUTES.PLAYLIST_CREATOR)
+                            navHostController.navigate(ROUTES.PLAYLIST_CREATOR) {
+                                popUpTo(ROUTES.SEARCH) { inclusive = true }
+                            }
                         }
                     }
                     Log.d("SearchScreen", "Navigating to: SELECTED PLAYLIST")
@@ -228,10 +232,8 @@ fun VinylList(
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(10.dp)
     ) {
-        items(albumList) { song ->
-            AlbumCard(
-                song
-            ) {
+        items(albumList, key = { it.id }) { song ->
+            AlbumCard(song) {
                 onClickedAlbumCover(song)
             }
         }
