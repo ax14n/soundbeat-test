@@ -217,10 +217,11 @@ fun MainScreen(
         mutableIntStateOf(0)
     }
 
-    Scaffold(modifier = Modifier.fillMaxSize(), topBar = {}, bottomBar = {
+    Scaffold(modifier = Modifier.fillMaxSize(), bottomBar = {
         BottomNavigationBar(navItemList, selectedIndex) { selectedIndex = it }
-    }) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+    }) { it ->
+        val padding = it
+        Column() {
             ContentScreen(
                 selectedIndex = selectedIndex,
                 navHostController = navHostController,
@@ -243,7 +244,7 @@ fun MainScreen(
 private fun BottomNavigationBar(
     navItemList: List<NavItem>, selectedIndex: Int, onInteraction: (Int) -> Unit
 ) {
-    NavigationBar(Modifier.padding(bottom = 32.dp)) {
+    NavigationBar() {
         navItemList.forEachIndexed { index, navItem ->
             NavigationBarItem(
                 selected = selectedIndex == index,
