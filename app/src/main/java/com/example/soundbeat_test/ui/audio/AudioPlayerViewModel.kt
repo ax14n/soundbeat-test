@@ -52,8 +52,14 @@ class AudioPlayerViewModel(
     private val _currentMediaItem = MutableStateFlow<MediaItem?>(null)
     val currentMediaItem: StateFlow<MediaItem?> = _currentMediaItem
 
+    private val _nextMediaItem = MutableStateFlow<MediaItem?>(null)
+    val nextMediaItem: StateFlow<MediaItem?> = _nextMediaItem
+
     private val _currentIndex = MutableStateFlow(0)
     val currentIndex: StateFlow<Int> = _currentIndex
+
+    private val _lastIndex = MutableStateFlow(0)
+    val lastIndex: StateFlow<Int> = _lastIndex
 
     private val _reproducerIsShowing = MutableStateFlow<Boolean>(false)
 
@@ -79,6 +85,10 @@ class AudioPlayerViewModel(
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             _currentMediaItem.value = mediaItem
             _currentIndex.value = exoPlayer.currentMediaItemIndex
+
+            val nextIndex = exoPlayer.currentMediaItemIndex + 1
+            val nextItem = exoPlayer.getMediaItemAt(nextIndex)
+            _nextMediaItem.value = nextItem
         }
 
     }
@@ -163,6 +173,7 @@ class AudioPlayerViewModel(
 
         exoPlayer.setMediaItems(mediaItems)
         exoPlayer.prepare()
+        _lastIndex.value = albums.size
         exoPlayer.playWhenReady = true
     }
 

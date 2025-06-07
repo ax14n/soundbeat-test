@@ -49,9 +49,14 @@ fun MusicPlayerDropdownMenu(
 ) {
 
     val isPlaying by audioPlayerViewModel.isPlaying.collectAsState()
-    val mediaItem by audioPlayerViewModel.currentMediaItem.collectAsState()
-    val songName = mediaItem?.mediaMetadata?.title ?: "No title"
-    val author = mediaItem?.mediaMetadata?.artist ?: "No author"
+    val currentMediaItem by audioPlayerViewModel.currentMediaItem.collectAsState()
+    val currentMediaItemIndex by audioPlayerViewModel.currentIndex.collectAsState()
+    val playlistLastIndex by audioPlayerViewModel.lastIndex.collectAsState()
+    val nextMediaItem by audioPlayerViewModel.nextMediaItem.collectAsState()
+
+    val songName = currentMediaItem?.mediaMetadata?.title ?: "No title"
+    val nextName = nextMediaItem?.mediaMetadata?.title ?: "No title"
+    val author = currentMediaItem?.mediaMetadata?.artist ?: "No author"
 
     val expanded = audioPlayerViewModel.reproducerIsShowing.collectAsState().value
 
@@ -67,8 +72,7 @@ fun MusicPlayerDropdownMenu(
                             audioPlayerViewModel.hidePlayerVisibility()
                         }
                     })
-            }
-    ) {
+            }) {
         AnimatedVisibility(
             visible = expanded,
             enter = slideInVertically { -it },
@@ -86,7 +90,10 @@ fun MusicPlayerDropdownMenu(
                     MusicPlayerControls(
                         isPlaying = isPlaying,
                         currentTrack = songName.toString(),
-                        author = author.toString()
+                        nextTrack = nextName.toString(),
+                        author = author.toString(),
+                        index = currentMediaItemIndex,
+                        len = playlistLastIndex
                     )
                 }
             }
@@ -122,22 +129,6 @@ fun MusicPlayerDropdownMenu(
         }
         Box() {
             content()
-//            Spacer(modifier = Modifier.padding(vertical = (10.dp)))
-//            IconButton(
-//                modifier = Modifier
-//                    .align(alignment = Alignment.TopCenter)
-//                    .offset(y = -(15.dp))
-//                    .clip(RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp))
-//                    .background(Color(0xFF026374)),
-//                onClick = { audioPlayerViewModel.togglePlayerVisibility() },
-//            ) {
-//                Icon(
-//                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-//                    contentDescription = if (expanded) "Cerrar controles" else "Abrir controles",
-//                    tint = Color.Black,
-//                    modifier = Modifier.size(23.dp)
-//                )
-//            }
         }
 
     }
@@ -153,7 +144,12 @@ fun MusicPlayerDropdownMenu(
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun MusicPlayerControls(
-    isPlaying: Boolean, currentTrack: String, author: String
+    isPlaying: Boolean,
+    currentTrack: String,
+    nextTrack: String,
+    author: String,
+    index: Int,
+    len: Int
 ) {
 
     Column(
@@ -161,7 +157,11 @@ fun MusicPlayerControls(
     ) {
         Log.d("AudioController", "Canción: $currentTrack by $author")
         PlayerControls(
-            songName = currentTrack, author = author
+            currentTrack = currentTrack,
+            author = author,
+            nextTrack = nextTrack,
+            index = index,
+            len = len
         )
     }
 }

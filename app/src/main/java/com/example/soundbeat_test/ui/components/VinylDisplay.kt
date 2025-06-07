@@ -2,6 +2,7 @@ package com.example.soundbeat_test.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,8 +48,7 @@ import com.example.soundbeat_test.data.Playlist
 fun AlbumHorizontalList(
     list: List<Any> = listOf<Playlist>(
         Playlist.PlaylistExample, Playlist.PlaylistExample, Playlist.PlaylistExample
-    ),
-    onPressedCover: (Any) -> Unit = {}
+    ), onPressedCover: (Any) -> Unit = {}
 ) {
     LazyRow {
         items(list) { item ->
@@ -124,8 +124,11 @@ fun AlbumCard(album: Album = Album.AlbumExample, onClickedAlbumCover: () -> Unit
 @Preview
 @Composable
 fun PlayerControls(
-    songName: String = "Unknown",
-    author: String = "Unknown"
+    currentTrack: String = "Unknown",
+    author: String = "Unknown",
+    nextTrack: String = "Unknown",
+    index: Int = 1,
+    len: Int = index
 ) {
     Row(
         modifier = Modifier
@@ -141,18 +144,31 @@ fun PlayerControls(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = songName,
+                text = currentTrack,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
-                maxLines = 1
+                maxLines = 1,
+                modifier = Modifier.basicMarquee()
+
             )
             Text(
                 text = "by $author",
                 fontSize = 13.sp,
                 color = Color.DarkGray,
-                modifier = Modifier.padding(bottom = 4.dp)
+                modifier = Modifier
+                    .padding(bottom = 4.dp)
+                    .basicMarquee()
+
             )
 
+            Text(
+                text = "next track: ${if (index + 1 == len) "no more tracks" else nextTrack}",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                maxLines = 1,
+                modifier = Modifier
+                    .basicMarquee()
+            )
         }
     }
 }
@@ -183,8 +199,7 @@ fun AlbumItem(album: Album = Album.AlbumExample, onPressedCover: (Album) -> Unit
 @Composable
 @Preview
 fun PlaylistItem(
-    playlist: Playlist = Playlist.PlaylistExample,
-    onPressedCover: (Playlist) -> Unit = {}
+    playlist: Playlist = Playlist.PlaylistExample, onPressedCover: (Playlist) -> Unit = {}
 ) {
     Column(modifier = Modifier) {
         PlaylistCover() { onPressedCover(playlist) }
@@ -211,8 +226,7 @@ fun AlbumCover(
     onPressedCover: () -> Unit = {}
 ) {
     Row(
-        Modifier
-            .padding(end = 50.dp)
+        Modifier.padding(end = 50.dp)
     ) {
 
 
@@ -252,8 +266,7 @@ fun PlaylistCover(
     onPressedCover: () -> Unit = {}
 ) {
     Row(
-        Modifier
-            .padding(end = 50.dp)
+        Modifier.padding(end = 50.dp)
     ) {
         Box(
             modifier = Modifier.size(120.dp), contentAlignment = Alignment.Center
