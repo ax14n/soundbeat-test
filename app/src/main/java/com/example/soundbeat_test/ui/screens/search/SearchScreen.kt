@@ -3,13 +3,21 @@ package com.example.soundbeat_test.ui.screens.search
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -61,7 +69,7 @@ fun SearchScreen(
     navHostController: NavHostController? = null,
     searchScreenViewModel: SearchScreenViewModel = viewModel(),
     sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
-    searchInteractionMode: SearchInteractionMode = REPRODUCE_ON_SELECT
+    searchInteractionMode: SearchInteractionMode = REPRODUCE_ON_SELECT,
 ) {
 
     val queryState = searchScreenViewModel.textFieldText.collectAsState()
@@ -71,6 +79,7 @@ fun SearchScreen(
     val list = listState.value
 
     val isChecked = searchScreenViewModel.isChecked.collectAsState().value
+    val selectedGenres = searchScreenViewModel.selectedGenres.collectAsState().value
 
     Scaffold { padding ->
         Column(
@@ -86,14 +95,14 @@ fun SearchScreen(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Switch(
-                    checked = isChecked,
-                    onCheckedChange = {
+                DropdownFiltersMenu(
+                    isChecked = isChecked,
+                    selectedGenres = selectedGenres,
+                    onSwitchToggle = {
                         searchScreenViewModel.alternateSwitch()
-                        searchScreenViewModel.fillSongsList()
-                    }
+                    },
+                    onGenreToggle = { genre -> searchScreenViewModel.toggleGenreInSongsFilter(genre) }
                 )
-                Text(if (isChecked) "Local" else "Remoto")
             }
 
             navHostController?.let {
@@ -118,6 +127,53 @@ fun SearchScreen(
                 }
             }
 
+        }
+    }
+}
+
+/**
+ * Menú que despliega los filtros de búsqueda.
+ */
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@Composable
+fun DropdownFiltersMenu(
+    isChecked: Boolean,
+    selectedGenres: Set<Genres>,
+    onSwitchToggle: () -> Unit,
+    onGenreToggle: (Genres) -> Unit
+) {
+    val allGenres = Genres.entries
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isChecked, onCheckedChange = {
+                    onSwitchToggle()
+                })
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = if (isChecked) "Local" else "Remoto",
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        FlowRow(
+        ) {
+            allGenres.forEach { genre ->
+                FilterChip(selected = selectedGenres.contains(element = genre), onClick = {
+                    onGenreToggle(genre)
+                }, label = {
+                    Text(genre.displayName)
+                })
+            }
         }
     }
 }
