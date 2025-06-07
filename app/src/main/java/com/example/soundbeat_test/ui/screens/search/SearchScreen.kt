@@ -106,7 +106,6 @@ fun SearchScreen(
             )
         }
 
-        // Aquí puedes seguir con la lista o lo que venga después
         Spacer(modifier = Modifier.height(16.dp))
     }
 
@@ -162,7 +161,7 @@ fun DropdownFiltersMenu(
                 })
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = if (isChecked) "Local" else "Remoto",
+                text = if (isChecked) "Remote" else "Local",
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.width(20.dp))

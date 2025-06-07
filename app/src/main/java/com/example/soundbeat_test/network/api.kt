@@ -209,8 +209,24 @@ suspend fun getServerSongs(genre: String = "null"): Result<List<Album>> {
             val artist = jsonResponse.getJSONObject(index).getString("artist")
             val duration = jsonResponse.getJSONObject(index).getDouble("duration")
             val url = jsonResponse.getJSONObject(index).getString("url")
+            val rawGenres = jsonResponse.getJSONObject(index).optJSONArray("genres")
+            val genres = mutableListOf<String>()
+
+            if (rawGenres != null && rawGenres.length() > 0) {
+                for (i in 0 until rawGenres.length()) {
+                    genres.add(rawGenres.getString(i))
+                }
+            } else {
+                genres.add("OTHER")
+            }
+
             Album(
-                id = id, name = title, author = artist, duration = duration, url = url
+                id = id,
+                name = title,
+                author = artist,
+                duration = duration,
+                url = url,
+                genre = genres
             )
         }
 

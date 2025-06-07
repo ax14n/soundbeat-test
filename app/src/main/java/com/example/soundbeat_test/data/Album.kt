@@ -22,7 +22,7 @@ data class Album(
     val id: Int = -1,
     val name: String = "Unknown",
     val author: String = "Unknown",
-    val genre: List<String> = listOf<String>(),
+    var genre: List<String> = listOf<String>(),
     val imageResId: Int = R.drawable.default_vinyl,
     val url: String = "assign url",
     val duration: Double = 0.0,

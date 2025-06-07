@@ -56,7 +56,7 @@ class SearchScreenViewModel() : ViewModel() {
     /**
      * Propuedad que almacena los géneros seleccionados en el filtro de búsqueda.
      */
-    private val _selectedGenres = MutableStateFlow<Set<Genres>>(setOf())
+    private val _selectedGenres = MutableStateFlow<Set<Genres>>(setOf(Genres.OTHER))
 
     /**
      * Propiedad de solo lectura que sirve al propósito de mostrar los géneros filtrados
@@ -132,16 +132,25 @@ class SearchScreenViewModel() : ViewModel() {
      * Carga canciones locales o remotas dependiendo del modo asignado en que actua el ViewModel.
      * @see SearchMode
      */
+    @OptIn(UnstableApi::class)
     fun fillSongsList(query: String = "") {
         val mode = if (_isChecked.value) REMOTE else LOCAL
         _searchMode.value = mode
+        Log.d("SearchScreenViewModel", "searching songs using $mode mode.")
 
         when (mode) {
             REMOTE -> {
                 viewModelScope.launch {
+                    val shouldFilterByGenre = _selectedGenres.value.isNotEmpty()
+                    Log.d(
+                        "SearchScreenViewModel",
+                        "genre filtering enabled: $shouldFilterByGenre"
+                    )
                     val result = getServerSongs()
-                    result.getOrNull()?.let { fullList ->
-                        _albumList.value = filterAlbumsByQuery(fullList, query)
+                    result.getOrNull()?.let { remoteAlbums ->
+                        val filteredRemoteAlbums =
+                            if (shouldFilterByGenre) filterAlbumsByGenre(remoteAlbums) else remoteAlbums
+                        _albumList.value = filterAlbumsByQuery(filteredRemoteAlbums, query)
                     } ?: run {
                         _errorMessage = result.exceptionOrNull()?.message ?: "Error desconocido"
                     }
@@ -150,9 +159,24 @@ class SearchScreenViewModel() : ViewModel() {
 
             LOCAL -> {
                 val localAlbums = listLocalAlbums()
-                _albumList.value = filterAlbumsByQuery(localAlbums, query)
+                val genreFilteredAlbums = filterAlbumsByGenre(localAlbums)
+                _albumList.value = filterAlbumsByQuery(genreFilteredAlbums, query)
             }
         }
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun filterAlbumsByGenre(list: List<Album>): List<Album> = list.filter { album ->
+
+        val selectedGenreNames = _selectedGenres.value.map { it.name }.toSet()
+
+        val hasOccurrences = album.genre.any { it in selectedGenreNames }
+
+        Log.d("SearchScreenViewModel", "album stored genres: ${album.genre}")
+        Log.d("SearchScreenViewModel", "selected genres: $selectedGenreNames")
+        Log.d("SearchScreenViewModel", "has common genres? ${if (hasOccurrences) "YES" else "NO"}")
+
+        hasOccurrences
     }
 
     private fun filterAlbumsByQuery(albums: List<Album>, query: String): List<Album> {
