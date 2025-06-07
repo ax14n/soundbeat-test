@@ -55,6 +55,14 @@ class AudioPlayerViewModel(
     private val _currentIndex = MutableStateFlow(0)
     val currentIndex: StateFlow<Int> = _currentIndex
 
+    private val _reproducerIsShowing = MutableStateFlow<Boolean>(false)
+
+    val reproducerIsShowing: StateFlow<Boolean> = _reproducerIsShowing
+
+    fun togglePlayerVisibility() {
+        _reproducerIsShowing.value = !_reproducerIsShowing.value
+    }
+
     /**
      * Listener para el ExoPlayer, actualiza los estados internos cuando cambia el estado de reproducción
      * o se cambia la canción.
@@ -93,8 +101,7 @@ class AudioPlayerViewModel(
     fun loadAndPlayHLS(url: String, title: String, artist: String? = null) {
         Log.d("AudioPlayerViewModel", "url: $url")
         val mediaItem = MediaItem.Builder().setUri(url).setMediaMetadata(
-            MediaMetadata.Builder().setTitle(title).setArtist(artist ?: "Autor desconocido")
-                .build()
+            MediaMetadata.Builder().setTitle(title).setArtist(artist ?: "Autor desconocido").build()
         ).build()
 
         exoPlayer.setMediaItem(mediaItem)
@@ -149,8 +156,7 @@ class AudioPlayerViewModel(
             MediaItem.Builder().setUri(uri).setMediaMetadata(
                 MediaMetadata.Builder().setTitle(album.name).setArtist(
                     album.author ?: "Autor desconocido"
-                )
-                    .build()
+                ).build()
             ).build()
         }
 

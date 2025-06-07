@@ -29,7 +29,7 @@ import com.example.soundbeat_test.navigation.GetNavItemList
 import com.example.soundbeat_test.navigation.NavItem
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.audio.AudioPlayerViewModel
-import com.example.soundbeat_test.ui.audio.MusicPlayerBottomSheet
+import com.example.soundbeat_test.ui.audio.MusicPlayerDropdownMenu
 import com.example.soundbeat_test.ui.screens.auth.LoginScreen
 import com.example.soundbeat_test.ui.screens.auth.RegisterScreen
 import com.example.soundbeat_test.ui.screens.configuration.ConfigurationScreen
@@ -63,9 +63,8 @@ class MainActivity : ComponentActivity() {
                 val createPlaylistViewModel: CreatePlaylistViewModel = viewModel()
                 Scaffold { it ->
                     Column(Modifier.padding(it)) {
-                        MusicPlayerBottomSheet(
+                        MusicPlayerDropdownMenu(
                             audioPlayerViewModel = audioPlayerViewModel,
-                            sharedPlaylistViewModel = sharedPlaylistViewModel
                         ) {
                             MainApp(
                                 audioPlayerViewModel = audioPlayerViewModel,
@@ -74,9 +73,7 @@ class MainActivity : ComponentActivity() {
                                 createPlaylistViewModel = createPlaylistViewModel
                             )
                         }
-
                     }
-
                 }
             }
         }
