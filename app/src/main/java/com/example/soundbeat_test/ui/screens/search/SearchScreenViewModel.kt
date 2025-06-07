@@ -24,8 +24,23 @@ enum class Genres(val displayName: String) {
     ELECTRONICA("Electrónica"), BLUES("Blues"), COUNTRY("Country"), FOLK("Folk"), LATINO("Latino"), RAP(
         "Rap"
     ),
-    TRAP("Trap"), RNB("R&B"), PUNK("Punk"), SOUL("Soul"), OTHER("Other")
+    TRAP("Trap"), RNB("R&B"), PUNK("Punk"), SOUL("Soul"), DANCE("Dance"), HOUSE("House"), TECHNO("Techno"), AMBIENT(
+        "Ambient"
+    ),
+    CINEMATIC("Cinematic"), INSTRUMENTAL("Instrumental"), ACOUSTIC("Acoustic"), INDIE("Indie"), EXPERIMENTAL(
+        "Experimental"
+    ),
+    CHILL("Chill"), LOFI("Lo-Fi"), OPERA("Opera"), SOUNDTRACK("Soundtrack"), TRAILER("Trailer"), EPIC(
+        "Epic"
+    ),
+    DARK("Dark"), PIANO("Piano"), SAD("Sad"), ALTERNATIVE("Alternative"), CLASSICAL("Classical"), INSPIRATIONAL(
+        "Inspirational"
+    ),
+    ORCHESTRAL("Orchestral"), HAPPY("Happy"), TEEN("Teen"), CORPORATE("Corporate"), INSPIRATION("Inspiration"), OTHER(
+        "Other"
+    )
 }
+
 
 /**
  * Enumera los modos de funcionamiento del ViewModel. Dependiendo del modo elegido el ViewModel
@@ -56,7 +71,7 @@ class SearchScreenViewModel() : ViewModel() {
     /**
      * Propuedad que almacena los géneros seleccionados en el filtro de búsqueda.
      */
-    private val _selectedGenres = MutableStateFlow<Set<Genres>>(setOf(Genres.OTHER))
+    private val _selectedGenres = MutableStateFlow<Set<Genres>>(setOf())
 
     /**
      * Propiedad de solo lectura que sirve al propósito de mostrar los géneros filtrados
@@ -76,7 +91,7 @@ class SearchScreenViewModel() : ViewModel() {
     val searchMode: StateFlow<SearchMode> = _searchMode
 
     /**
-     * Propiedad que almacena la lista de canciones obtenidas del servidor.
+     * Propiedad que almacena la lista de canciones remotas/locales a mostrar.
      */
     private var _albumList = MutableStateFlow<List<Album>>(emptyList<Album>())
 
@@ -137,14 +152,13 @@ class SearchScreenViewModel() : ViewModel() {
         val mode = if (_isChecked.value) REMOTE else LOCAL
         _searchMode.value = mode
         Log.d("SearchScreenViewModel", "searching songs using $mode mode.")
-
+        val shouldFilterByGenre = _selectedGenres.value.isNotEmpty()
         when (mode) {
+
             REMOTE -> {
                 viewModelScope.launch {
-                    val shouldFilterByGenre = _selectedGenres.value.isNotEmpty()
                     Log.d(
-                        "SearchScreenViewModel",
-                        "genre filtering enabled: $shouldFilterByGenre"
+                        "SearchScreenViewModel", "genre filtering enabled: $shouldFilterByGenre"
                     )
                     val result = getServerSongs()
                     result.getOrNull()?.let { remoteAlbums ->
@@ -159,8 +173,9 @@ class SearchScreenViewModel() : ViewModel() {
 
             LOCAL -> {
                 val localAlbums = listLocalAlbums()
-                val genreFilteredAlbums = filterAlbumsByGenre(localAlbums)
-                _albumList.value = filterAlbumsByQuery(genreFilteredAlbums, query)
+                val filteredLocalAlbums =
+                    if (shouldFilterByGenre) filterAlbumsByGenre(localAlbums) else localAlbums
+                _albumList.value = filterAlbumsByQuery(filteredLocalAlbums, query)
             }
         }
     }
@@ -168,9 +183,9 @@ class SearchScreenViewModel() : ViewModel() {
     @OptIn(UnstableApi::class)
     private fun filterAlbumsByGenre(list: List<Album>): List<Album> = list.filter { album ->
 
-        val selectedGenreNames = _selectedGenres.value.map { it.name }.toSet()
+        val selectedGenreNames = _selectedGenres.value.map { it.displayName }.toSet()
 
-        val hasOccurrences = album.genre.any { it in selectedGenreNames }
+        val hasOccurrences = selectedGenreNames.all { it in album.genre }
 
         Log.d("SearchScreenViewModel", "album stored genres: ${album.genre}")
         Log.d("SearchScreenViewModel", "selected genres: $selectedGenreNames")
