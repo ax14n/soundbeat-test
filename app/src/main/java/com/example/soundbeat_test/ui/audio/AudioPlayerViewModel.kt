@@ -59,8 +59,12 @@ class AudioPlayerViewModel(
 
     val reproducerIsShowing: StateFlow<Boolean> = _reproducerIsShowing
 
-    fun togglePlayerVisibility() {
-        _reproducerIsShowing.value = !_reproducerIsShowing.value
+    fun showPlayerVisibility() {
+        _reproducerIsShowing.value = true
+    }
+
+    fun hidePlayerVisibility() {
+        _reproducerIsShowing.value = false
     }
 
     /**
@@ -81,9 +85,6 @@ class AudioPlayerViewModel(
 
     init {
         exoPlayer.addListener(listener)
-//         Ejemplo de reproducción de playlist que hice.
-        // val list = Album.AlbumListExample
-        //loadPlaylist(list)
     }
 
     /**

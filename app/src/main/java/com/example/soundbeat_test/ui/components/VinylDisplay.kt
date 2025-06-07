@@ -17,15 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FastForward
-import androidx.compose.material.icons.filled.FastRewind
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -134,13 +125,7 @@ fun AlbumCard(album: Album = Album.AlbumExample, onClickedAlbumCover: () -> Unit
 @Composable
 fun PlayerControls(
     songName: String = "Unknown",
-    author: String = "Unknown",
-    isPlaying: Boolean = false,
-    onPlayPauseClick: () -> Unit = {},
-    onNextTrackClick: () -> Unit = {},
-    onPreviousTrackClick: () -> Unit = {},
-    onAddToFavorites: () -> Unit = {},
-    onSaveTrack: () -> Unit = {}
+    author: String = "Unknown"
 ) {
     Row(
         modifier = Modifier
@@ -168,31 +153,6 @@ fun PlayerControls(
                 modifier = Modifier.padding(bottom = 4.dp)
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .offset(x = (-14).dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                IconButton(onClick = onAddToFavorites) {
-                    Icon(Icons.Default.FavoriteBorder, contentDescription = "Añadir a Favoritos")
-                }
-                IconButton(onClick = onPreviousTrackClick) {
-                    Icon(Icons.Default.FastRewind, contentDescription = "Anterior Canción")
-                }
-                IconButton(onClick = onPlayPauseClick) {
-                    Icon(
-                        imageVector = if (isPlaying) Icons.Default.Stop else Icons.Default.PlayArrow,
-                        contentDescription = if (isPlaying) "Pausar" else "Reproducir"
-                    )
-                }
-                IconButton(onClick = onNextTrackClick) {
-                    Icon(Icons.Default.FastForward, contentDescription = "Siguiente Canción")
-                }
-                IconButton(onClick = onSaveTrack) {
-                    Icon(Icons.Default.Save, contentDescription = "Guardar Canción")
-                }
-            }
         }
     }
 }

@@ -4,13 +4,20 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.filled.FastRewind
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
@@ -48,7 +56,18 @@ fun MusicPlayerDropdownMenu(
     val expanded = audioPlayerViewModel.reproducerIsShowing.collectAsState().value
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .pointerInput(Unit) {
+                detectVerticalDragGestures(
+                    onVerticalDrag = { _, dragAmount ->
+                        if (dragAmount > 0) {
+                            audioPlayerViewModel.showPlayerVisibility()
+                        } else {
+                            audioPlayerViewModel.hidePlayerVisibility()
+                        }
+                    })
+            }
     ) {
         AnimatedVisibility(
             visible = expanded,
@@ -62,48 +81,64 @@ fun MusicPlayerDropdownMenu(
                 color = MaterialTheme.colorScheme.surface, tonalElevation = 6.dp
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     MusicPlayerControls(
                         isPlaying = isPlaying,
                         currentTrack = songName.toString(),
-                        author = author.toString(),
-                        onPlayPauseClick = {
-                            audioPlayerViewModel.playPause()
-                        },
-                        onNextTrackClick = {
-                            audioPlayerViewModel.skipToNext()
-                        },
-                        onPreviousTrackClick = {
-                            audioPlayerViewModel.skipToPrevious()
-                        },
-                        onAddToFavorites = {
-                            audioPlayerViewModel.addToFavorites()
-                        },
-                        onSaveTrack = {
-                            audioPlayerViewModel.saveTrack()
-                        })
+                        author = author.toString()
+                    )
                 }
             }
         }
-        IconButton(
-            onClick = { audioPlayerViewModel.togglePlayerVisibility() },
-            modifier = Modifier
-                .background(Color(0xFF026374))
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
-        ) {
-            Icon(
-                imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                contentDescription = if (expanded) "Cerrar controles" else "Abrir controles",
-                tint = Color.White,
-                modifier = Modifier.size(32.dp)
-            )
+        Column(Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF026374))
+                    .padding(horizontal = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(30.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { audioPlayerViewModel.addToFavorites() }) {
+                    Icon(Icons.Default.FavoriteBorder, contentDescription = "Añadir a Favoritos")
+                }
+                IconButton(onClick = { audioPlayerViewModel.skipToPrevious() }) {
+                    Icon(Icons.Default.FastRewind, contentDescription = "Anterior Canción")
+                }
+                IconButton(onClick = { audioPlayerViewModel.playPause() }) {
+                    Icon(
+                        imageVector = if (isPlaying) Icons.Default.Stop else Icons.Default.PlayArrow,
+                        contentDescription = if (isPlaying) "Pausar" else "Reproducir"
+                    )
+                }
+                IconButton(onClick = { audioPlayerViewModel.skipToNext() }) {
+                    Icon(Icons.Default.FastForward, contentDescription = "Siguiente Canción")
+                }
+                IconButton(onClick = { audioPlayerViewModel.saveTrack() }) {
+                    Icon(Icons.Default.Save, contentDescription = "Guardar Canción")
+                }
+            }
         }
-
-        content()
+        Box() {
+            content()
+//            Spacer(modifier = Modifier.padding(vertical = (10.dp)))
+//            IconButton(
+//                modifier = Modifier
+//                    .align(alignment = Alignment.TopCenter)
+//                    .offset(y = -(15.dp))
+//                    .clip(RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp))
+//                    .background(Color(0xFF026374)),
+//                onClick = { audioPlayerViewModel.togglePlayerVisibility() },
+//            ) {
+//                Icon(
+//                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+//                    contentDescription = if (expanded) "Cerrar controles" else "Abrir controles",
+//                    tint = Color.Black,
+//                    modifier = Modifier.size(23.dp)
+//                )
+//            }
+        }
 
     }
 }
@@ -114,23 +149,11 @@ fun MusicPlayerDropdownMenu(
  *
  * @param isPlaying Estado que indica si hay reproducción activa.
  * @param currentTrack Nombre de la canción actual.
- * @param onPlayPauseClick Acción al pulsar el botón de reproducción/pausa.
- * @param onNextTrackClick Acción al pulsar el botón de siguiente canción.
- * @param onPreviousTrackClick Acción al pulsar el botón de canción anterior.
- * @param onAddToFavorites Acción al pulsar el botón de favoritos.
- * @param onSaveTrack Acción al pulsar el botón de salvar.
  */
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun MusicPlayerControls(
-    isPlaying: Boolean,
-    currentTrack: String,
-    author: String,
-    onPlayPauseClick: () -> Unit,
-    onNextTrackClick: () -> Unit,
-    onPreviousTrackClick: () -> Unit,
-    onAddToFavorites: () -> Unit,
-    onSaveTrack: () -> Unit
+    isPlaying: Boolean, currentTrack: String, author: String
 ) {
 
     Column(
@@ -138,14 +161,7 @@ fun MusicPlayerControls(
     ) {
         Log.d("AudioController", "Canción: $currentTrack by $author")
         PlayerControls(
-            songName = currentTrack,
-            author = author,
-            isPlaying = isPlaying,
-            onPlayPauseClick = onPlayPauseClick,
-            onNextTrackClick = onNextTrackClick,
-            onPreviousTrackClick = onPreviousTrackClick,
-            onAddToFavorites = onAddToFavorites,
-            onSaveTrack = onSaveTrack
+            songName = currentTrack, author = author
         )
     }
 }
