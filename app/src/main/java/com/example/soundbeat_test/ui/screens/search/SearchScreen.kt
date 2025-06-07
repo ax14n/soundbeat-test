@@ -27,6 +27,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +43,7 @@ import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumCard
+import com.example.soundbeat_test.ui.screens.create_playlist.CreationMode
 import com.example.soundbeat_test.ui.screens.search.SearchInteractionMode.APPEND_TO_PLAYLIST
 import com.example.soundbeat_test.ui.screens.search.SearchInteractionMode.REPRODUCE_ON_SELECT
 import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
@@ -76,6 +78,7 @@ fun SearchScreen(
     searchScreenViewModel: SearchScreenViewModel = viewModel(),
     sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
     searchInteractionMode: SearchInteractionMode = REPRODUCE_ON_SELECT,
+    creationMode: CreationMode? = null
 ) {
 
     val queryState = searchScreenViewModel.textFieldText.collectAsState()
@@ -85,8 +88,27 @@ fun SearchScreen(
     val list = listState.value
 
     val isFilterVisible = searchScreenViewModel.isFilterVisible.collectAsState().value
-    val isChecked = searchScreenViewModel.isChecked.collectAsState().value
     val selectedGenres = searchScreenViewModel.selectedGenres.collectAsState().value
+
+    val hideSwitch = creationMode != null
+
+    LaunchedEffect(key1 = creationMode) {
+        Log.d(
+            "SearchScreen",
+            "search screen opened from a creation playlist screen. creation mode: $creationMode"
+        )
+
+        if (hideSwitch) {
+            searchScreenViewModel.switchHidden()
+            if (creationMode == CreationMode.ONLINE_PLAYLIST) {
+                searchScreenViewModel.setSearchMode(SearchMode.REMOTE)
+            } else {
+                searchScreenViewModel.setSearchMode(SearchMode.LOCAL)
+            }
+        }
+    }
+
+
 
     Column {
 
@@ -104,15 +126,22 @@ fun SearchScreen(
                 onClick = { searchScreenViewModel.toggleFilterVisibility() }) {
                 Text(if (isFilterVisible) "Ocultar filtros" else "Mostrar filtros")
             }
+            val currentSearchMode = searchScreenViewModel.searchMode.collectAsState().value
 
             AnimatedVisibility(visible = isFilterVisible) {
                 DropdownFiltersMenu(
-                    isChecked = isChecked,
+                    isChecked = currentSearchMode == SearchMode.REMOTE,
                     selectedGenres = selectedGenres,
-                    onSwitchToggle = { searchScreenViewModel.alternateSwitch() },
-                    onGenreToggle = { searchScreenViewModel.toggleGenreInSongsFilter(it) }
+                    onSwitchToggle = {
+                        val next =
+                            if (currentSearchMode == SearchMode.REMOTE) SearchMode.LOCAL else SearchMode.REMOTE
+                        searchScreenViewModel.setSearchMode(next)
+                    },
+                    onGenreToggle = { searchScreenViewModel.toggleGenreInSongsFilter(it) },
+                    hideSwitch = !hideSwitch
                 )
             }
+
         }
 
         if (listState.value.isEmpty()) {
@@ -178,7 +207,8 @@ fun DropdownFiltersMenu(
     isChecked: Boolean,
     selectedGenres: Set<Genres>,
     onSwitchToggle: () -> Unit,
-    onGenreToggle: (Genres) -> Unit
+    onGenreToggle: (Genres) -> Unit,
+    hideSwitch: Boolean
 ) {
     val allGenres = Genres.entries
 
@@ -187,26 +217,27 @@ fun DropdownFiltersMenu(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Switch(
-                checked = isChecked, onCheckedChange = {
-                    onSwitchToggle()
-                })
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = if (isChecked) "Remote" else "Local",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Spacer(modifier = Modifier.width(20.dp))
-            Text(
-                text = "¡Filtra tus canciones a tu gusto!",
-                style = MaterialTheme.typography.bodyLarge
-            )
+        if (hideSwitch) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Switch(
+                    checked = isChecked, onCheckedChange = {
+                        onSwitchToggle()
+                    })
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (isChecked) "Remote" else "Local",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.width(20.dp))
+                Text(
+                    text = "¡Filtra tus canciones a tu gusto!",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         FlowRow(
         ) {

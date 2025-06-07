@@ -157,20 +157,29 @@ fun AppNavigation(
                 playlistScreenViewModel = playlistScreenViewModel!!
             )
         }
-        composable("SEARCH/{mode}") { backStackEntry ->
+        composable("SEARCH/{mode}/{origin}") { backStackEntry ->
             val modeArg = backStackEntry.arguments?.getString("mode")
+            val originArg = backStackEntry.arguments?.getString("origin")
+
             val searchInteractionMode = try {
                 SearchInteractionMode.valueOf(
                     modeArg ?: SearchInteractionMode.REPRODUCE_ON_SELECT.name
                 )
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 SearchInteractionMode.REPRODUCE_ON_SELECT
+            }
+
+            val searchOrigin = try {
+                CreationMode.valueOf(originArg ?: "null")
+            } catch (_: IllegalArgumentException) {
+                CreationMode.OFFLINE_PLAYLIST
             }
 
             SearchScreen(
                 navHostController = navController,
                 sharedPlaylistViewModel = sharedPlaylistViewModel!!,
-                searchInteractionMode = searchInteractionMode
+                searchInteractionMode = searchInteractionMode,
+                creationMode = searchOrigin
             )
         }
         // navController.navigate("PLAYLIST_CREATOR/${CreationMode.ONLINE_PLAYLIST.name}")

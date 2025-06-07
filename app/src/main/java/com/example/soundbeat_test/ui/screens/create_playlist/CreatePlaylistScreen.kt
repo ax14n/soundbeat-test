@@ -125,14 +125,16 @@ fun CreatePlaylistScreen(
         SongsListBox(
             albums = songsSet?.toList() ?: emptyList(),
             playerViewModel = playerViewModel,
-            navController = navController
+            navController = navController,
+            creationMode = creationMode
         )
     }
 }
 
 @Composable
 fun SongsListBox(
-    albums: List<Album>, playerViewModel: AudioPlayerViewModel?, navController: NavHostController?
+    albums: List<Album>, playerViewModel: AudioPlayerViewModel?, navController: NavHostController?,
+    creationMode: CreationMode
 ) {
     OutlinedCard(
         modifier = Modifier
@@ -149,7 +151,7 @@ fun SongsListBox(
             )
             Button(
                 onClick = {
-                    navController?.navigate("search/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}") {
+                    navController?.navigate("search/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${creationMode}") {
                         launchSingleTop = true
                     }
                 },

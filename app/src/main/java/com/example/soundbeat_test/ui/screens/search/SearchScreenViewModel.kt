@@ -60,17 +60,6 @@ enum class SearchMode {
 class SearchScreenViewModel() : ViewModel() {
 
     /**
-     * Propiedad que almacena el modo de búsqueda de la pantalla de búsqueda de canciones.
-     * Dependiendo de `_isChecked` se procederá a buscar las canciones locales o remotas.
-     */
-    private val _isChecked = MutableStateFlow<Boolean>(false)
-
-    /**
-     * Propiedad de solo lectura que inspecciona el estado en el que se encuentra el Switch.
-     */
-    val isChecked: StateFlow<Boolean> = _isChecked
-
-    /**
      * Propuedad que almacena los géneros seleccionados en el filtro de búsqueda.
      */
     private val _selectedGenres = MutableStateFlow<Set<Genres>>(setOf())
@@ -164,8 +153,7 @@ class SearchScreenViewModel() : ViewModel() {
      */
     @OptIn(UnstableApi::class)
     fun fillSongsList(query: String = "") {
-        val mode = if (_isChecked.value) REMOTE else LOCAL
-        _searchMode.value = mode
+        val mode = _searchMode.value
         Log.d("SearchScreenViewModel", "searching songs using $mode mode.")
         val shouldFilterByGenre = _selectedGenres.value.isNotEmpty()
         when (mode) {
@@ -190,8 +178,8 @@ class SearchScreenViewModel() : ViewModel() {
                 viewModelScope.launch(Dispatchers.IO) {
                     val localAlbums = listLocalAlbums()
 
-                    val filteredLocalAlbums = if (shouldFilterByGenre)
-                        filterAlbumsByGenre(localAlbums) else localAlbums
+                    val filteredLocalAlbums =
+                        if (shouldFilterByGenre) filterAlbumsByGenre(localAlbums) else localAlbums
 
                     val finalAlbums = filterAlbumsByQuery(filteredLocalAlbums, query)
 
@@ -230,12 +218,13 @@ class SearchScreenViewModel() : ViewModel() {
     }
 
     /**
-     * Alterna el estado del Switch.
+     * Establece el modo de búsqueda.
      */
-    fun alternateSwitch() {
-        _isChecked.value = !_isChecked.value
+    fun setSearchMode(mode: SearchMode) {
+        _searchMode.value = mode
         fillSongsList()
     }
+
 
     /**
      * Alterna la presencia de un género en el filtro:
