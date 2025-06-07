@@ -109,12 +109,12 @@ class SearchScreenViewModel() : ViewModel() {
     /**
      * Propiedad que almacena si el desplegable de filtros se encuentra visible o no.
      */
-    private val _isListVisible = MutableStateFlow(true)
+    private val _isFilterVisible = MutableStateFlow(false)
 
     /**
      * Propiedad de solo lectura que consulta si el desplegable de filtros se encuentra visible o no.
      */
-    val isListVisible: StateFlow<Boolean> = _isListVisible
+    val isFilterVisible: StateFlow<Boolean> = _isFilterVisible
 
     init {
         // Carga las canciones una vez mostrada la pantalla de búsqueda.
@@ -124,8 +124,8 @@ class SearchScreenViewModel() : ViewModel() {
     /**
      * Muestra o esconde el desplegable de filtros.
      */
-    fun toggleListVisibility() {
-        _isListVisible.value = !_isListVisible.value
+    fun toggleFilterVisibility() {
+        _isFilterVisible.value = !_isFilterVisible.value
     }
 
     /**

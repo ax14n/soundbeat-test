@@ -1,6 +1,7 @@
 package com.example.soundbeat_test.ui.screens.search
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -13,12 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -78,58 +79,61 @@ fun SearchScreen(
     val query = queryState.value
     val list = listState.value
 
+    val isFilterVisible = searchScreenViewModel.isFilterVisible.collectAsState().value
     val isChecked = searchScreenViewModel.isChecked.collectAsState().value
     val selectedGenres = searchScreenViewModel.selectedGenres.collectAsState().value
 
-    Scaffold { padding ->
-        Column(
-            modifier = Modifier.padding(padding), verticalArrangement = Arrangement.spacedBy(15.dp)
-        ) {
-            SearchBarWithButton(
-                text = query,
-                onTextChange = { searchScreenViewModel.onSearchQueryChange(it) },
-                onSearch = { query ->
-                    searchScreenViewModel.fillSongsList(query)
-                })
+    SearchBarWithButton(
+        text = query,
+        onTextChange = { searchScreenViewModel.onSearchQueryChange(it) },
+        onSearch = { query ->
+            searchScreenViewModel.fillSongsList(query)
+        })
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                DropdownFiltersMenu(
-                    isChecked = isChecked,
-                    selectedGenres = selectedGenres,
-                    onSwitchToggle = {
-                        searchScreenViewModel.alternateSwitch()
-                    },
-                    onGenreToggle = { genre -> searchScreenViewModel.toggleGenreInSongsFilter(genre) }
-                )
-            }
+    Column {
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { searchScreenViewModel.toggleFilterVisibility() }) {
+            Text(if (isFilterVisible) "Ocultar filtros" else "Mostrar filtros")
+        }
 
-            navHostController?.let {
-                VinylList(
-                    albumList = list
-                ) { album ->
-                    val playlist = Playlist(
-                        id = 1, name = album.name, songs = setOf(album)
-                    )
-                    sharedPlaylistViewModel?.updatePlaylist(playlist)
+        AnimatedVisibility(visible = isFilterVisible) {
+            DropdownFiltersMenu(
+                isChecked = isChecked,
+                selectedGenres = selectedGenres,
+                onSwitchToggle = { searchScreenViewModel.alternateSwitch() },
+                onGenreToggle = { searchScreenViewModel.toggleGenreInSongsFilter(it) }
+            )
+        }
 
-                    when (searchInteractionMode) {
-                        REPRODUCE_ON_SELECT -> {
-                            navHostController.navigate(ROUTES.SELECTED_PLAYLIST)
-                        }
+        // Aquí puedes seguir con la lista o lo que venga después
+        Spacer(modifier = Modifier.height(16.dp))
+    }
 
-                        APPEND_TO_PLAYLIST -> {
-                            navHostController.navigate(ROUTES.PLAYLIST_CREATOR)
-                        }
-                    }
-                    Log.d("SearchScreen", "Navigating to: SELECTED PLAYLIST")
+    navHostController?.let {
+        VinylList(
+            albumList = list
+        ) { album ->
+            val playlist = Playlist(
+                id = 1, name = album.name, songs = setOf(album)
+            )
+            sharedPlaylistViewModel?.updatePlaylist(playlist)
+
+            when (searchInteractionMode) {
+                REPRODUCE_ON_SELECT -> {
+                    navHostController.navigate(ROUTES.SELECTED_PLAYLIST)
+                }
+
+                APPEND_TO_PLAYLIST -> {
+                    navHostController.navigate(ROUTES.PLAYLIST_CREATOR)
                 }
             }
-
+            Log.d("SearchScreen", "Navigating to: SELECTED PLAYLIST")
         }
     }
+
 }
+
 
 /**
  * Menú que despliega los filtros de búsqueda.
@@ -159,6 +163,11 @@ fun DropdownFiltersMenu(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = if (isChecked) "Local" else "Remoto",
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Spacer(modifier = Modifier.width(20.dp))
+            Text(
+                text = "¡Filtra tus canciones a tu gusto!",
                 style = MaterialTheme.typography.bodyLarge
             )
         }
