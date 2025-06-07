@@ -11,10 +11,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MusicOff
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -27,6 +30,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -91,8 +96,9 @@ fun SearchScreen(
         })
 
     Column {
-        Button(
+        ElevatedButton(
             modifier = Modifier.fillMaxWidth(),
+            shape = RectangleShape,
             onClick = { searchScreenViewModel.toggleFilterVisibility() }) {
             Text(if (isFilterVisible) "Ocultar filtros" else "Mostrar filtros")
         }
@@ -105,31 +111,54 @@ fun SearchScreen(
                 onGenreToggle = { searchScreenViewModel.toggleGenreInSongsFilter(it) }
             )
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 
-    navHostController?.let {
-        VinylList(
-            albumList = list
-        ) { album ->
-            val playlist = Playlist(
-                id = 1, name = album.name, songs = setOf(album)
+    if (listState.value.isEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = Icons.Default.MusicOff,
+                contentDescription = null,
+                tint = Color.Gray,
+                modifier = Modifier.size(64.dp)
             )
-            sharedPlaylistViewModel?.updatePlaylist(playlist)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "No hay canciones que encajen con tu búsqueda",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+        }
+    } else {
 
-            when (searchInteractionMode) {
-                REPRODUCE_ON_SELECT -> {
-                    navHostController.navigate(ROUTES.SELECTED_PLAYLIST)
-                }
+        navHostController?.let {
+            VinylList(
+                albumList = list
+            ) { album ->
+                val playlist = Playlist(
+                    id = 1, name = album.name, songs = setOf(album)
+                )
+                sharedPlaylistViewModel?.updatePlaylist(playlist)
 
-                APPEND_TO_PLAYLIST -> {
-                    navHostController.navigate(ROUTES.PLAYLIST_CREATOR)
+                when (searchInteractionMode) {
+                    REPRODUCE_ON_SELECT -> {
+                        navHostController.navigate(ROUTES.SELECTED_PLAYLIST)
+                    }
+
+                    APPEND_TO_PLAYLIST -> {
+                        navHostController.navigate(ROUTES.PLAYLIST_CREATOR)
+                    }
                 }
+                Log.d("SearchScreen", "Navigating to: SELECTED PLAYLIST")
             }
-            Log.d("SearchScreen", "Navigating to: SELECTED PLAYLIST")
         }
     }
+
 
 }
 
