@@ -149,7 +149,9 @@ fun SongsListBox(
             )
             Button(
                 onClick = {
-                    navController?.navigate("search/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}")
+                    navController?.navigate("search/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}") {
+                        launchSingleTop = true
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),

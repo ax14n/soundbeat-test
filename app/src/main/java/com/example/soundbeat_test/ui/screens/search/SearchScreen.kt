@@ -88,77 +88,79 @@ fun SearchScreen(
     val isChecked = searchScreenViewModel.isChecked.collectAsState().value
     val selectedGenres = searchScreenViewModel.selectedGenres.collectAsState().value
 
-    SearchBarWithButton(
-        text = query,
-        onTextChange = { searchScreenViewModel.onSearchQueryChange(it) },
-        onSearch = { query ->
-            searchScreenViewModel.fillSongsList(query)
-        })
-
     Column {
-        ElevatedButton(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RectangleShape,
-            onClick = { searchScreenViewModel.toggleFilterVisibility() }) {
-            Text(if (isFilterVisible) "Ocultar filtros" else "Mostrar filtros")
-        }
 
-        AnimatedVisibility(visible = isFilterVisible) {
-            DropdownFiltersMenu(
-                isChecked = isChecked,
-                selectedGenres = selectedGenres,
-                onSwitchToggle = { searchScreenViewModel.alternateSwitch() },
-                onGenreToggle = { searchScreenViewModel.toggleGenreInSongsFilter(it) }
-            )
-        }
-    }
+        SearchBarWithButton(
+            text = query,
+            onTextChange = { searchScreenViewModel.onSearchQueryChange(it) },
+            onSearch = { query ->
+                searchScreenViewModel.fillSongsList(query)
+            })
 
-    if (listState.value.isEmpty()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 32.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = Icons.Default.MusicOff,
-                contentDescription = null,
-                tint = Color.Gray,
-                modifier = Modifier.size(64.dp)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "No hay canciones que encajen con tu búsqueda",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
-            )
-        }
-    } else {
+        Column {
+            ElevatedButton(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RectangleShape,
+                onClick = { searchScreenViewModel.toggleFilterVisibility() }) {
+                Text(if (isFilterVisible) "Ocultar filtros" else "Mostrar filtros")
+            }
 
-        navHostController?.let {
-            VinylList(
-                albumList = list
-            ) { album ->
-                val playlist = Playlist(
-                    id = 1, name = album.name, songs = setOf(album)
+            AnimatedVisibility(visible = isFilterVisible) {
+                DropdownFiltersMenu(
+                    isChecked = isChecked,
+                    selectedGenres = selectedGenres,
+                    onSwitchToggle = { searchScreenViewModel.alternateSwitch() },
+                    onGenreToggle = { searchScreenViewModel.toggleGenreInSongsFilter(it) }
                 )
-                sharedPlaylistViewModel?.updatePlaylist(playlist)
+            }
+        }
 
-                when (searchInteractionMode) {
-                    REPRODUCE_ON_SELECT -> {
-                        navHostController.navigate(ROUTES.SELECTED_PLAYLIST)
-                    }
+        if (listState.value.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 32.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MusicOff,
+                    contentDescription = null,
+                    tint = Color.Gray,
+                    modifier = Modifier.size(64.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "No hay canciones que encajen con tu búsqueda",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+            }
+        } else {
 
-                    APPEND_TO_PLAYLIST -> {
-                        navHostController.navigate(ROUTES.PLAYLIST_CREATOR)
+            navHostController?.let {
+                VinylList(
+                    albumList = list
+                ) { album ->
+                    val playlist = Playlist(
+                        id = 1, name = album.name, songs = setOf(album)
+                    )
+                    sharedPlaylistViewModel?.updatePlaylist(playlist)
+
+                    when (searchInteractionMode) {
+                        REPRODUCE_ON_SELECT -> {
+                            navHostController.navigate(ROUTES.SELECTED_PLAYLIST)
+                        }
+
+                        APPEND_TO_PLAYLIST -> {
+                            navHostController.navigate(ROUTES.PLAYLIST_CREATOR)
+                        }
                     }
+                    Log.d("SearchScreen", "Navigating to: SELECTED PLAYLIST")
                 }
-                Log.d("SearchScreen", "Navigating to: SELECTED PLAYLIST")
             }
         }
     }
-
 
 }
 
