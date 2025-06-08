@@ -143,10 +143,12 @@ suspend fun getUserPlaylists(email: String): Result<List<Playlist>> {
 
         Result.success(playlists)
     } catch (jsonEx: JSONException) {
-        Log.e("SOUND_BEAT", "Error procesando el JSON de playlists: ${jsonEx.message}", jsonEx)
+        Log.e(
+            "API", "failed to parse user playlists JSON response: ${jsonEx.message}", jsonEx
+        )
         Result.failure(jsonEx)
     } catch (ex: Exception) {
-        Log.e("SOUND_BEAT", "Error obteniendo playlists: ${ex.message}", ex)
+        Log.e("API", "unexpected error while fetching user playlists: ${ex.message}", ex)
         Result.failure(ex)
     }
 }
@@ -171,11 +173,11 @@ suspend fun getPlaylistSongs(playlistId: Int): Result<List<Album>> {
         val albumList = List(jsonArray.length()) { index ->
             val json = jsonArray.getJSONObject(index)
             Album(
-                id = json.getInt("song_id"),
-                name = json.getString("title"),
-                author = json.getString("artist"),
-                genre = listOf(), // Si el JSON no incluye género, se deja vacío
-                imageResId = R.drawable.default_vinyl, // Default si no viene en la respuesta
+                id = json.getInt("songId"),
+                name = json.getString("name"),
+                author = json.getString("author"),
+                genre = listOf(),
+                imageResId = R.drawable.default_vinyl,
                 url = json.getString("url"),
                 duration = json.getDouble("duration")
             )
@@ -183,7 +185,7 @@ suspend fun getPlaylistSongs(playlistId: Int): Result<List<Album>> {
 
         Result.success(albumList)
     } catch (ex: Exception) {
-        Log.e("API", "Error obteniendo canciones de la playlist: ${ex.message}", ex)
+        Log.e("API", "failed to fetch songs from playlist: ${ex.message}", ex)
         Result.failure(ex)
     }
 }
@@ -233,13 +235,15 @@ suspend fun getServerSongs(genre: String = "null"): Result<List<Album>> {
         Result.success(songList)
     } catch (jsonException: JSONException) {
         Log.e(
-            "SOUND_BEAT",
-            "Error procesando el JSON de canciones: ${jsonException.message}",
+            "API",
+            "error while parsing playlist songs json: ${jsonException.message}",
             jsonException
         )
         Result.failure(jsonException)
     } catch (exception: Exception) {
-        Log.e("SOUND_BEAT", "Error obteniendo canciones: ${exception.message}", exception)
+        Log.e(
+            "API", "error while fetching playlist songs: ${exception.message}", exception
+        )
         Result.failure(exception)
     }
 }

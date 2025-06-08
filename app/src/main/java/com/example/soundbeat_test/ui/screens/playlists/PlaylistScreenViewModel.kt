@@ -53,6 +53,7 @@ class PlaylistScreenViewModel(
      */
     fun obtainRemoteUserPlaylists() {
         if (email == "OFFLINE") {
+            _remotePlaylistError.value = "You're currently in OFFLINE MODE"
             return
         }
 
@@ -72,7 +73,7 @@ class PlaylistScreenViewModel(
             }
         } else {
             _remotePlaylistError.value = "No se encontró el email del usuario."
-            Toast.makeText(context, "$remotePlaylistError", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "${remotePlaylistError.value}", Toast.LENGTH_SHORT).show()
         }
     }
 

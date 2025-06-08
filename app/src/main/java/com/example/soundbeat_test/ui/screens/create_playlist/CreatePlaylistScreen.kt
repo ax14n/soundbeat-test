@@ -52,10 +52,12 @@ fun CreatePlaylistScreen(
         if (receivedPlaylist?.songs?.isNotEmpty() == true) {
             val album: Album = receivedPlaylist.songs.last()
             createPlaylistViewModel?.addSong(album)
+
             Log.d("CreatePlaylistScreen", "${createPlaylistViewModel.songs.value}")
             sharedPlaylistViewModel?.clearPlaylist()
         }
     }
+
 
     val playlistName = createPlaylistViewModel?.playlistName
     val songsSet = createPlaylistViewModel?.songs?.collectAsState()?.value
@@ -72,7 +74,7 @@ fun CreatePlaylistScreen(
                 .background(Color(0xFFFF5722)),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = "Modo: $creationMode", color = Color.White, fontStyle = FontStyle.Italic)
+            Text(text = "mode: $creationMode", color = Color.White, fontStyle = FontStyle.Italic)
         }
 
         Spacer(modifier = Modifier.height(2.dp))
@@ -89,7 +91,7 @@ fun CreatePlaylistScreen(
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
             ) {
-                Text("Crear")
+                Text("Create")
             }
 
             Button(
@@ -151,7 +153,7 @@ fun SongsListBox(
             )
             Button(
                 onClick = {
-                    navController?.navigate("search/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${creationMode}") {
+                    navController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${creationMode}") {
                         launchSingleTop = true
                     }
                 },

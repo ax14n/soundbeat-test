@@ -3,8 +3,6 @@ package com.example.soundbeat_test.ui.screens.create_playlist
 import android.app.Application
 import android.content.Context
 import androidx.annotation.OptIn
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.Log
@@ -45,8 +43,8 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
      */
     private val localPlaylistSongDb = getPlaylistSongDao(application.applicationContext)
 
-    private val _playlistName = mutableStateOf("Playlist nº1")
-    val playlistName: State<String> = _playlistName
+    private val _playlistName = MutableStateFlow("Playlist nº1")
+    val playlistName: StateFlow<String> = _playlistName
 
     private val _songs = MutableStateFlow<Set<Album>>(emptySet())
     val songs: StateFlow<Set<Album>> = _songs

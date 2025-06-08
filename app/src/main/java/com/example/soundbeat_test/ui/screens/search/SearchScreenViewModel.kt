@@ -135,9 +135,6 @@ class SearchScreenViewModel() : ViewModel() {
      */
     val alternationSwitchIsHidden: StateFlow<Boolean> = _alternationSwitchIsHidden
 
-    init {
-//        fillSongsList()
-    }
 
     /**
      * Muestra o esconde el desplegable de filtros.

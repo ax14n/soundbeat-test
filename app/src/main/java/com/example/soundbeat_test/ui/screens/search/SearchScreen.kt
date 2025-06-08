@@ -187,7 +187,7 @@ fun SearchScreen(
                         }
 
                         APPEND_TO_PLAYLIST -> {
-                            navHostController.navigate(ROUTES.PLAYLIST_CREATOR) {
+                            navHostController.navigate("PLAYLIST_CREATOR/${creationMode?.name}") {
                                 popUpTo(ROUTES.SEARCH) { inclusive = true }
                             }
                         }

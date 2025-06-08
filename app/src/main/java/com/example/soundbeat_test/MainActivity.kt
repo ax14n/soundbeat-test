@@ -170,6 +170,7 @@ fun AppNavigation(
             } catch (_: IllegalArgumentException) {
                 CreationMode.OFFLINE_PLAYLIST
             }
+            Log.d("MainActivity", "${searchOrigin.name}")
 
             SearchScreen(
                 navHostController = navController,
@@ -178,7 +179,6 @@ fun AppNavigation(
                 creationMode = searchOrigin
             )
         }
-        // navController.navigate("PLAYLIST_CREATOR/${CreationMode.ONLINE_PLAYLIST.name}")
         composable("PLAYLIST_CREATOR/{mode}") { backStackEntry ->
             val modeArg = backStackEntry.arguments?.getString("mode")
             val creationMode = try {

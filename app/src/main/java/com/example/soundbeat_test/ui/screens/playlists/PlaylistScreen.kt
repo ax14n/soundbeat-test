@@ -89,7 +89,7 @@ fun PlaylistScreen(
 
                     val message = when {
 
-                        remotePlaylistError != null -> "Error"
+                        remotePlaylistError != null -> remotePlaylistError
                         remotePlaylists.isEmpty() -> "No playlist"
                         else -> null
                     }
