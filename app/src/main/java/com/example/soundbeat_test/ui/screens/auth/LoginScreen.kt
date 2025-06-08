@@ -149,7 +149,6 @@ fun LoginScreen(
                             loginViewModel.logInUser(
                                 email = email.value.trim(),
                                 password = password.value.trim(),
-                                context = context,
                                 loginModes = LoginModes.ONLINE_MODE
                             )
                         }
@@ -169,7 +168,6 @@ fun LoginScreen(
                             loginViewModel.logInUser(
                                 email = email.value.trim(),
                                 password = password.value.trim(),
-                                context = context,
                                 loginModes = LoginModes.OFFLINE_MODE
                             )
                         }

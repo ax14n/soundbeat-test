@@ -1,6 +1,5 @@
 package com.example.soundbeat_test.ui.screens.profile
 
-
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
@@ -10,84 +9,37 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-/**
- * ViewModel encargado de gestionar los datos del perfil del usuario.
- *
- * Utiliza `AndroidViewModel` para acceder de forma segura al contexto de la aplicación,
- * permitiendo recuperar el correo del usuario almacenado en `SharedPreferences` y
- * obtener su información desde una fuente remota.
- *
- * @constructor Recibe la instancia de [Application] necesaria para acceder a recursos del sistema.
- */
-class ProfileViewModel(
-    application: Application
-) : AndroidViewModel(application) {
+class ProfileViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _userInfo = MutableStateFlow<Map<String, Any>?>(null)
+    private val prefs = application.getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
 
-    /**
-     * Flujo de datos que contiene la información del usuario si se ha recuperado correctamente.
-     */
-    val userInfo: StateFlow<Map<String, Any>?> = _userInfo
+    private val _userInfo = MutableStateFlow<Map<String, Any>>(mapOf())
+    val userInfo: StateFlow<Map<String, Any>> = _userInfo
 
     private val _error = MutableStateFlow<String?>(null)
-
-    /**
-     * Flujo de datos que contiene mensajes de error si ocurre algún problema durante la obtención del perfil.
-     */
     val error: StateFlow<String?> = _error
 
     init {
-        val email = getSavedEmail()
-        if (email != null) {
-            getProfile(email)
-        } else {
+        prefs.getString("email", null)?.let {
+            fetchUserProfile(it)
+        } ?: run {
             _error.value = "No se encontró el email en preferencias."
         }
     }
 
-    /**
-     * Recupera el correo electrónico almacenado en `SharedPreferences`.
-     *
-     * @return El correo electrónico del usuario o `null` si no existe.
-     */
-    private fun getSavedEmail(): String? {
-        val prefs =
-            getApplication<Application>().getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
-        return prefs.getString("email", null)
-    }
-
-    /**
-     * Obtiene la información del perfil del usuario de forma asíncrona y la guarda en el estado.
-     *
-     * @param email Correo electrónico del usuario cuyo perfil se desea obtener.
-     */
-    fun getProfile(email: String) {
+    fun fetchUserProfile(email: String) {
         viewModelScope.launch {
-            try {
-                when (email) {
-                    "OFFLINE" -> {
-                        _userInfo.value = mapOf<String, Any>(
-                            "username" to "OFFLINE USER"
-                        )
-                    }
-
-                    else -> {
-                        val result = getUserInfo(email)
-
-                        if (result.isSuccess) {
-                            val data = result.getOrNull()
-                            _userInfo.value = data
-                        } else {
-                            val errorMsg = result.exceptionOrNull()?.message ?: "Error desconocido"
-                            _error.value = errorMsg
-                        }
-                    }
+            when (email) {
+                "OFFLINE" -> {
+                    _userInfo.value = mapOf("username" to "OFFLINE USER")
                 }
-            } catch (e: Exception) {
-                _error.value = "Error de conexión: ${e.message}"
+
+                else -> {
+                    val result = runCatching { getUserInfo(email) }
+                    result.onSuccess { _userInfo.value = it.getOrDefault(mapOf()) }
+                        .onFailure { _error.value = it.message ?: "Unknown error" }
+                }
             }
         }
     }
-
 }
