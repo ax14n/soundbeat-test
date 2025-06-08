@@ -100,11 +100,14 @@ fun SearchScreen(
 
         if (hideSwitch) {
             searchScreenViewModel.switchHidden()
+
             if (creationMode == CreationMode.ONLINE_PLAYLIST) {
                 searchScreenViewModel.setSearchMode(SearchMode.REMOTE)
             } else {
                 searchScreenViewModel.setSearchMode(SearchMode.LOCAL)
             }
+
+            searchScreenViewModel.fillSongsList()
         }
     }
 
