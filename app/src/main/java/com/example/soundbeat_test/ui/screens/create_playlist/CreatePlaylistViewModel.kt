@@ -31,24 +31,19 @@ enum class CreationMode {
 class CreatePlaylistViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
-     * Contexto de la aplicación necesario para acceder a la base de datos local.
-     */
-    private val context = application.applicationContext
-
-    /**
      * Instancia de acceso a `PlaylistDao`.
      */
-    private val localPlaylistDb = getPlaylistDao(context)
+    private val localPlaylistDb = getPlaylistDao(application.applicationContext)
 
     /**
      * Instancia de acceso a `SongDao`.
      */
-    private val localSongDb = getSongDao(context)
+    private val localSongDb = getSongDao(application.applicationContext)
 
     /**
      * Instancia de acceso a `PlaylistSongDao`.
      */
-    private val localPlaylistSongDb = getPlaylistSongDao(context)
+    private val localPlaylistSongDb = getPlaylistSongDao(application.applicationContext)
 
     private val _playlistName = mutableStateOf("Playlist nº1")
     val playlistName: State<String> = _playlistName

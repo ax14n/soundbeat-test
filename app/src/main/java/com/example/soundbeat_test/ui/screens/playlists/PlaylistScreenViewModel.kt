@@ -36,8 +36,10 @@ class PlaylistScreenViewModel(
     private val _songs = MutableStateFlow<List<Album>>(emptyList<Album>())
     val songs: StateFlow<List<Album>> = _songs
 
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error
+    private val _remotePlaylistError = MutableStateFlow<String?>(null)
+    val remotePlaylistError: StateFlow<String?> = _remotePlaylistError
+
+    private val email = getSavedEmail()
 
     init {
         obtainRemoteUserPlaylists()
@@ -47,9 +49,13 @@ class PlaylistScreenViewModel(
     /**
      * Llama a la API para obtener las playlists del usuario actualmente autenticado.
      * El resultado se almacena en [_remoteUserPlaylists] si es exitoso,
-     * o en [_error] si ocurre algún fallo.
+     * o en [_remotePlaylistError] si ocurre algún fallo.
      */
     fun obtainRemoteUserPlaylists() {
+        if (email == "OFFLINE") {
+            return
+        }
+
         val savedEmail = getSavedEmail()
 
         if (savedEmail != null) {
@@ -61,12 +67,12 @@ class PlaylistScreenViewModel(
                     _remoteUserPlaylists.value = playlists ?: emptyList()
                 } else {
                     val error = result.exceptionOrNull()?.message ?: "Error desconocido"
-                    _error.value = error
+                    _remotePlaylistError.value = error
                 }
             }
         } else {
-            _error.value = "No se encontró el email del usuario."
-            Toast.makeText(context, "$error", Toast.LENGTH_SHORT).show()
+            _remotePlaylistError.value = "No se encontró el email del usuario."
+            Toast.makeText(context, "$remotePlaylistError", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -87,7 +93,7 @@ class PlaylistScreenViewModel(
     /**
      * Llama a la API para obtener las canciones asociadas a una playlist específica.
      * El resultado se almacena en [_songs] si es exitoso,
-     * o en [_error] si ocurre algún fallo.
+     * o en [_remotePlaylistError] si ocurre algún fallo.
      *
      * @param playlistId ID de la playlist cuyas canciones se desean obtener.
      */
@@ -97,8 +103,9 @@ class PlaylistScreenViewModel(
             if (result.isSuccess) {
                 _songs.value = result.getOrDefault(emptyList())
             } else {
-                _error.value = result.exceptionOrNull()?.message ?: "Error desconocido"
-                Toast.makeText(context, "$error", Toast.LENGTH_SHORT).show()
+                _remotePlaylistError.value =
+                    result.exceptionOrNull()?.message ?: "Error desconocido"
+                Toast.makeText(context, "$remotePlaylistError", Toast.LENGTH_SHORT).show()
             }
         }
     }

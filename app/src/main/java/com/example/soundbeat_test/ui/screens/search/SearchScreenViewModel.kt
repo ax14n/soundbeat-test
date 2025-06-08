@@ -136,8 +136,7 @@ class SearchScreenViewModel() : ViewModel() {
     val alternationSwitchIsHidden: StateFlow<Boolean> = _alternationSwitchIsHidden
 
     init {
-        // Carga las canciones una vez mostrada la pantalla de búsqueda.
-        fillSongsList()
+        setSearchMode(_searchMode.value)
     }
 
     /**

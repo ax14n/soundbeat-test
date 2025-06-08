@@ -55,7 +55,7 @@ fun PlaylistScreen(
     }
 
     val remotePlaylists = playlistScreenViewModel.remoteUserPlaylists.collectAsState().value
-    val remoteError = playlistScreenViewModel.error.collectAsState().value
+    val remotePlaylistError = playlistScreenViewModel.remotePlaylistError.collectAsState().value
 
     val localPlaylists = playlistScreenViewModel.localUserPlaylist.collectAsState().value
 
@@ -80,29 +80,21 @@ fun PlaylistScreen(
                     modifier = Modifier.padding(10.dp),
                     verticalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
+                    Log.d(
+                        "PlaylistScreen",
+                        "remotePlaylistEror is null: ${if (remotePlaylistError == null) "YES" else "NO"}"
+                    )
                     Text("¡Tus playlists en línea!")
-                    if (remotePlaylists.isNotEmpty()) {
-                        AlbumHorizontalList(
-                            list = remotePlaylists
-                        ) { item ->
-                            if (item is Playlist) {
-                                sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
-                                sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.REMOTES)
-                                Log.d("PlaylistScreen", "Playlist: ${item.id} - ${item.name}")
-                                sharedPlaylistViewModel.updatePlaylist(item)
-                                Log.d(
-                                    "PlaylistScreen",
-                                    "${sharedPlaylistViewModel.selectedPlaylist.value}"
-                                )
 
-                                navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
-                                Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
-                            }
 
-                            navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
-                            Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
-                        }
-                    } else {
+                    val message = when {
+
+                        remotePlaylistError != null -> "Error"
+                        remotePlaylists.isEmpty() -> "No playlist"
+                        else -> null
+                    }
+
+                    if (message != null) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -110,10 +102,27 @@ fun PlaylistScreen(
                             horizontalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                "Sin conexión",
-                                color = (Color.White),
-                                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
+                                message,
+                                color = Color.White,
+                                modifier = Modifier.padding(vertical = 10.dp)
                             )
+                        }
+                    } else {
+                        AlbumHorizontalList(
+                            list = remotePlaylists
+                        ) { item ->
+                            if (item is Playlist) {
+                                sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
+                                sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.REMOTES)
+                                sharedPlaylistViewModel.updatePlaylist(item)
+                                Log.d("PlaylistScreen", "Playlist: ${item.id} - ${item.name}")
+                                Log.d(
+                                    "PlaylistScreen",
+                                    "${sharedPlaylistViewModel.selectedPlaylist.value}"
+                                )
+                                navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
+                                Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
+                            }
                         }
                     }
 
