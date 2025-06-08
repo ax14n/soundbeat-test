@@ -105,11 +105,13 @@ suspend fun getUserInfo(email: String): Result<Map<String, Any>> {
 
     return try {
         val jsonResponse = JSONObject(response)
+        Log.d("API_RESPONSE", response)
+
         val username = jsonResponse.getString("username")
-        val fechaRegistro = jsonResponse.getString("fecha_registro")
-        Result.success(mapOf("username" to username, "fecha_registro" to fechaRegistro))
+        val dateJoined = jsonResponse.getString("dateJoined")
+        Result.success(mapOf("username" to username, "dateJoined" to dateJoined))
     } catch (e: Exception) {
-        Log.e("PROFILE", "Excepción en getUserInfo: ${e.message}", e)
+        Log.e("API", "exception in getUserInfo: ${e.message}", e)
         Result.failure(e)
     }
 }
@@ -131,6 +133,7 @@ suspend fun getUserPlaylists(email: String): Result<List<Playlist>> {
 
     return try {
         val jsonArray = JSONArray(response)
+        Log.d("API_RESPONSE", response)
 
         val playlists = List(jsonArray.length()) { index ->
             val jsonObj = jsonArray.getJSONObject(index)
@@ -169,6 +172,7 @@ suspend fun getPlaylistSongs(playlistId: Int): Result<List<Album>> {
 
     return try {
         val jsonArray = JSONArray(response)
+        Log.d("API_RESPONSE", response)
 
         val albumList = List(jsonArray.length()) { index ->
             val json = jsonArray.getJSONObject(index)
@@ -204,9 +208,10 @@ suspend fun getServerSongs(genre: String = "null"): Result<List<Album>> {
 
     return try {
         val jsonResponse = JSONArray(response)
+        Log.d("API_RESPONSE", response)
 
         val songList = List(jsonResponse.length()) { index ->
-            val id = jsonResponse.getJSONObject(index).getInt("song_id")
+            val id = jsonResponse.getJSONObject(index).getInt("songId")
             val title = jsonResponse.getJSONObject(index).getString("title")
             val artist = jsonResponse.getJSONObject(index).getString("artist")
             val duration = jsonResponse.getJSONObject(index).getDouble("duration")
