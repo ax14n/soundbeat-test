@@ -37,32 +37,19 @@ fun HomeScreen(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(15.dp)
     ) {
-        // LeftColumnRightLargeGifLayout()
         Column(
             modifier = Modifier.padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             ListSongs(
-                "¡Canciones del servidor!",
+                "Remote songs!",
                 navHostController = navHostController,
                 genre = null,
                 sharedPlaylistViewModel = sharedPlaylistViewModel
             )
+
             ListSongs(
-                "¡Tus canciones favoritas remotas!",
-                navHostController = navHostController,
-                genre = null,
-                sharedPlaylistViewModel = sharedPlaylistViewModel,
-            )
-            ListSongs(
-                "¡Canciones locales!",
-                navHostController = navHostController,
-                genre = null,
-                sharedPlaylistViewModel = sharedPlaylistViewModel,
-                isLocal = true
-            )
-            ListSongs(
-                "¡Tus canciones favoritas locales!",
+                "Local songs!",
                 navHostController = navHostController,
                 genre = null,
                 sharedPlaylistViewModel = sharedPlaylistViewModel,
