@@ -148,26 +148,7 @@ fun SearchScreen(
         }
 
         if (listState.value.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 32.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    imageVector = Icons.Default.MusicOff,
-                    contentDescription = null,
-                    tint = Color.Gray,
-                    modifier = Modifier.size(64.dp)
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "No hay canciones que encajen con tu búsqueda",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
-            }
+            NoSongsFoundMessage()
         } else {
 
             navHostController?.let {
@@ -198,6 +179,30 @@ fun SearchScreen(
         }
     }
 
+}
+
+@Composable
+private fun NoSongsFoundMessage() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = Icons.Default.MusicOff,
+            contentDescription = null,
+            tint = Color.Gray,
+            modifier = Modifier.size(64.dp)
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "No hay canciones que encajen con tu búsqueda",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
+        )
+    }
 }
 
 
