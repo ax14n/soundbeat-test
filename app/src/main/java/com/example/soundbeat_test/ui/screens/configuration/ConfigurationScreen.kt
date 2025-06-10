@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -35,13 +36,11 @@ import com.example.soundbeat_test.ui.components.ImageGif
 fun ConfigurationScreen(navHostController: NavHostController? = null) {
     val url =
         "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaGN4MG9nMHdiZXd0aDJ6OGF6ejU0Y3J4Z2ZpNnpuM3hrcjJ5ZnhvZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/zYoVn6EN9mM8VQFbOd/giphy.gif"
-    Scaffold { padding ->
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(padding), verticalArrangement = Arrangement.spacedBy(10.dp)
+                .verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)
 
         ) {
             Column(
@@ -63,7 +62,7 @@ fun ConfigurationScreen(navHostController: NavHostController? = null) {
                             }
                         })
                     )
-                    Text("¡Configura todo lo que quieras!")
+                    Text("Set up everything you want!")
                 }
                 ImageGif(
                     imageSource = url, modifier = Modifier.size(width = 500.dp, height = 150.dp)
@@ -75,26 +74,32 @@ fun ConfigurationScreen(navHostController: NavHostController? = null) {
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text(text = "Configuraciones")
-                SettingsButton() {
-                    println("hola")
-                }
-                SettingsButton() {}
-                SettingsButton() {}
-                SettingsButton() {}
-                SettingsButton() {}
-                SettingsButton() {}
-                SettingsButton() {}
+                Text(
+                    text = "Configurations",
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                Text("Remote settings")
+                SettingsButton("Change username") {}
+                SettingsButton("Change email") {}
+                SettingsButton("Change password") {}
+                Spacer(modifier = Modifier.padding(vertical = 2.dp))
+                Text("Local settings")
+                SettingsButton("Change music directory") {}
+                SettingsButton("Change the app theme") {}
+                SettingsButton("Change server address") {}
 
                 Spacer(Modifier.padding(top = 10.dp))
-                SettingsButton(text = "Cerrar sesión", color = Color.Red) {
+                SettingsButton(text = "Log out", color = Color.Red) {
                     onCloseSessionClick(navHostController!!)
                 }
-
+                Text(
+                    "Created by Zelmar Hernán Ramilo Piazzoli",
+                    modifier = Modifier.align(Alignment.End)
+                )
             }
         }
     }
-}
+
 
 @Composable
 fun SettingsButton(
@@ -105,8 +110,7 @@ fun SettingsButton(
             .fillMaxWidth()
             .background(color = color, shape = RoundedCornerShape(8.dp))
             .clickable { onClick() }
-            .padding(2.dp) // Agregamos padding interno
-    ) {
+            .padding(2.dp)) {
         Text(text = text, modifier = Modifier.padding(10.dp), color = Color.White)
     }
 }
