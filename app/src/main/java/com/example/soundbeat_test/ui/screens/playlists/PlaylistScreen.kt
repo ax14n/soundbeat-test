@@ -86,12 +86,10 @@ fun PlaylistScreen(
 
 
     val scrollState = rememberScrollState()
-    Scaffold() { padding ->
 
         Column(
             modifier = Modifier
                 .verticalScroll(scrollState)
-                .padding(padding)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
@@ -129,7 +127,7 @@ fun PlaylistScreen(
 
             }
         }
-    }
+
 
 
 }

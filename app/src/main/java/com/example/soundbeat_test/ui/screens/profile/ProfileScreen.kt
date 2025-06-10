@@ -5,14 +5,18 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.navigation.ROUTES
+import com.example.soundbeat_test.ui.components.FavoritePlaylist
 import com.example.soundbeat_test.ui.components.UserImage
 
 /**
@@ -63,9 +68,66 @@ fun ProfileScreen(
                 Text(name)
             }
         }
+        Spacer(modifier = Modifier.padding(vertical = 10.dp))
+
+        OutlinedCard(
+            modifier = Modifier
+                .background(Color(0xFFE8E8E8))
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(10.dp),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 10.dp
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                FavoriteSongsSection()
+                StatsSection()
+            }
+        }
 
     }
 }
+
+@Composable
+private fun StatsSection() {
+    SectionTitle("Stats zone!")
+    Row(
+    ) {
+        Column(
+        ) {
+            Text("Playlists count:")
+            Text("0")
+        }
+        Spacer(modifier = Modifier.padding(horizontal = 10.dp))
+        Column(
+        ) {
+            Text("Most reproduced song:")
+            Text("Empty")
+        }
+
+    }
+}
+
+@Composable
+private fun SectionTitle(title: String) {
+    Text(title)
+    Spacer(modifier = Modifier.padding(vertical = 5.dp))
+}
+
+@Composable
+private fun FavoriteSongsSection() {
+    SectionTitle("Your special playlist")
+    FavoritePlaylist() {
+        Log.d("ProfileScreen", "user wanna see his favorite songs")
+    }
+    Spacer(modifier = Modifier.padding(vertical = 10.dp))
+}
+
 
 @Composable
 private fun SettingsIcon(navHostController: NavHostController?) {
@@ -85,7 +147,6 @@ private fun SettingsIcon(navHostController: NavHostController?) {
                 .padding(8.dp)
                 .size(24.dp),
         )
-
     }
 }
 

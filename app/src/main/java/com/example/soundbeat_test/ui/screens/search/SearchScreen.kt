@@ -198,7 +198,7 @@ private fun NoSongsFoundMessage() {
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "No hay canciones que encajen con tu búsqueda",
+            text = "No song matches based on your query",
             style = MaterialTheme.typography.bodyMedium,
             color = Color.Gray
         )
@@ -240,7 +240,7 @@ fun DropdownFiltersMenu(
                 )
                 Spacer(modifier = Modifier.width(20.dp))
                 Text(
-                    text = "¡Filtra tus canciones a tu gusto!",
+                    text = "Filter your songs as you wish!",
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
@@ -297,7 +297,7 @@ fun SearchBarWithButton(
         TextField(
             value = text,
             onValueChange = { onTextChange(it) },
-            label = { Text("Introduzca su canción deseada...") },
+            label = { Text("Search song...") },
             modifier = Modifier.weight(1f)
         )
 

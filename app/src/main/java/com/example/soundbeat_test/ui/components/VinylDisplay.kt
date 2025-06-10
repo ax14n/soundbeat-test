@@ -18,6 +18,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -223,13 +226,13 @@ fun PlaylistItem(
 fun AlbumCover(
     cover: Int = R.drawable.premium_vinyl,
     disk: Int = R.drawable.vinyl,
+    size: Int = 1,
     onPressedCover: () -> Unit = {}
 ) {
     Row(
         Modifier.padding(end = 50.dp)
     ) {
-
-
+        
         Box(contentAlignment = Alignment.Center) {
             val diskPainter = rememberAsyncImagePainter(model = disk) // o cover
             val coverPainter = rememberAsyncImagePainter(model = cover) // o cover
@@ -237,15 +240,15 @@ fun AlbumCover(
                 painter = diskPainter,
                 contentDescription = "Disco",
                 modifier = Modifier
-                    .offset(x = 50.dp)
-                    .size(90.dp),
+                    .offset(x = 50.dp * size)
+                    .size(90.dp * size),
             )
 
             Image(
                 painter = coverPainter,
                 contentDescription = "Portada del álbum",
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(100.dp * size)
                     .clickable(onClick = { onPressedCover() })
 
             )
@@ -290,6 +293,26 @@ fun PlaylistCover(
         }
     }
 
+}
+
+@Preview
+@Composable
+fun FavoritePlaylist(
+    onPressedCover: () -> Unit = {}
+) {
+    Box {
+        AlbumCover(size = 2) {
+            onPressedCover
+        }
+        Icon(
+            imageVector = Icons.Default.Favorite,
+            contentDescription = null,
+            tint = Color.Red,
+            modifier = Modifier
+                .size(100.dp * 2)
+                .offset(x = 2.dp * 2, y = 0.dp)
+        )
+    }
 }
 
 /**
