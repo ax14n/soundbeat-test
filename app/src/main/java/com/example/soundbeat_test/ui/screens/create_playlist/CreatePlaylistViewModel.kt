@@ -3,8 +3,6 @@ package com.example.soundbeat_test.ui.screens.create_playlist
 import android.app.Application
 import android.content.Context
 import androidx.annotation.OptIn
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.Log
@@ -31,27 +29,22 @@ enum class CreationMode {
 class CreatePlaylistViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
-     * Contexto de la aplicación necesario para acceder a la base de datos local.
-     */
-    private val context = application.applicationContext
-
-    /**
      * Instancia de acceso a `PlaylistDao`.
      */
-    private val localPlaylistDb = getPlaylistDao(context)
+    private val localPlaylistDb = getPlaylistDao(application.applicationContext)
 
     /**
      * Instancia de acceso a `SongDao`.
      */
-    private val localSongDb = getSongDao(context)
+    private val localSongDb = getSongDao(application.applicationContext)
 
     /**
      * Instancia de acceso a `PlaylistSongDao`.
      */
-    private val localPlaylistSongDb = getPlaylistSongDao(context)
+    private val localPlaylistSongDb = getPlaylistSongDao(application.applicationContext)
 
-    private val _playlistName = mutableStateOf("Playlist nº1")
-    val playlistName: State<String> = _playlistName
+    private val _playlistName = MutableStateFlow("Playlist nº1")
+    val playlistName: StateFlow<String> = _playlistName
 
     private val _songs = MutableStateFlow<Set<Album>>(emptySet())
     val songs: StateFlow<Set<Album>> = _songs

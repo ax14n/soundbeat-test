@@ -54,8 +54,7 @@ import com.example.soundbeat_test.navigation.ROUTES
 @Preview(showSystemUi = true)
 @Composable
 fun LoginScreen(
-    navHostController: NavHostController? = null,
-    loginViewModel: LoginViewModel = viewModel()
+    navHostController: NavHostController? = null, loginViewModel: LoginViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val isAuthenticated by loginViewModel.isAuthenticated.collectAsState()
@@ -148,12 +147,13 @@ fun LoginScreen(
                     onClick = {
                         navHostController?.let {
                             loginViewModel.logInUser(
-                                email = email.value.trim(), password = password.value.trim(),
-                                context = context
+                                email = email.value.trim(),
+                                password = password.value.trim(),
+                                loginModes = LoginModes.ONLINE_MODE
                             )
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF94ACD5)), // lavanda
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDE7028)), // lavanda
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
@@ -162,11 +162,28 @@ fun LoginScreen(
                     )
                 }
 
+                Button(
+                    onClick = {
+                        navHostController?.let {
+                            loginViewModel.logInUser(
+                                email = email.value.trim(),
+                                password = password.value.trim(),
+                                loginModes = LoginModes.OFFLINE_MODE
+                            )
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF013603)), // lavanda
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = "Offline Mode", fontWeight = FontWeight.Bold
+                    )
+                }
+
                 LaunchedEffect(isAuthenticated) {
                     if (isAuthenticated) {
-                        navHostController?.navigate(ROUTES.HOME) {
-                            popUpTo(ROUTES.LOGIN) { inclusive = true }
-                        }
+                        onEnterClick(navHostController!!)
                     }
                 }
 
@@ -181,7 +198,9 @@ fun LoginScreen(
  * @param navHostController Controlador de navegación usado para redirigir al registro.
  */
 private fun ColumnScope.onLoginClick(navHostController: NavHostController) {
-    navHostController.navigate(ROUTES.REGISTER)
+    navHostController.navigate(ROUTES.REGISTER) {
+        popUpTo(ROUTES.LOGIN) { inclusive = true }
+    }
     Log.d("LoginScreen", "Navigating to: REGISTER SCREEN")
 }
 
@@ -191,6 +210,8 @@ private fun ColumnScope.onLoginClick(navHostController: NavHostController) {
  * @param navHostController Controlador de navegación usado para redirigir al home.
  */
 private fun ColumnScope.onEnterClick(navHostController: NavHostController) {
-    navHostController.navigate(ROUTES.HOME)
+    navHostController.navigate(ROUTES.HOME) {
+        popUpTo(ROUTES.LOGIN) { inclusive = true }
+    }
     Log.d("LoginScreen", "Navigating to: HOME SCREEN")
 }

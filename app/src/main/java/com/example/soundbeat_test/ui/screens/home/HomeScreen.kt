@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,49 +32,32 @@ fun HomeScreen(
     sharedPlaylistViewModel: SharedPlaylistViewModel? = null
 ) {
 
-    Scaffold { padding ->
-
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(15.dp)
+    ) {
         Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(padding),
+            modifier = Modifier.padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(15.dp)
-
         ) {
-            // LeftColumnRightLargeGifLayout()
-            Column(
-                modifier = Modifier.padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(15.dp)
-            ) {
-                ListSongs(
-                    "¡Canciones del servidor!",
-                    navHostController = navHostController,
-                    genre = null,
-                    sharedPlaylistViewModel = sharedPlaylistViewModel
-                )
-                ListSongs(
-                    "¡Tus canciones favoritas remotas!",
-                    navHostController = navHostController,
-                    genre = null,
-                    sharedPlaylistViewModel = sharedPlaylistViewModel,
-                )
-                ListSongs(
-                    "¡Canciones locales!",
-                    navHostController = navHostController,
-                    genre = null,
-                    sharedPlaylistViewModel = sharedPlaylistViewModel,
-                    isLocal = true
-                )
-                ListSongs(
-                    "¡Tus canciones favoritas locales!",
-                    navHostController = navHostController,
-                    genre = null,
-                    sharedPlaylistViewModel = sharedPlaylistViewModel,
-                    isLocal = true
-                )
-            }
+            ListSongs(
+                "Remote songs!",
+                navHostController = navHostController,
+                genre = null,
+                sharedPlaylistViewModel = sharedPlaylistViewModel
+            )
+
+            ListSongs(
+                "Local songs!",
+                navHostController = navHostController,
+                genre = null,
+                sharedPlaylistViewModel = sharedPlaylistViewModel,
+                isLocal = true
+            )
         }
     }
+
 }
 
 /**

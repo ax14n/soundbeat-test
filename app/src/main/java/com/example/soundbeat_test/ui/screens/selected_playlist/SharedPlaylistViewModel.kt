@@ -1,9 +1,17 @@
 package com.example.soundbeat_test.ui.screens.selected_playlist
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import android.app.Application
+import androidx.annotation.OptIn
+import androidx.lifecycle.AndroidViewModel
+import androidx.media3.common.util.Log
+import androidx.media3.common.util.UnstableApi
 import com.example.soundbeat_test.data.Playlist
+import com.example.soundbeat_test.data.Playlist.Companion.toEntity
+import com.example.soundbeat_test.local.room.DatabaseProvider
+import com.example.soundbeat_test.local.room.repositories.PlaylistRepository
 import com.example.soundbeat_test.network.deletePlaylist
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -35,7 +43,7 @@ enum class SongSource {
  * Es útil cuando se navega entre composables y se quiere evitar la serialización
  * de objetos complejos como `Playlist`.
  */
-class SharedPlaylistViewModel : ViewModel() {
+class SharedPlaylistViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
      * Flujo interno que contiene la playlist actualmente seleccionada.
@@ -115,13 +123,39 @@ class SharedPlaylistViewModel : ViewModel() {
         _isPlaylist.value = selectionMode
     }
 
+    /**
+     * Almacena y configura el ViewModel para destingir la procedencia de las canciones
+     * almacenadas en su interior.
+     */
     fun setSongsSource(songsSource: SongSource) {
         _songsSource.value = songsSource
     }
 
-    fun deletePlaylist(playlist: Playlist) {
-        viewModelScope.launch {
-            deletePlaylist(playlist.id)
+    /**
+     * Elimina la playlist remota pasada como argumento a la función.
+     * @param playlist Referencia de la playlist a eliminar.
+     */
+    @OptIn(UnstableApi::class)
+    fun deleteRemotePlaylist(playlist: Playlist) {
+        Log.d("SharedPlaylistViewModel", "trying to erase remote playlist with id: ${playlist.id}")
+        CoroutineScope(Dispatchers.IO).launch {
+            deletePlaylist(playlist?.id ?: -1)
+        }
+    }
+
+    /**
+     * Elimina la playlist local pasada como argumento a la función.
+     * @param context Contexto
+     * @param playlist Referencia de la playlist a eliminar.
+     */
+    @OptIn(UnstableApi::class)
+    fun deleteLocalPlaylist(playlist: Playlist) {
+        Log.d("SharedPlaylistViewModel", "trying to erase local playlist with id: ${playlist.id}")
+        val context = getApplication<Application>().applicationContext
+        CoroutineScope(Dispatchers.IO).launch {
+            val dao = DatabaseProvider.getPlaylistDao(context)
+            val repository = PlaylistRepository(dao)
+            repository.delete(playlist.toEntity())
         }
     }
 

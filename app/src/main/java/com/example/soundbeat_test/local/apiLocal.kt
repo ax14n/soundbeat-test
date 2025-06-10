@@ -18,7 +18,7 @@ fun listLocalAlbums(): List<Album> {
     val musicDirectory = File(URI_BASE)
 
     if (!musicDirectory.exists() || !musicDirectory.isDirectory) {
-        Log.d("apiLocal", "[LocalScan] Directory not found: $URI_BASE")
+        Log.d("API-LOCAL", "directory not found: $URI_BASE")
         return emptyList()
     }
 
@@ -42,19 +42,19 @@ fun listLocalAlbums(): List<Album> {
                 id = index,
                 name = title,
                 author = artist,
-                genre = emptyList(),
+                genre = listOf("Other"),
                 imageResId = R.drawable.default_vinyl,
                 url = "file://${file.absolutePath}",
                 duration = durationMs / 1000.0,
                 isLocal = true
             )
         } catch (e: Exception) {
-            println("[LocalScan] Fallo al leer los meta-datos de: ${file.name}")
+            Log.d("API-LOCAL", "failed to retrieve metadata from file: ${file.name}")
             Album(
                 id = index,
                 name = file.nameWithoutExtension,
                 author = "Unknown",
-                genre = emptyList(),
+                genre = listOf("Other"),
                 imageResId = R.drawable.default_vinyl,
                 url = "file://${file.absolutePath}",
                 duration = 0.0,

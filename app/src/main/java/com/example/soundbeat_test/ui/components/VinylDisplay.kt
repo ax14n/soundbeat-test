@@ -2,6 +2,7 @@ package com.example.soundbeat_test.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,14 +19,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FastForward
-import androidx.compose.material.icons.filled.FastRewind
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.example.soundbeat_test.R
 import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.data.Playlist
@@ -55,8 +51,7 @@ import com.example.soundbeat_test.data.Playlist
 fun AlbumHorizontalList(
     list: List<Any> = listOf<Playlist>(
         Playlist.PlaylistExample, Playlist.PlaylistExample, Playlist.PlaylistExample
-    ),
-    onPressedCover: (Any) -> Unit = {}
+    ), onPressedCover: (Any) -> Unit = {}
 ) {
     LazyRow {
         items(list) { item ->
@@ -132,14 +127,11 @@ fun AlbumCard(album: Album = Album.AlbumExample, onClickedAlbumCover: () -> Unit
 @Preview
 @Composable
 fun PlayerControls(
-    songName: String = "Unknown",
+    currentTrack: String = "Unknown",
     author: String = "Unknown",
-    isPlaying: Boolean = false,
-    onPlayPauseClick: () -> Unit = {},
-    onNextTrackClick: () -> Unit = {},
-    onPreviousTrackClick: () -> Unit = {},
-    onAddToFavorites: () -> Unit = {},
-    onSaveTrack: () -> Unit = {}
+    nextTrack: String = "Unknown",
+    index: Int = 1,
+    len: Int = index
 ) {
     Row(
         modifier = Modifier
@@ -155,43 +147,31 @@ fun PlayerControls(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = songName,
+                text = currentTrack,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
-                maxLines = 1
+                maxLines = 1,
+                modifier = Modifier.basicMarquee()
+
             )
             Text(
                 text = "by $author",
                 fontSize = 13.sp,
                 color = Color.DarkGray,
-                modifier = Modifier.padding(bottom = 4.dp)
+                modifier = Modifier
+                    .padding(bottom = 4.dp)
+                    .basicMarquee()
+
             )
 
-            Row(
+            Text(
+                text = "next track: ${if (index + 1 == len) "no more tracks" else nextTrack}",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                maxLines = 1,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .offset(x = (-14).dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                IconButton(onClick = onAddToFavorites) {
-                    Icon(Icons.Default.FavoriteBorder, contentDescription = "Añadir a Favoritos")
-                }
-                IconButton(onClick = onPreviousTrackClick) {
-                    Icon(Icons.Default.FastRewind, contentDescription = "Anterior Canción")
-                }
-                IconButton(onClick = onPlayPauseClick) {
-                    Icon(
-                        imageVector = if (isPlaying) Icons.Default.Stop else Icons.Default.PlayArrow,
-                        contentDescription = if (isPlaying) "Pausar" else "Reproducir"
-                    )
-                }
-                IconButton(onClick = onNextTrackClick) {
-                    Icon(Icons.Default.FastForward, contentDescription = "Siguiente Canción")
-                }
-                IconButton(onClick = onSaveTrack) {
-                    Icon(Icons.Default.Save, contentDescription = "Guardar Canción")
-                }
-            }
+                    .basicMarquee()
+            )
         }
     }
 }
@@ -222,8 +202,7 @@ fun AlbumItem(album: Album = Album.AlbumExample, onPressedCover: (Album) -> Unit
 @Composable
 @Preview
 fun PlaylistItem(
-    playlist: Playlist = Playlist.PlaylistExample,
-    onPressedCover: (Playlist) -> Unit = {}
+    playlist: Playlist = Playlist.PlaylistExample, onPressedCover: (Playlist) -> Unit = {}
 ) {
     Column(modifier = Modifier) {
         PlaylistCover() { onPressedCover(playlist) }
@@ -247,27 +226,29 @@ fun PlaylistItem(
 fun AlbumCover(
     cover: Int = R.drawable.premium_vinyl,
     disk: Int = R.drawable.vinyl,
+    size: Int = 1,
     onPressedCover: () -> Unit = {}
 ) {
     Row(
-        Modifier
-            .padding(end = 50.dp)
+        Modifier.padding(end = 50.dp)
     ) {
-
+        
         Box(contentAlignment = Alignment.Center) {
+            val diskPainter = rememberAsyncImagePainter(model = disk) // o cover
+            val coverPainter = rememberAsyncImagePainter(model = cover) // o cover
             Image(
-                painter = painterResource(id = disk),
+                painter = diskPainter,
                 contentDescription = "Disco",
                 modifier = Modifier
-                    .offset(x = 50.dp)
-                    .size(90.dp),
+                    .offset(x = 50.dp * size)
+                    .size(90.dp * size),
             )
 
             Image(
-                painter = painterResource(id = cover),
+                painter = coverPainter,
                 contentDescription = "Portada del álbum",
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(100.dp * size)
                     .clickable(onClick = { onPressedCover() })
 
             )
@@ -288,8 +269,7 @@ fun PlaylistCover(
     onPressedCover: () -> Unit = {}
 ) {
     Row(
-        Modifier
-            .padding(end = 50.dp)
+        Modifier.padding(end = 50.dp)
     ) {
         Box(
             modifier = Modifier.size(120.dp), contentAlignment = Alignment.Center
@@ -313,6 +293,26 @@ fun PlaylistCover(
         }
     }
 
+}
+
+@Preview
+@Composable
+fun FavoritePlaylist(
+    onPressedCover: () -> Unit = {}
+) {
+    Box {
+        AlbumCover(size = 2) {
+            onPressedCover
+        }
+        Icon(
+            imageVector = Icons.Default.Favorite,
+            contentDescription = null,
+            tint = Color.Red,
+            modifier = Modifier
+                .size(100.dp * 2)
+                .offset(x = 2.dp * 2, y = 0.dp)
+        )
+    }
 }
 
 /**

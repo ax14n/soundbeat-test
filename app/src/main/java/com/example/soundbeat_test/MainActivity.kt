@@ -19,7 +19,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -29,7 +28,7 @@ import com.example.soundbeat_test.navigation.GetNavItemList
 import com.example.soundbeat_test.navigation.NavItem
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.audio.AudioPlayerViewModel
-import com.example.soundbeat_test.ui.audio.MusicPlayerBottomSheet
+import com.example.soundbeat_test.ui.audio.MusicPlayerDropdownMenu
 import com.example.soundbeat_test.ui.screens.auth.LoginScreen
 import com.example.soundbeat_test.ui.screens.auth.RegisterScreen
 import com.example.soundbeat_test.ui.screens.configuration.ConfigurationScreen
@@ -63,9 +62,8 @@ class MainActivity : ComponentActivity() {
                 val createPlaylistViewModel: CreatePlaylistViewModel = viewModel()
                 Scaffold { it ->
                     Column(Modifier.padding(it)) {
-                        MusicPlayerBottomSheet(
+                        MusicPlayerDropdownMenu(
                             audioPlayerViewModel = audioPlayerViewModel,
-                            sharedPlaylistViewModel = sharedPlaylistViewModel
                         ) {
                             MainApp(
                                 audioPlayerViewModel = audioPlayerViewModel,
@@ -74,9 +72,7 @@ class MainActivity : ComponentActivity() {
                                 createPlaylistViewModel = createPlaylistViewModel
                             )
                         }
-
                     }
-
                 }
             }
         }
@@ -157,23 +153,32 @@ fun AppNavigation(
                 playlistScreenViewModel = playlistScreenViewModel!!
             )
         }
-        composable("SEARCH/{mode}") { backStackEntry ->
+        composable("SEARCH/{mode}/{origin}") { backStackEntry ->
             val modeArg = backStackEntry.arguments?.getString("mode")
+            val originArg = backStackEntry.arguments?.getString("origin")
+
             val searchInteractionMode = try {
                 SearchInteractionMode.valueOf(
                     modeArg ?: SearchInteractionMode.REPRODUCE_ON_SELECT.name
                 )
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 SearchInteractionMode.REPRODUCE_ON_SELECT
             }
+
+            val searchOrigin = try {
+                CreationMode.valueOf(originArg ?: "null")
+            } catch (_: IllegalArgumentException) {
+                CreationMode.OFFLINE_PLAYLIST
+            }
+            Log.d("MainActivity", "${searchOrigin.name}")
 
             SearchScreen(
                 navHostController = navController,
                 sharedPlaylistViewModel = sharedPlaylistViewModel!!,
-                searchInteractionMode = searchInteractionMode
+                searchInteractionMode = searchInteractionMode,
+                creationMode = searchOrigin
             )
         }
-        // navController.navigate("PLAYLIST_CREATOR/${CreationMode.ONLINE_PLAYLIST.name}")
         composable("PLAYLIST_CREATOR/{mode}") { backStackEntry ->
             val modeArg = backStackEntry.arguments?.getString("mode")
             val creationMode = try {
@@ -211,10 +216,11 @@ fun MainScreen(
         mutableIntStateOf(0)
     }
 
-    Scaffold(modifier = Modifier.fillMaxSize(), topBar = {}, bottomBar = {
+    Scaffold(modifier = Modifier.fillMaxSize(), bottomBar = {
         BottomNavigationBar(navItemList, selectedIndex) { selectedIndex = it }
-    }) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+    }) { it ->
+        val padding = it
+        Column() {
             ContentScreen(
                 selectedIndex = selectedIndex,
                 navHostController = navHostController,
@@ -237,7 +243,7 @@ fun MainScreen(
 private fun BottomNavigationBar(
     navItemList: List<NavItem>, selectedIndex: Int, onInteraction: (Int) -> Unit
 ) {
-    NavigationBar(Modifier.padding(bottom = 32.dp)) {
+    NavigationBar() {
         navItemList.forEachIndexed { index, navItem ->
             NavigationBarItem(
                 selected = selectedIndex == index,

@@ -45,20 +45,21 @@ fun CreatePlaylistScreen(
     sharedPlaylistViewModel: SharedPlaylistViewModel,
     creationMode: CreationMode
 ) {
-    val sharedPlaylist = sharedPlaylistViewModel?.selectedPlaylist?.collectAsState()
+    val sharedPlaylist = sharedPlaylistViewModel.selectedPlaylist.collectAsState()
     val receivedPlaylist = sharedPlaylist?.value
 
     LaunchedEffect(receivedPlaylist?.songs?.lastOrNull()) {
         if (receivedPlaylist?.songs?.isNotEmpty() == true) {
             val album: Album = receivedPlaylist.songs.last()
-            createPlaylistViewModel?.addSong(album)
+            createPlaylistViewModel.addSong(album)
+
             Log.d("CreatePlaylistScreen", "${createPlaylistViewModel.songs.value}")
-            sharedPlaylistViewModel?.clearPlaylist()
+            sharedPlaylistViewModel.clearPlaylist()
         }
     }
 
-    val playlistName = createPlaylistViewModel?.playlistName
-    val songsSet = createPlaylistViewModel?.songs?.collectAsState()?.value
+    val playlistName = createPlaylistViewModel.playlistName.collectAsState().value
+    val songsSet = createPlaylistViewModel.songs.collectAsState().value
 
     Column(
         modifier = Modifier
@@ -72,7 +73,7 @@ fun CreatePlaylistScreen(
                 .background(Color(0xFFFF5722)),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = "Modo: $creationMode", color = Color.White, fontStyle = FontStyle.Italic)
+            Text(text = "mode: $creationMode", color = Color.White, fontStyle = FontStyle.Italic)
         }
 
         Spacer(modifier = Modifier.height(2.dp))
@@ -83,26 +84,29 @@ fun CreatePlaylistScreen(
                 .padding(top = 20.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Button(
-                onClick = {
-                    createPlaylistViewModel.createPlaylist(creationMode)
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
-            ) {
-                Text("Crear")
-            }
 
             Button(
                 onClick = {
                     createPlaylistViewModel.clearPlaylistName()
                     createPlaylistViewModel.clearSongsList()
-                    navController?.navigate(ROUTES.HOME) {
+                    navController.navigate(ROUTES.HOME) {
                         popUpTo(ROUTES.HOME) { inclusive = true }
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
             ) {
-                Text("Descartar")
+                Text("Discard")
+            }
+            Button(
+                onClick = {
+                    createPlaylistViewModel.createPlaylist(creationMode)
+                    navController.navigate(ROUTES.HOME) {
+                        popUpTo(ROUTES.HOME) { inclusive = true }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
+            ) {
+                Text("Create")
             }
         }
 
@@ -113,9 +117,9 @@ fun CreatePlaylistScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = playlistName?.value ?: "",
-            onValueChange = { createPlaylistViewModel?.onPlaylistNameChange(it) },
-            label = { Text("Nombre de la playlist") },
+            value = playlistName,
+            onValueChange = { createPlaylistViewModel.onPlaylistNameChange(it) },
+            label = { Text("Give your playlist a name!") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -125,14 +129,16 @@ fun CreatePlaylistScreen(
         SongsListBox(
             albums = songsSet?.toList() ?: emptyList(),
             playerViewModel = playerViewModel,
-            navController = navController
+            navController = navController,
+            creationMode = creationMode
         )
     }
 }
 
 @Composable
 fun SongsListBox(
-    albums: List<Album>, playerViewModel: AudioPlayerViewModel?, navController: NavHostController?
+    albums: List<Album>, playerViewModel: AudioPlayerViewModel?, navController: NavHostController?,
+    creationMode: CreationMode
 ) {
     OutlinedCard(
         modifier = Modifier
@@ -143,13 +149,15 @@ fun SongsListBox(
             modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Canciones de la playlist",
+                text = "Your playlist's songs",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             Button(
                 onClick = {
-                    navController?.navigate("search/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}")
+                    navController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${creationMode}") {
+                        launchSingleTop = true
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),

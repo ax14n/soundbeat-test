@@ -91,6 +91,9 @@ dependencies {
     // optional - Paging 3 Integration
     implementation("androidx.room:room-paging:$room_version")
 
+    // Hace que los textos se delicen de derecha a izquierda si no se ven completos.
+    implementation("com.google.accompanist:accompanist-placeholder-material:0.35.0-alpha")
+
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

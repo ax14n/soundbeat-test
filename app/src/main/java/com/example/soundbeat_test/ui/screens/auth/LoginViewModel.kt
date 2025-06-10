@@ -1,18 +1,24 @@
 package com.example.soundbeat_test.ui.screens.auth
 
+import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.annotation.OptIn
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import com.example.soundbeat_test.network.loginUser
 import com.example.soundbeat_test.network.userExists
+import com.example.soundbeat_test.ui.screens.auth.LoginModes.OFFLINE_MODE
+import com.example.soundbeat_test.ui.screens.auth.LoginModes.ONLINE_MODE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+
+enum class LoginModes {
+    OFFLINE_MODE, ONLINE_MODE
+}
 
 /**
  * ViewModel encargado de gestionar el proceso de inicio de sesión de usuarios.
@@ -20,7 +26,7 @@ import kotlinx.coroutines.launch
  * Expone el estado del mensaje y la autenticación para que la interfaz pueda reaccionar
  * a los cambios producidos durante la operación de login.
  */
-class LoginViewModel : ViewModel() {
+class LoginViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * Mensaje emitido durante el proceso de inicio de sesión, como errores o éxito.
      */
@@ -45,28 +51,38 @@ class LoginViewModel : ViewModel() {
      * @param context Contexto de la aplicación, necesario para acceder a SharedPreferences.
      */
     @OptIn(UnstableApi::class)
-    fun logInUser(email: String, password: String, context: Context) {
+    fun logInUser(email: String, password: String, loginModes: LoginModes) {
+        // Si el dato es diferente al email del usuario entonces significa
+        when (loginModes) {
+            OFFLINE_MODE -> {
+                saveUserData("OFFLINE")
+                _isAuthenticated.value = true
+            }
 
-        if (checkInputs(email, password)) return
+            ONLINE_MODE -> {
+                if (checkInputs(email, password)) return
 
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                if (checkUserExistence(email)) return@launch
+                viewModelScope.launch(Dispatchers.IO) {
+                    try {
+                        if (checkUserExistence(email)) return@launch
 
-                val resultantLogin = loginUser(email, password)
-                Log.d("LoginViewModel", "Resultado Log in: $resultantLogin")
+                        val resultantLogin = loginUser(email, password)
+                        Log.d("LoginViewModel", "Resultado Log in: $resultantLogin")
 
-                if (resultantLogin == "Inicio de sesión exitoso!") {
-                    saveUserData(context, email)
-                    _isAuthenticated.value = true
+                        if (resultantLogin == "Inicio de sesión exitoso!") {
+                            saveUserData(email)
+                            _isAuthenticated.value = true
+                        }
+
+                        _message.value = resultantLogin
+
+                    } catch (e: Exception) {
+                        _message.value = "Error de conexión: ${e.localizedMessage}"
+                    }
                 }
-
-                _message.value = resultantLogin
-
-            } catch (e: Exception) {
-                _message.value = "Error de conexión: ${e.localizedMessage}"
             }
         }
+
     }
 
     /**
@@ -81,10 +97,10 @@ class LoginViewModel : ViewModel() {
     @OptIn(UnstableApi::class)
     private suspend fun checkUserExistence(email: String): Boolean {
         val exist = userExists(email)
-        Log.d("LoginViewModel", "Existe \"$email?\": ${if (exist) "Sí" else "No"}")
+        Log.d("LoginViewModel", "exists \"$email?\": ${if (exist) "YES" else "NO"}")
 
         if (!exist) {
-            _message.value = "El usuario no está registrado."
+            _message.value = "User not found."
             return true
         }
         return false
@@ -102,7 +118,7 @@ class LoginViewModel : ViewModel() {
      */
     private fun checkInputs(email: String, password: String): Boolean {
         if (email.isBlank() || password.isBlank()) {
-            _message.value = "Email y contraseña no pueden estar vacíos."
+            _message.value = "Email and password are required."
             return true
         }
         return false
@@ -116,13 +132,11 @@ class LoginViewModel : ViewModel() {
      * @param context Contexto necesario para acceder a SharedPreferences.
      * @param email Correo electrónico del usuario que se desea guardar.
      */
-    private fun saveUserData(context: Context, email: String) {
-        val prefs: SharedPreferences =
-            context.getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
-        val editor = prefs.edit()
-
-        editor.putString("email", email)
-        editor.apply()
+    private fun saveUserData(email: String) {
+        val prefs =
+            getApplication<Application>().getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
+        prefs.edit().putString("email", email).apply()
     }
+
 
 }

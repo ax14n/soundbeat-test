@@ -1,12 +1,15 @@
 package com.example.soundbeat_test.ui.screens.configuration
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -81,6 +84,12 @@ fun ConfigurationScreen(navHostController: NavHostController? = null) {
                 SettingsButton() {}
                 SettingsButton() {}
                 SettingsButton() {}
+                SettingsButton() {}
+
+                Spacer(Modifier.padding(top = 10.dp))
+                SettingsButton(text = "Cerrar sesión", color = Color.Red) {
+                    onCloseSessionClick(navHostController!!)
+                }
 
             }
         }
@@ -89,15 +98,27 @@ fun ConfigurationScreen(navHostController: NavHostController? = null) {
 
 @Composable
 fun SettingsButton(
-    text: String = "Not implemented", onClick: () -> Unit
+    text: String = "Not implemented", color: Color = Color.Gray, onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = Color.Gray, shape = RoundedCornerShape(8.dp))
+            .background(color = color, shape = RoundedCornerShape(8.dp))
             .clickable { onClick() }
             .padding(2.dp) // Agregamos padding interno
     ) {
         Text(text = text, modifier = Modifier.padding(10.dp), color = Color.White)
     }
+}
+
+/**
+ * Maneja el evento de clic en el botón "ENTER!" y navega a la pantalla principal (HOME).
+ *
+ * @param navHostController Controlador de navegación usado para redirigir al home.
+ */
+private fun ColumnScope.onCloseSessionClick(navHostController: NavHostController) {
+    navHostController.navigate(ROUTES.LOGIN) {
+        popUpTo(ROUTES.SETTINGS) { inclusive = true }
+    }
+    Log.d("LoginScreen", "Navigating to: HOME SCREEN")
 }

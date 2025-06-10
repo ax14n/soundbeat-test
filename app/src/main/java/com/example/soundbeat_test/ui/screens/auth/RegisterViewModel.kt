@@ -1,8 +1,8 @@
 package com.example.soundbeat_test.ui.screens.auth
 
+import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.soundbeat_test.network.registerUser
 import com.example.soundbeat_test.network.userExists
@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
  *
  * @property mensaje Un StateFlow que expone mensajes de estado o error relacionados con el proceso de registro.
  */
-class RegisterViewModel : ViewModel() {
+class RegisterViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _message = MutableStateFlow<String?>(null)
 
@@ -56,7 +56,7 @@ class RegisterViewModel : ViewModel() {
                 val resultantRegistry = registerUser(email, password)
 
                 if (resultantRegistry == "Usuario registrado exitosamente!") {
-                    saveUserData(context, email)
+                    saveUserData(email)
                     _isAuthenticated.value = true
                 }
 
@@ -80,7 +80,7 @@ class RegisterViewModel : ViewModel() {
         val exist = userExists(email)
 
         if (exist) {
-            _message.value = "El usuario ya se encuentra registrado."
+            _message.value = "This email is already registered"
             return true
         }
         return false
@@ -94,13 +94,10 @@ class RegisterViewModel : ViewModel() {
      * @param context Contexto necesario para acceder a SharedPreferences.
      * @param email Correo electrónico del usuario que se desea guardar.
      */
-    private fun saveUserData(context: Context, email: String) {
-        val prefs: SharedPreferences =
-            context.getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
-        val editor = prefs.edit()
-
-        editor.putString("email", email)
-        editor.apply()
+    private fun saveUserData(email: String) {
+        val prefs =
+            getApplication<Application>().getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
+        prefs.edit().putString("email", email).apply()
     }
 
     /**

@@ -52,8 +52,26 @@ class AudioPlayerViewModel(
     private val _currentMediaItem = MutableStateFlow<MediaItem?>(null)
     val currentMediaItem: StateFlow<MediaItem?> = _currentMediaItem
 
+    private val _nextMediaItem = MutableStateFlow<MediaItem?>(null)
+    val nextMediaItem: StateFlow<MediaItem?> = _nextMediaItem
+
     private val _currentIndex = MutableStateFlow(0)
     val currentIndex: StateFlow<Int> = _currentIndex
+
+    private val _lastIndex = MutableStateFlow(0)
+    val lastIndex: StateFlow<Int> = _lastIndex
+
+    private val _reproducerIsShowing = MutableStateFlow<Boolean>(false)
+
+    val reproducerIsShowing: StateFlow<Boolean> = _reproducerIsShowing
+
+    fun showPlayerVisibility() {
+        _reproducerIsShowing.value = true
+    }
+
+    fun hidePlayerVisibility() {
+        _reproducerIsShowing.value = false
+    }
 
     /**
      * Listener para el ExoPlayer, actualiza los estados internos cuando cambia el estado de reproducción
@@ -67,15 +85,16 @@ class AudioPlayerViewModel(
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             _currentMediaItem.value = mediaItem
             _currentIndex.value = exoPlayer.currentMediaItemIndex
+
+            val nextIndex = exoPlayer.currentMediaItemIndex + 1
+            val nextItem = exoPlayer.getMediaItemAt(nextIndex)
+            _nextMediaItem.value = nextItem
         }
 
     }
 
     init {
         exoPlayer.addListener(listener)
-//         Ejemplo de reproducción de playlist que hice.
-        // val list = Album.AlbumListExample
-        //loadPlaylist(list)
     }
 
     /**
@@ -93,8 +112,7 @@ class AudioPlayerViewModel(
     fun loadAndPlayHLS(url: String, title: String, artist: String? = null) {
         Log.d("AudioPlayerViewModel", "url: $url")
         val mediaItem = MediaItem.Builder().setUri(url).setMediaMetadata(
-            MediaMetadata.Builder().setTitle(title).setArtist(artist ?: "Autor desconocido")
-                .build()
+            MediaMetadata.Builder().setTitle(title).setArtist(artist ?: "Autor desconocido").build()
         ).build()
 
         exoPlayer.setMediaItem(mediaItem)
@@ -149,13 +167,13 @@ class AudioPlayerViewModel(
             MediaItem.Builder().setUri(uri).setMediaMetadata(
                 MediaMetadata.Builder().setTitle(album.name).setArtist(
                     album.author ?: "Autor desconocido"
-                )
-                    .build()
+                ).build()
             ).build()
         }
 
         exoPlayer.setMediaItems(mediaItems)
         exoPlayer.prepare()
+        _lastIndex.value = albums.size
         exoPlayer.playWhenReady = true
     }
 

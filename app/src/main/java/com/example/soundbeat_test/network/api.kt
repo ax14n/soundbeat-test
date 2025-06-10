@@ -17,7 +17,7 @@ import java.net.URLEncoder
 /**
  * Aquí se introduce la dirección IP o dominio del servidor.
  */
-const val URL_BASE = "http://192.168.1.200:8080"
+const val URL_BASE = "http://192.168.1.152:8080"
 
 /**
  * Función para hacer peticiones a la API, tanto GET como POST, con el manejo adecuado de respuestas y errores.
@@ -105,11 +105,13 @@ suspend fun getUserInfo(email: String): Result<Map<String, Any>> {
 
     return try {
         val jsonResponse = JSONObject(response)
+        Log.d("API_RESPONSE", response)
+
         val username = jsonResponse.getString("username")
-        val fechaRegistro = jsonResponse.getString("fecha_registro")
-        Result.success(mapOf("username" to username, "fecha_registro" to fechaRegistro))
+        val dateJoined = jsonResponse.getString("dateJoined")
+        Result.success(mapOf("username" to username, "dateJoined" to dateJoined))
     } catch (e: Exception) {
-        Log.e("PROFILE", "Excepción en getUserInfo: ${e.message}", e)
+        Log.e("API", "exception in getUserInfo: ${e.message}", e)
         Result.failure(e)
     }
 }
@@ -131,6 +133,7 @@ suspend fun getUserPlaylists(email: String): Result<List<Playlist>> {
 
     return try {
         val jsonArray = JSONArray(response)
+        Log.d("API_RESPONSE", response)
 
         val playlists = List(jsonArray.length()) { index ->
             val jsonObj = jsonArray.getJSONObject(index)
@@ -143,10 +146,12 @@ suspend fun getUserPlaylists(email: String): Result<List<Playlist>> {
 
         Result.success(playlists)
     } catch (jsonEx: JSONException) {
-        Log.e("SOUND_BEAT", "Error procesando el JSON de playlists: ${jsonEx.message}", jsonEx)
+        Log.e(
+            "API", "failed to parse user playlists JSON response: ${jsonEx.message}", jsonEx
+        )
         Result.failure(jsonEx)
     } catch (ex: Exception) {
-        Log.e("SOUND_BEAT", "Error obteniendo playlists: ${ex.message}", ex)
+        Log.e("API", "unexpected error while fetching user playlists: ${ex.message}", ex)
         Result.failure(ex)
     }
 }
@@ -167,15 +172,16 @@ suspend fun getPlaylistSongs(playlistId: Int): Result<List<Album>> {
 
     return try {
         val jsonArray = JSONArray(response)
+        Log.d("API_RESPONSE", response)
 
         val albumList = List(jsonArray.length()) { index ->
             val json = jsonArray.getJSONObject(index)
             Album(
-                id = json.getInt("song_id"),
+                id = json.getInt("songId"),
                 name = json.getString("title"),
                 author = json.getString("artist"),
-                genre = listOf(), // Si el JSON no incluye género, se deja vacío
-                imageResId = R.drawable.default_vinyl, // Default si no viene en la respuesta
+                genre = listOf(),
+                imageResId = R.drawable.default_vinyl,
                 url = json.getString("url"),
                 duration = json.getDouble("duration")
             )
@@ -183,7 +189,7 @@ suspend fun getPlaylistSongs(playlistId: Int): Result<List<Album>> {
 
         Result.success(albumList)
     } catch (ex: Exception) {
-        Log.e("API", "Error obteniendo canciones de la playlist: ${ex.message}", ex)
+        Log.e("API", "failed to fetch songs from playlist: ${ex.message}", ex)
         Result.failure(ex)
     }
 }
@@ -202,28 +208,47 @@ suspend fun getServerSongs(genre: String = "null"): Result<List<Album>> {
 
     return try {
         val jsonResponse = JSONArray(response)
+        Log.d("API_RESPONSE", response)
 
         val songList = List(jsonResponse.length()) { index ->
-            val id = jsonResponse.getJSONObject(index).getInt("song_id")
+            val id = jsonResponse.getJSONObject(index).getInt("songId")
             val title = jsonResponse.getJSONObject(index).getString("title")
             val artist = jsonResponse.getJSONObject(index).getString("artist")
             val duration = jsonResponse.getJSONObject(index).getDouble("duration")
             val url = jsonResponse.getJSONObject(index).getString("url")
+            val rawGenres = jsonResponse.getJSONObject(index).optJSONArray("genres")
+            val genres = mutableListOf<String>()
+
+            if (rawGenres != null && rawGenres.length() > 0) {
+                for (i in 0 until rawGenres.length()) {
+                    genres.add(rawGenres.getString(i))
+                }
+            } else {
+                genres.add("OTHER")
+            }
+
             Album(
-                id = id, name = title, author = artist, duration = duration, url = url
+                id = id,
+                name = title,
+                author = artist,
+                duration = duration,
+                url = url,
+                genre = genres
             )
         }
 
         Result.success(songList)
     } catch (jsonException: JSONException) {
         Log.e(
-            "SOUND_BEAT",
-            "Error procesando el JSON de canciones: ${jsonException.message}",
+            "API",
+            "error while parsing playlist songs json: ${jsonException.message}",
             jsonException
         )
         Result.failure(jsonException)
     } catch (exception: Exception) {
-        Log.e("SOUND_BEAT", "Error obteniendo canciones: ${exception.message}", exception)
+        Log.e(
+            "API", "error while fetching playlist songs: ${exception.message}", exception
+        )
         Result.failure(exception)
     }
 }

@@ -32,5 +32,14 @@ data class Playlist(
                 Album.AlbumExample,
             )
         )
+
+        fun Playlist.toEntity(): com.example.soundbeat_test.local.room.entities.Playlist {
+            return com.example.soundbeat_test.local.room.entities.Playlist(
+                playlistId = this.id,
+                name = this.name,
+                createdAt = 0
+            )
+        }
+
     }
 }
