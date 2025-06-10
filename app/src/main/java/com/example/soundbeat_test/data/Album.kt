@@ -2,7 +2,7 @@ package com.example.soundbeat_test.data
 
 import com.example.soundbeat_test.R
 import com.example.soundbeat_test.local.room.entities.Song
-import com.example.soundbeat_test.network.URL_BASE
+import com.example.soundbeat_test.network.ServerConfig
 
 /**
  * Representa un álbum de música con su nombre, autor, género y una imagen asociada.
@@ -46,7 +46,7 @@ data class Album(
                 author = "TODO()",
                 genre = listOf("TODO()"),
                 imageResId = 1,
-                url = "$URL_BASE/media/Blind_girl_(feat._Dia_Yiannopoulou)_-_zero-project.m3u8",
+                url = "${ServerConfig.getBaseUrl()}/media/Blind_girl_(feat._Dia_Yiannopoulou)_-_zero-project.m3u8",
                 duration = 2.2
             ), Album(
                 id = 0,
@@ -54,7 +54,7 @@ data class Album(
                 author = "TODO()",
                 genre = listOf("TODO()"),
                 imageResId = 1,
-                url = "$URL_BASE/media/Alone_-_Color_Out.m3u8",
+                url = "${ServerConfig.getBaseUrl()}/media/Alone_-_Color_Out.m3u8",
                 duration = 2.2
             ), Album(
                 id = 0,
@@ -62,7 +62,7 @@ data class Album(
                 author = "TODO()",
                 genre = listOf("TODO()"),
                 imageResId = 1,
-                url = "$URL_BASE/media/Molotov_Heart_-_radionowhere.m3u8",
+                url = "${ServerConfig.getBaseUrl()}/media/Molotov_Heart_-_radionowhere.m3u8",
                 duration = 2.2
             )
         )

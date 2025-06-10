@@ -111,7 +111,9 @@ fun ConfigurationScreen(
             Text("Local settings")
             SettingsButton("Change music directory") {}
             SettingsButton("Change the app theme") {}
-            SettingsButton("Change server address") {}
+            SettingsButton("Change server address") {
+                activeDialog.value = "address"
+            }
 
             Spacer(Modifier.padding(top = 10.dp))
             SettingsButton(text = "Log out", color = Color.Red) {
@@ -169,6 +171,17 @@ private fun dialogHandler(
                 activeDialog.value = null
                 onCloseSessionClick(navHostController!!)
             })
+
+        "address" -> TextInputDialog(
+            title = "Change the IP Address",
+            initialText = "",
+            onDismissRequest = { activeDialog.value = null },
+            onConfirm = { input ->
+                configurationViewModel.changeIPAddress(input)
+                activeDialog.value = null
+            })
+
+
     }
 }
 

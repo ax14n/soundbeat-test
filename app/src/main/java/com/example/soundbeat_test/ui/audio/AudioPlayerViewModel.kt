@@ -12,7 +12,7 @@ import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.soundbeat_test.data.Album
-import com.example.soundbeat_test.network.URL_BASE
+import com.example.soundbeat_test.network.ServerConfig
 import com.example.soundbeat_test.network.addSongToFavorites
 import com.example.soundbeat_test.network.isFavorite
 import com.example.soundbeat_test.network.removeSongFromFavorites
@@ -165,7 +165,7 @@ class AudioPlayerViewModel(
     fun createSongUrl(album: Album): String {
         val result = if (!album.isLocal) {
             val encodedName = URLEncoder.encode(album.title.trim() + ".m3u8", "UTF-8")
-            val url = "$URL_BASE/media/$encodedName"
+            val url = "${ServerConfig.getBaseUrl()}/media/$encodedName"
             return url
         } else {
             album.url

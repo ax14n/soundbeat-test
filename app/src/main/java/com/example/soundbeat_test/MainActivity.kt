@@ -27,6 +27,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.soundbeat_test.navigation.GetNavItemList
 import com.example.soundbeat_test.navigation.NavItem
 import com.example.soundbeat_test.navigation.ROUTES
+import com.example.soundbeat_test.network.ServerConfig
 import com.example.soundbeat_test.ui.audio.AudioPlayerViewModel
 import com.example.soundbeat_test.ui.audio.MusicPlayerDropdownMenu
 import com.example.soundbeat_test.ui.screens.auth.LoginScreen
@@ -53,6 +54,7 @@ import com.example.soundbeat_test.ui.theme.SoundBeat_TestTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ServerConfig.init(this)
         enableEdgeToEdge()
         setContent {
             SoundBeat_TestTheme {

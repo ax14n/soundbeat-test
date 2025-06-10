@@ -15,11 +15,6 @@ import java.net.URL
 import java.net.URLEncoder
 
 /**
- * Aquí se introduce la dirección IP o dominio del servidor.
- */
-const val URL_BASE = "http://192.168.1.152:8080"
-
-/**
  * Función para hacer peticiones a la API, tanto GET como POST, con el manejo adecuado de respuestas y errores.
  */
 private suspend fun makeApiRequest(
@@ -59,7 +54,7 @@ private suspend fun makeApiRequest(
  * Verifica la existencia de un usuario a través de su correo electrónico.
  */
 suspend fun userExists(email: String): Boolean {
-    val url = "${URL_BASE}/api/userExists?email=${
+    val url = "${ServerConfig.getBaseUrl()}/api/userExists?email=${
         URLEncoder.encode(
             email.trim(), "UTF-8"
         )
@@ -72,7 +67,7 @@ suspend fun userExists(email: String): Boolean {
  * Realiza un intento de inicio de sesión con los datos proporcionados por el usuario.
  */
 suspend fun loginUser(email: String, password: String): String {
-    val url = "${URL_BASE}/api/login"
+    val url = "${ServerConfig.getBaseUrl()}/api/login"
     val json = JSONObject().apply {
         put("email", email)
         put("password", password)
@@ -84,7 +79,7 @@ suspend fun loginUser(email: String, password: String): String {
  * Mediante los datos introducidos por el usuario, lo registra en la base de datos para que tenga acceso futuro a la aplicación.
  */
 suspend fun registerUser(email: String, password: String): String {
-    val url = "${URL_BASE}/api/register"
+    val url = "${ServerConfig.getBaseUrl()}/api/register"
     val json = JSONObject().apply {
         put("email", email)
         put("password", password)
@@ -101,7 +96,7 @@ suspend fun addSongToFavorites(email: String, album: Album) {
     if (!album.isLocal) {
 
         Log.d("API", "trying to add song with id ${album.id} to $email favorite songs")
-        val url = "${URL_BASE}/api/favorites/addFavorite"
+        val url = "${ServerConfig.getBaseUrl()}/api/favorites/addFavorite"
         val json = JSONObject().apply {
             put("email", email)
             put("songId", album.id)
@@ -120,7 +115,7 @@ suspend fun removeSongFromFavorites(email: String, album: Album) {
     if (!album.isLocal) {
 
         Log.d("API", "trying to add song with id ${album.id} to $email favorite songs")
-        val url = "${URL_BASE}/api/favorites/deleteFavorite"
+        val url = "${ServerConfig.getBaseUrl()}/api/favorites/deleteFavorite"
         val json = JSONObject().apply {
             put("email", email)
             put("songId", album.id)
@@ -133,19 +128,17 @@ suspend fun removeSongFromFavorites(email: String, album: Album) {
 suspend fun isFavorite(email: String, album: Album): String {
     if (!album.isLocal) {
 
-        val url = "${URL_BASE}/api/favorites/isFavorite?email=${
+        val url = "${ServerConfig.getBaseUrl()}/api/favorites/isFavorite?email=${
             URLEncoder.encode(
                 email.trim(), "UTF-8"
             )
         }&songId=${album.id}"
         Log.d(
-            "API",
-            "trying receive if song with id ${album.id} in $email favorite songs. URL: $url"
+            "API", "trying receive if song with id ${album.id} in $email favorite songs. URL: $url"
         )
         val result = makeApiRequest(url)
         Log.d(
-            "API",
-            "${album.id} in $email favorite songs? ${if (result == "true") "YES" else "NO"} "
+            "API", "${album.id} in $email favorite songs? ${if (result == "true") "YES" else "NO"} "
         )
         return result
     }
@@ -154,7 +147,7 @@ suspend fun isFavorite(email: String, album: Album): String {
 
 suspend fun setUsername(email: String, newUsername: String) {
     Log.d("API", "trying to set a new username: $newUsername to account named $email")
-    val url = "${URL_BASE}/api/configurations/changeUsername"
+    val url = "${ServerConfig.getBaseUrl()}/api/configurations/changeUsername"
     val json = JSONObject().apply {
         put("email", email)
         put("newUsername", newUsername)
@@ -165,7 +158,7 @@ suspend fun setUsername(email: String, newUsername: String) {
 
 suspend fun setEmail(email: String, newEmail: String) {
     Log.d("API", "trying to set a new email: $newEmail to account named $email")
-    val url = "${URL_BASE}/api/configurations/changeEmail"
+    val url = "${ServerConfig.getBaseUrl()}/api/configurations/changeEmail"
     val json = JSONObject().apply {
         put("email", email)
         put("newEmail", newEmail)
@@ -176,7 +169,7 @@ suspend fun setEmail(email: String, newEmail: String) {
 
 suspend fun setPassword(email: String, newPassword: String) {
     Log.d("API", "trying to set a new password to account named $email")
-    val url = "${URL_BASE}/api/configurations/changePassword"
+    val url = "${ServerConfig.getBaseUrl()}/api/configurations/changePassword"
     val json = JSONObject().apply {
         put("email", email)
         put("newPassword", newPassword)
@@ -190,7 +183,7 @@ suspend fun setPassword(email: String, newPassword: String) {
  * Obtiene la información del usuario con el correo proporcionado.
  */
 suspend fun getUserInfo(email: String): Result<Map<String, Any>> {
-    val url = "${URL_BASE}/api/userInfo?email=${
+    val url = "${ServerConfig.getBaseUrl()}/api/userInfo?email=${
         URLEncoder.encode(
             email.trim(), "UTF-8"
         )
@@ -222,7 +215,12 @@ suspend fun getUserInfo(email: String): Result<Map<String, Any>> {
  *         si la operación fue exitosa, o un error si algo falló en la petición o el procesamiento del JSON.
  */
 suspend fun getUserPlaylists(email: String): Result<List<Playlist>> {
-    val url = "${URL_BASE}/api/userPlaylists?email=${URLEncoder.encode(email.trim(), "UTF-8")}"
+    val url = "${ServerConfig.getBaseUrl()}/api/userPlaylists?email=${
+        URLEncoder.encode(
+            email.trim(),
+            "UTF-8"
+        )
+    }"
     val response = makeApiRequest(url)
 
     return try {
@@ -261,7 +259,7 @@ suspend fun getUserPlaylists(email: String): Result<List<Playlist>> {
  *         o una excepción en caso de error (ya sea de red o de análisis de datos).
  */
 suspend fun getPlaylistSongs(playlistId: Int): Result<List<Album>> {
-    val url = "${URL_BASE}/api/getPlaylistSongs?playlistId=$playlistId"
+    val url = "${ServerConfig.getBaseUrl()}/api/getPlaylistSongs?playlistId=$playlistId"
     val response = makeApiRequest(url)
 
     return try {
@@ -292,17 +290,19 @@ suspend fun getPlaylistSongs(playlistId: Int): Result<List<Album>> {
  * Obtiene la lista de canciones disponibles desde el servidor, filtradas por género si se proporciona.
  */
 suspend fun getServerSongs(genre: String = "null"): Result<List<Album>> {
-    val url = "${URL_BASE}/api/songs?genre=${
+    val url = "${ServerConfig.getBaseUrl()}/api/songs?genre=${
         URLEncoder.encode(
             genre.trim(), "UTF-8"
         )
     }"
+    Log.d("API_RESPONSE", url)
 
     val response = makeApiRequest(url)
+    Log.d("API_RESPONSE", response)
 
     return try {
-        val jsonResponse = JSONArray(response)
         Log.d("API_RESPONSE", response)
+        val jsonResponse = JSONArray(response)
 
         val songList = List(jsonResponse.length()) { index ->
             val id = jsonResponse.getJSONObject(index).getInt("songId")
@@ -354,7 +354,7 @@ suspend fun getServerSongs(genre: String = "null"): Result<List<Album>> {
  * @param name: Nombre de la playlist a crear o modificar.
  */
 suspend fun createPlaylist(playlistName: String, userEmail: String, songsId: List<Int>): String {
-    val url = "${URL_BASE}/api/playlists/createPlaylist"
+    val url = "${ServerConfig.getBaseUrl()}/api/playlists/createPlaylist"
 
     val jsonBody = JSONObject().apply {
         put("playlist_name", playlistName)
@@ -375,7 +375,9 @@ suspend fun deletePlaylist(id: Int): String {
     }
 
     return makeApiRequest(
-        url = "${URL_BASE}/api/playlists/deletePlaylist", method = "POST", jsonBody = jsonBody
+        url = "${ServerConfig.getBaseUrl()}/api/playlists/deletePlaylist",
+        method = "POST",
+        jsonBody = jsonBody
     )
 }
 
@@ -390,7 +392,7 @@ suspend fun addSongsToPlaylist(playlistId: Int, songIds: List<Int>): String {
         put("song_ids", JSONArray(songIds))
     }
 
-    val url = "${URL_BASE}/api/playlists/add-songs"
+    val url = "${ServerConfig.getBaseUrl()}/api/playlists/add-songs"
     return makeApiRequest(url, method = "POST", jsonBody = jsonBody)
 }
 
@@ -405,7 +407,7 @@ suspend fun deleteSongsFromPlaylist(playlistId: Int, songIds: List<Int>): String
         put("song_ids", JSONArray(songIds))
     }
 
-    val url = "${URL_BASE}/api/playlists/delete-songs"
+    val url = "${ServerConfig.getBaseUrl()}/api/playlists/delete-songs"
     return makeApiRequest(url, method = "POST", jsonBody = jsonBody)
 }
 

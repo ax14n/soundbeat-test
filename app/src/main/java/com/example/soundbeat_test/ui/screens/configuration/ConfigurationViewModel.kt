@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context.MODE_PRIVATE
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.soundbeat_test.network.ServerConfig
 import com.example.soundbeat_test.network.setEmail
 import com.example.soundbeat_test.network.setPassword
 import com.example.soundbeat_test.network.setUsername
@@ -54,6 +55,17 @@ class ConfigurationViewModel(application: Application) : AndroidViewModel(applic
             )
 
         }
+    }
+
+    fun changeIPAddress(address: String) {
+        val context = getApplication<Application>()
+        val prefs = context.getSharedPreferences("UserInfo", MODE_PRIVATE)
+
+        prefs.edit().putString("address", address).apply()
+
+        val address = prefs.getString("address", "192.168.1.152") ?: "192.168.1.152"
+
+        ServerConfig.updateIp(context, address)
     }
 
 }
