@@ -93,6 +93,67 @@ suspend fun registerUser(email: String, password: String): String {
 }
 
 /**
+ * Agrega la canción escuchada a la lista de favoritos.
+ * @param email email de la cuenta donde agregar la canción
+ * @param album album de donde obtener la información.
+ */
+suspend fun addSongToFavorites(email: String, album: Album) {
+    if (!album.isLocal) {
+
+        Log.d("API", "trying to add song with id ${album.id} to $email favorite songs")
+        val url = "${URL_BASE}/api/favorites/addFavorite"
+        val json = JSONObject().apply {
+            put("email", email)
+            put("songId", album.id)
+        }
+
+        makeApiRequest(url, "POST", json)
+    }
+}
+
+/**
+ * Elimina la canción escuchada a la lista de favoritos.
+ * @param email email de la cuenta donde agregar la canción
+ * @param album album de donde obtener la información.
+ */
+suspend fun removeSongFromFavorites(email: String, album: Album) {
+    if (!album.isLocal) {
+
+        Log.d("API", "trying to add song with id ${album.id} to $email favorite songs")
+        val url = "${URL_BASE}/api/favorites/deleteFavorite"
+        val json = JSONObject().apply {
+            put("email", email)
+            put("songId", album.id)
+        }
+
+        makeApiRequest(url, "POST", json)
+    }
+}
+
+suspend fun isFavorite(email: String, album: Album): String {
+    if (!album.isLocal) {
+
+        val url = "${URL_BASE}/api/favorites/isFavorite?email=${
+            URLEncoder.encode(
+                email.trim(), "UTF-8"
+            )
+        }&songId=${album.id}"
+        Log.d(
+            "API",
+            "trying receive if song with id ${album.id} in $email favorite songs. URL: $url"
+        )
+        val result = makeApiRequest(url)
+        Log.d(
+            "API",
+            "${album.id} in $email favorite songs? ${if (result == "true") "YES" else "NO"} "
+        )
+        return result
+    }
+    return "false"
+}
+
+
+/**
  * Obtiene la información del usuario con el correo proporcionado.
  */
 suspend fun getUserInfo(email: String): Result<Map<String, Any>> {
@@ -178,7 +239,7 @@ suspend fun getPlaylistSongs(playlistId: Int): Result<List<Album>> {
             val json = jsonArray.getJSONObject(index)
             Album(
                 id = json.getInt("songId"),
-                name = json.getString("title"),
+                title = json.getString("title"),
                 author = json.getString("artist"),
                 genre = listOf(),
                 imageResId = R.drawable.default_vinyl,
@@ -229,7 +290,7 @@ suspend fun getServerSongs(genre: String = "null"): Result<List<Album>> {
 
             Album(
                 id = id,
-                name = title,
+                title = title,
                 author = artist,
                 duration = duration,
                 url = url,

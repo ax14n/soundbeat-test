@@ -150,7 +150,7 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
                 Log.d("PlaylistCreation", "Canciones iterar: ${_songs.value.size}")
                 for (album in _songs.value) {
                     Log.d("PlaylistCreation", "Insertando canción: $album")
-                    val existing = localSongDb.getSongByTitleAndArtist(album.name, album.author)
+                    val existing = localSongDb.getSongByTitleAndArtist(album.title, album.author)
 
                     val songId = existing?.songId ?: localSongDb.insert(album.toSong()).toInt()
 

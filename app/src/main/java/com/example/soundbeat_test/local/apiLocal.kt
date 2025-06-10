@@ -40,7 +40,7 @@ fun listLocalAlbums(): List<Album> {
 
             Album(
                 id = index,
-                name = title,
+                title = title,
                 author = artist,
                 genre = listOf("Other"),
                 imageResId = R.drawable.default_vinyl,
@@ -52,7 +52,7 @@ fun listLocalAlbums(): List<Album> {
             Log.d("API-LOCAL", "failed to retrieve metadata from file: ${file.name}")
             Album(
                 id = index,
-                name = file.nameWithoutExtension,
+                title = file.nameWithoutExtension,
                 author = "Unknown",
                 genre = listOf("Other"),
                 imageResId = R.drawable.default_vinyl,

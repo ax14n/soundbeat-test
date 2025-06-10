@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Save
@@ -29,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.Log
@@ -53,6 +55,7 @@ fun MusicPlayerDropdownMenu(
     val currentMediaItemIndex by audioPlayerViewModel.currentIndex.collectAsState()
     val playlistLastIndex by audioPlayerViewModel.lastIndex.collectAsState()
     val nextMediaItem by audioPlayerViewModel.nextMediaItem.collectAsState()
+    val isMarkedAsFavorite by audioPlayerViewModel.isMarkedAsFavorite.collectAsState()
 
     val songName = currentMediaItem?.mediaMetadata?.title ?: "No title"
     val nextName = nextMediaItem?.mediaMetadata?.title ?: "No title"
@@ -107,8 +110,10 @@ fun MusicPlayerDropdownMenu(
                 horizontalArrangement = Arrangement.spacedBy(30.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { audioPlayerViewModel.addToFavorites() }) {
-                    Icon(Icons.Default.FavoriteBorder, contentDescription = "Añadir a Favoritos")
+                IconButton(onClick = { audioPlayerViewModel.alternateFavoriteSong() }) {
+                    val icon: ImageVector =
+                        if (isMarkedAsFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder
+                    Icon(icon, contentDescription = "Añadir a Favoritos")
                 }
                 IconButton(onClick = { audioPlayerViewModel.skipToPrevious() }) {
                     Icon(Icons.Default.FastRewind, contentDescription = "Anterior Canción")

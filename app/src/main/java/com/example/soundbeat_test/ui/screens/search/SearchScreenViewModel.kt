@@ -203,7 +203,7 @@ class SearchScreenViewModel() : ViewModel() {
 
     private fun filterAlbumsByQuery(albums: List<Album>, query: String): List<Album> {
         return if (query.isBlank()) albums
-        else albums.filter { it.name.startsWith(query, ignoreCase = true) }
+        else albums.filter { it.title.startsWith(query, ignoreCase = true) }
     }
 
     /**

@@ -97,7 +97,7 @@ fun AlbumCard(album: Album = Album.AlbumExample, onClickedAlbumCover: () -> Unit
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = album.name, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 1
+                text = album.title, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 1
             )
             Text(
                 text = "by ${album.author}",
@@ -187,7 +187,7 @@ fun PlayerControls(
 fun AlbumItem(album: Album = Album.AlbumExample, onPressedCover: (Album) -> Unit = {}) {
     Column(modifier = Modifier) {
         AlbumCover() { onPressedCover(album) }
-        Text(text = album.name.take(17), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = album.title.take(17), maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(text = "by ${album.author}".take(17), maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
@@ -232,7 +232,7 @@ fun AlbumCover(
     Row(
         Modifier.padding(end = 50.dp)
     ) {
-        
+
         Box(contentAlignment = Alignment.Center) {
             val diskPainter = rememberAsyncImagePainter(model = disk) // o cover
             val coverPainter = rememberAsyncImagePainter(model = cover) // o cover

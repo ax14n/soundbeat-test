@@ -107,7 +107,7 @@ fun ListSongs(
             is Album -> {
                 val playlist = Playlist(
                     id = item.id,
-                    name = item.name,
+                    name = item.title,
                     songs = setOf(item.copy())
                 )
                 sharedPlaylistViewModel?.setMode(SelectionMode.SONG)

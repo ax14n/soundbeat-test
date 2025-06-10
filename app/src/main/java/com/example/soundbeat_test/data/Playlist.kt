@@ -22,7 +22,7 @@ data class Playlist(
                 Album.AlbumExample,
                 Album(
                     id = 2,
-                    name = "Led Zeppelin IV",
+                    title = "Led Zeppelin IV",
                     author = "Led Zeppelin",
                     genre = listOf("Hard Rock", "Blues Rock"),
                     imageResId = R.drawable.premium_vinyl,
