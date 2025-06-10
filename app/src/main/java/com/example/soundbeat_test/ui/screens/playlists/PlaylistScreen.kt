@@ -1,5 +1,6 @@
 package com.example.soundbeat_test.ui.screens.playlists
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,8 +16,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -37,12 +41,26 @@ fun PlaylistScreen(
     playlistScreenViewModel: PlaylistScreenViewModel,
     sharedPlaylistViewModel: SharedPlaylistViewModel
 ) {
+    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+
+    val prefs = remember { context.getSharedPreferences("UserInfo", Context.MODE_PRIVATE) }
+    val email = remember {
+        derivedStateOf {
+            prefs.getString("email", "OFFLINE")
+        }
+    }.value
+    Log.d("PlaylistScreen", "email: $email")
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                playlistScreenViewModel.obtainRemoteUserPlaylists()
+                val prefs = context.getSharedPreferences("UserInfo", Context.MODE_PRIVATE)
+                val updatedEmail = prefs.getString("email", "OFFLINE")
+
+                if (updatedEmail != "OFFLINE") {
+                    playlistScreenViewModel.obtainRemoteUserPlaylists()
+                }
                 playlistScreenViewModel.obtainLocalUserPlaylists()
             }
         }
@@ -53,6 +71,7 @@ fun PlaylistScreen(
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
+
 
     val remotePlaylists = playlistScreenViewModel.remoteUserPlaylists.collectAsState().value
     val remotePlaylistError = playlistScreenViewModel.remotePlaylistError.collectAsState().value
@@ -88,7 +107,7 @@ fun PlaylistScreen(
 
 
                     val message = when {
-
+                        email == "OFFLINE" -> "You're in OFFLINE MODE"
                         remotePlaylistError != null -> remotePlaylistError
                         remotePlaylists.isEmpty() -> "No playlist"
                         else -> null

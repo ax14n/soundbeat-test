@@ -32,14 +32,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.R
 import com.example.soundbeat_test.navigation.ROUTES
-import com.example.soundbeat_test.network.deletePlaylist
 import com.example.soundbeat_test.ui.audio.AudioPlayerViewModel
 import com.example.soundbeat_test.ui.components.UserImage
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreenViewModel
 import com.example.soundbeat_test.ui.screens.search.VinylList
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 /**
  * Composable que representa la pantalla de una playlist seleccionada.
@@ -67,27 +63,29 @@ fun SelectedPlaylistScreen(
     val songSource = sharedPlaylistViewModel.songsSource.collectAsState().value
     val songs = playlistScreenViewModel.songs.collectAsState().value
 
+    val songsSource = sharedPlaylistViewModel.songsSource.collectAsState().value
+
     LaunchedEffect(songSource, playlist?.id) {
         when (songSource) {
             SongSource.LOCALS -> {
-                playlist?.let {
-                    Log.d("SelectedPlaylistScreen", "Playlist ID: ${playlist.id}")
-                    Log.d("SelectedPlaylistScreen", "Playlist canciones:  ${playlist.songs}")
-                    playlistScreenViewModel.obtainLocalPlaylistSongs(playlist.id)
+                playlist.let {
+                    Log.d("SelectedPlaylistScreen", "Playlist ID: ${playlist?.id}")
+                    Log.d("SelectedPlaylistScreen", "Playlist canciones:  ${playlist?.songs}")
+                    playlistScreenViewModel.obtainLocalPlaylistSongs(playlist?.id ?: -1)
                 }
             }
 
             SongSource.REMOTES -> {
-                playlist?.let {
-                    Log.d("SelectedPlaylistScreen", "Playlist ID: ${playlist.id}")
-                    Log.d("SelectedPlaylistScreen", "Playlist canciones:  ${playlist.songs}")
-                    playlistScreenViewModel.obtainRemotePlaylistSongs(playlist.id)
+                playlist.let {
+                    Log.d("SelectedPlaylistScreen", "Playlist ID: ${playlist?.id}")
+                    Log.d("SelectedPlaylistScreen", "playlist's songs:  ${playlist?.songs}")
+                    playlistScreenViewModel.obtainRemotePlaylistSongs(playlist?.id ?: -1)
                 }
             }
         }
     }
 
-    val reproduce = if (playlist?.songs?.toList()!!.isEmpty()) songs else playlist?.songs?.toList()
+    val reproduce = if (playlist?.songs?.toList()!!.isEmpty()) songs else playlist.songs.toList()
 
     Column(
         modifier = Modifier
@@ -102,18 +100,24 @@ fun SelectedPlaylistScreen(
             if (screenMode == SelectionMode.PLAYLIST) {
                 Icon(
                     imageVector = Icons.Default.DeleteForever,
-                    contentDescription = "Go back",
+                    contentDescription = "Delete playlist",
                     tint = Color(0xFFCB3813),
                     modifier = Modifier
+                        .padding(top = 20.dp)
                         .clickable(onClick = {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                deletePlaylist(playlist.id)
+                            when (songsSource) {
+                                SongSource.LOCALS -> {
+                                    sharedPlaylistViewModel.deleteLocalPlaylist(playlist)
+                                }
+
+                                SongSource.REMOTES -> {
+                                    sharedPlaylistViewModel.deleteRemotePlaylist(playlist)
+                                }
                             }
                             navHostController?.navigate(ROUTES.HOME) {
                                 popUpTo(ROUTES.HOME) { inclusive = true }
                             }
                         })
-                        .padding(top = 20.dp)
                 )
             }
             Image(
@@ -154,7 +158,7 @@ fun SelectedPlaylistScreen(
 
             Button(
                 onClick = {
-                    audioPlayerViewModel?.loadPlaylist(reproduce!!)
+                    audioPlayerViewModel.loadPlaylist(reproduce)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
                 shape = RoundedCornerShape(12.dp),
@@ -166,10 +170,10 @@ fun SelectedPlaylistScreen(
             }
 
             VinylList(
-                albumList = reproduce!!
+                albumList = reproduce
             ) { album ->
-                val url: String = audioPlayerViewModel?.createSongUrl(album).toString()
-                audioPlayerViewModel?.loadAndPlayHLS(
+                val url: String = audioPlayerViewModel.createSongUrl(album).toString()
+                audioPlayerViewModel.loadAndPlayHLS(
                     url = url,
                     title = album.name,
                     artist = album.author,

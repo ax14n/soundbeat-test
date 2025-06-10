@@ -18,7 +18,7 @@ fun listLocalAlbums(): List<Album> {
     val musicDirectory = File(URI_BASE)
 
     if (!musicDirectory.exists() || !musicDirectory.isDirectory) {
-        Log.d("apiLocal", "[LocalScan] Directory not found: $URI_BASE")
+        Log.d("API-LOCAL", "directory not found: $URI_BASE")
         return emptyList()
     }
 
@@ -49,7 +49,7 @@ fun listLocalAlbums(): List<Album> {
                 isLocal = true
             )
         } catch (e: Exception) {
-            println("[LocalScan] Fallo al leer los meta-datos de: ${file.name}")
+            Log.d("API-LOCAL", "failed to retrieve metadata from file: ${file.name}")
             Album(
                 id = index,
                 name = file.nameWithoutExtension,
