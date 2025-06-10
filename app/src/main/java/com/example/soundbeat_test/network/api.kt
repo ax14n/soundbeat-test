@@ -152,6 +152,39 @@ suspend fun isFavorite(email: String, album: Album): String {
     return "false"
 }
 
+suspend fun setUsername(email: String, newUsername: String) {
+    Log.d("API", "trying to set a new username: $newUsername to account named $email")
+    val url = "${URL_BASE}/api/configurations/changeUsername"
+    val json = JSONObject().apply {
+        put("email", email)
+        put("newUsername", newUsername)
+    }
+
+    makeApiRequest(url, "POST", json)
+}
+
+suspend fun setEmail(email: String, newEmail: String) {
+    Log.d("API", "trying to set a new email: $newEmail to account named $email")
+    val url = "${URL_BASE}/api/configurations/changeEmail"
+    val json = JSONObject().apply {
+        put("email", email)
+        put("newEmail", newEmail)
+    }
+
+    makeApiRequest(url, "POST", json)
+}
+
+suspend fun setPassword(email: String, newPassword: String) {
+    Log.d("API", "trying to set a new password to account named $email")
+    val url = "${URL_BASE}/api/configurations/changePassword"
+    val json = JSONObject().apply {
+        put("email", email)
+        put("newPassword", newPassword)
+    }
+
+    makeApiRequest(url, "POST", json)
+}
+
 
 /**
  * Obtiene la información del usuario con el correo proporcionado.

@@ -31,7 +31,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -56,7 +55,6 @@ import com.example.soundbeat_test.navigation.ROUTES
 fun LoginScreen(
     navHostController: NavHostController? = null, loginViewModel: LoginViewModel = viewModel()
 ) {
-    val context = LocalContext.current
     val isAuthenticated by loginViewModel.isAuthenticated.collectAsState()
     val message by loginViewModel.message.collectAsState()
 
