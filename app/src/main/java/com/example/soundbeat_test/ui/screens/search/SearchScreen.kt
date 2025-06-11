@@ -81,6 +81,10 @@ fun SearchScreen(
     creationMode: CreationMode? = null
 ) {
 
+    if (creationMode == null) {
+        searchScreenViewModel.fillSongsList()
+    }
+
     val queryState = searchScreenViewModel.textFieldText.collectAsState()
     val listState = searchScreenViewModel.albumList.collectAsState()
 
