@@ -24,6 +24,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.soundbeat_test.local.LocalConfig
 import com.example.soundbeat_test.navigation.GetNavItemList
 import com.example.soundbeat_test.navigation.NavItem
 import com.example.soundbeat_test.navigation.ROUTES
@@ -55,6 +56,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ServerConfig.init(this)
+        LocalConfig.init(this)
         enableEdgeToEdge()
         setContent {
             SoundBeat_TestTheme {

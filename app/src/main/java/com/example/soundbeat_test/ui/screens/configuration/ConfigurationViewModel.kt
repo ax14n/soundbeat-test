@@ -2,6 +2,8 @@ package com.example.soundbeat_test.ui.screens.configuration
 
 import android.app.Application
 import android.content.Context.MODE_PRIVATE
+import android.net.Uri
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.soundbeat_test.network.ServerConfig
@@ -11,10 +13,6 @@ import com.example.soundbeat_test.network.setUsername
 import kotlinx.coroutines.launch
 
 class ConfigurationViewModel(application: Application) : AndroidViewModel(application) {
-
-    fun onChangeText() {
-
-    }
 
     /**
      * Cambia el username del actual usuario de la aplicación por uno nuevo.
@@ -66,6 +64,10 @@ class ConfigurationViewModel(application: Application) : AndroidViewModel(applic
         val address = prefs.getString("address", "192.168.1.152") ?: "192.168.1.152"
 
         ServerConfig.updateIp(context, address)
+    }
+
+    fun changeMusicDirectory(launcher: ManagedActivityResultLauncher<Uri?, Uri?>) {
+        launcher.launch(null)
     }
 
 }

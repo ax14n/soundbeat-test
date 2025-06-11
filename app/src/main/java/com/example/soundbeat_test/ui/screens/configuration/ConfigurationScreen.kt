@@ -1,6 +1,12 @@
 package com.example.soundbeat_test.ui.screens.configuration
 
+import android.content.Context
+import android.net.Uri
+import android.os.Environment
+import android.provider.DocumentsContract
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,12 +30,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.R
+import com.example.soundbeat_test.local.LocalConfig
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.ImageGif
 import com.example.soundbeat_test.utils.SimpleAlertDialog
@@ -43,6 +51,20 @@ fun ConfigurationScreen(
 ) {
     val activeDialog = remember { mutableStateOf<String?>(null) }
     val temporalBuffer = remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+            uri?.let {
+                val path = getFullPathFromTreeUri(uri, context)
+                Log.d("%%%", uri.toString())
+                Log.d("%%%", path ?: "Ruta nula")
+
+                if (path != null) {
+                    LocalConfig.setMusicDirectory(context, path)
+                }
+            }
+        }
 
     dialogHandler(
         activeDialog = activeDialog,
@@ -109,7 +131,9 @@ fun ConfigurationScreen(
 
             Spacer(modifier = Modifier.padding(vertical = 2.dp))
             Text("Local settings")
-            SettingsButton("Change music directory") {}
+            SettingsButton("Change music directory") {
+                configurationViewModel.changeMusicDirectory(launcher)
+            }
             SettingsButton("Change the app theme") {}
             SettingsButton("Change server address") {
                 activeDialog.value = "address"
@@ -211,3 +235,20 @@ private fun onCloseSessionClick(navHostController: NavHostController) {
     }
     Log.d("LoginScreen", "Navigating to: HOME SCREEN")
 }
+
+fun getFullPathFromTreeUri(uri: Uri, context: Context): String? {
+    val docId = DocumentsContract.getTreeDocumentId(uri) // p.ej. "primary:Music/Telegram"
+    val parts = docId.split(":")
+    if (parts.isEmpty()) return null
+
+    val type = parts[0] // "primary"
+    val relativePath = if (parts.size > 1) parts[1] else ""
+
+    val basePath = when (type) {
+        "primary" -> Environment.getExternalStorageDirectory().absolutePath // "/storage/emulated/0"
+        else -> "/storage/$type"
+    }
+
+    return "$basePath/${relativePath}".trimEnd('/')
+}
+

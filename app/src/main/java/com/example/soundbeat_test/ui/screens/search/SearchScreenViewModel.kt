@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import com.example.soundbeat_test.data.Album
-import com.example.soundbeat_test.local.listLocalAlbums
+import com.example.soundbeat_test.local.LocalConfig
 import com.example.soundbeat_test.network.getServerSongs
 import com.example.soundbeat_test.ui.screens.search.SearchMode.LOCAL
 import com.example.soundbeat_test.ui.screens.search.SearchMode.REMOTE
@@ -172,7 +172,7 @@ class SearchScreenViewModel() : ViewModel() {
 
             LOCAL -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    val localAlbums = listLocalAlbums()
+                    val localAlbums = LocalConfig.listLocalAlbums()
 
                     val filteredLocalAlbums =
                         if (shouldFilterByGenre) filterAlbumsByGenre(localAlbums) else localAlbums
