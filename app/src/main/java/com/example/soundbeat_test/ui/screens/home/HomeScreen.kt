@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,18 +52,20 @@ fun HomeScreen(
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+//        verticalArrangement = Arrangement.spacedBy(2.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val url =
             "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeHlsYW5haXFhcGpidjd0emd5ZHZsbDJ0MDlvM3NlMGh6aWI3bTJkZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/0xl8wFcBg6OPU6UzCh/giphy.gif"
 
         Card(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .background(MaterialTheme.colorScheme.primary),
+            modifier = Modifier.fillMaxWidth(0.9f),
             shape = RoundedCornerShape(10.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            )
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -105,15 +106,14 @@ fun HomeScreen(
 
         Column(
             modifier = Modifier
-                .background(Color.Red)
                 .fillMaxWidth()
                 .padding(vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
 
             Column(
                 modifier = Modifier
-                    .background(Color.Cyan)
+                    .background(MaterialTheme.colorScheme.surface)
                     .padding(10.dp)
             ) {
                 ListSongs(
@@ -126,7 +126,7 @@ fun HomeScreen(
 
             Column(
                 modifier = Modifier
-                    .background(Color.Cyan)
+                    .background(MaterialTheme.colorScheme.surface)
                     .padding(10.dp)
             ) {
                 ListSongs(
