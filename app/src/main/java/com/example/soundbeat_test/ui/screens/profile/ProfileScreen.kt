@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.navigation.ROUTES
-import com.example.soundbeat_test.ui.components.FavoritePlaylist
 import com.example.soundbeat_test.ui.components.UserImage
 
 /**
@@ -85,7 +84,6 @@ fun ProfileScreen(
                     .padding(vertical = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                FavoriteSongsSection()
                 StatsSection()
             }
         }
@@ -117,15 +115,6 @@ private fun StatsSection() {
 private fun SectionTitle(title: String) {
     Text(title)
     Spacer(modifier = Modifier.padding(vertical = 5.dp))
-}
-
-@Composable
-private fun FavoriteSongsSection() {
-    SectionTitle("Your special playlist")
-    FavoritePlaylist() {
-        Log.d("ProfileScreen", "user wanna see his favorite songs")
-    }
-    Spacer(modifier = Modifier.padding(vertical = 10.dp))
 }
 
 
