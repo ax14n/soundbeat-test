@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,7 +51,7 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFE3E3E3))
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -64,18 +65,17 @@ fun ProfileScreen(
 
             userInfo != null -> {
                 val name = userInfo?.get("username")?.toString() ?: "[Sin nombre]"
-                Text(name)
+                Text(name, color = MaterialTheme.colorScheme.onBackground)
             }
         }
         Spacer(modifier = Modifier.padding(vertical = 10.dp))
 
         OutlinedCard(
-            modifier = Modifier
-                .background(Color(0xFFE8E8E8))
-                .fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 10.dp
+            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
             )
         ) {
             Column(
