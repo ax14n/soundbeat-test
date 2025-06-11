@@ -102,10 +102,12 @@ fun PlaylistScreen(
             verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             Card(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(10.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(5.dp),
@@ -122,26 +124,50 @@ fun PlaylistScreen(
                 }
             }
 
-            Text("Your remote playlists!")
-            showRemoteUserPlaylists(
-                email,
-                remotePlaylistError,
-                remotePlaylists,
-                sharedPlaylistViewModel,
-                navHostController
-            )
+            Column(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(10.dp)
+            ) {
+                Text("Your remote playlists!")
+                showRemoteUserPlaylists(
+                    email,
+                    remotePlaylistError,
+                    remotePlaylists,
+                    sharedPlaylistViewModel,
+                    navHostController
+                )
+            }
 
-            Text("Your local playlists!")
-            showLocalUserPlaylists(
-                localPlaylists, sharedPlaylistViewModel, navHostController
-            )
+            Column(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface)
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Text("Your local playlists!")
+                showLocalUserPlaylists(
+                    localPlaylists, sharedPlaylistViewModel, navHostController
+                )
+            }
 
-            Text("Based in what you heard!")
-            ComingSoonMessage()
+            Column(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(10.dp)
+            ) {
+                Text("Based in what you heard!")
+                ComingSoonMessage()
+            }
 
-            Text("Here are some auto-generated rock playlist created using your local songs!")
-            ComingSoonMessage()
-
+            Column(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(10.dp)
+            ) {
+                Text("Here are some auto-generated rock playlist created using your local songs!")
+                ComingSoonMessage()
+            }
         }
     }
 
