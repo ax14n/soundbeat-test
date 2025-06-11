@@ -2,6 +2,7 @@ package com.example.soundbeat_test.ui.screens.playlists
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -115,11 +116,11 @@ fun PlaylistScreen(
                     modifier = Modifier.padding(5.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    TopLargeBottomRowGifLayout(
-                        bigImageOnClick = {
+                    TopLargeBottomRowGifLayout(bigImageOnClick = {
+
+                        if (email != "OFFLINE") {
                             Log.d(
-                                "PlaylistScreen",
-                                "Favoritos: ${favoritePlaylist != null}"
+                                "PlaylistScreen", "Favorites: ${favoritePlaylist != null}"
                             )
                             sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
                             sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.REMOTES)
@@ -132,13 +133,22 @@ fun PlaylistScreen(
                             )
                             navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
                             Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
-                        },
-                        leftImageOnClick = {
-                            navHostController?.navigate("PLAYLIST_CREATOR/${CreationMode.OFFLINE_PLAYLIST.name}")
-                        },
-                        rightImageOnClick = {
+                        } else {
+                            Toast.makeText(
+                                context, "You're in OFFLINE MODE", Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }, leftImageOnClick = {
+                        navHostController?.navigate("PLAYLIST_CREATOR/${CreationMode.OFFLINE_PLAYLIST.name}")
+                    }, rightImageOnClick = {
+                        if (email != "OFFLINE") {
                             navHostController?.navigate("PLAYLIST_CREATOR/${CreationMode.ONLINE_PLAYLIST.name}")
-                        })
+                        } else {
+                            Toast.makeText(
+                                context, "You're in OFFLINE MODE", Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    })
                 }
             }
 

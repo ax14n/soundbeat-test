@@ -1,5 +1,7 @@
 package com.example.soundbeat_test.ui.audio
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -27,11 +29,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
@@ -49,6 +53,9 @@ import com.example.soundbeat_test.ui.components.PlayerControls
 fun MusicPlayerDropdownMenu(
     audioPlayerViewModel: AudioPlayerViewModel, content: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("UserInfo", Context.MODE_PRIVATE) }
+    val email = remember { mutableStateOf(prefs.getString("email", "OFFLINE")) }
 
     val isPlaying by audioPlayerViewModel.isPlaying.collectAsState()
     val currentMediaItem by audioPlayerViewModel.currentMediaItem.collectAsState()
@@ -56,6 +63,7 @@ fun MusicPlayerDropdownMenu(
     val playlistLastIndex by audioPlayerViewModel.lastIndex.collectAsState()
     val nextMediaItem by audioPlayerViewModel.nextMediaItem.collectAsState()
     val isMarkedAsFavorite by audioPlayerViewModel.isMarkedAsFavorite.collectAsState()
+    val isLocal by audioPlayerViewModel.isLocal.collectAsState()
 
     val songName = currentMediaItem?.mediaMetadata?.title ?: "No title"
     val nextName = nextMediaItem?.mediaMetadata?.title ?: "No title"
@@ -110,7 +118,23 @@ fun MusicPlayerDropdownMenu(
                 horizontalArrangement = Arrangement.spacedBy(30.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { audioPlayerViewModel.alternateFavoriteSong() }) {
+                IconButton(onClick = {
+                    email.value = prefs.getString("email", "OFFLINE")
+
+                    if (email.value == "OFFLINE") {
+                        Toast.makeText(
+                            context, "You're in OFFLINE MODE", Toast.LENGTH_SHORT
+                        ).show()
+                    } else if (isLocal) {
+                        Toast.makeText(
+                            context, "Local songs can't be added to favorites.", Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        audioPlayerViewModel.alternateFavoriteSong()
+                    }
+
+
+                }) {
                     val icon: ImageVector =
                         if (isMarkedAsFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder
                     Icon(icon, contentDescription = "Añadir a Favoritos")
