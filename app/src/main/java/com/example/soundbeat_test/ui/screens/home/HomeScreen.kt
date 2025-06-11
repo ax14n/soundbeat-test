@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.data.Playlist
-import com.example.soundbeat_test.local.listLocalAlbums
+import com.example.soundbeat_test.local.LocalConfig
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.network.getServerSongs
 import com.example.soundbeat_test.ui.components.AlbumHorizontalList
@@ -85,7 +85,7 @@ fun ListSongs(
 
     LaunchedEffect(Unit) {
         songsList = if (isLocal) {
-            listLocalAlbums()
+            LocalConfig.listLocalAlbums()
         } else {
             val result = getServerSongs(genre ?: "null")
             if (result.isSuccess) {
@@ -107,7 +107,7 @@ fun ListSongs(
             is Album -> {
                 val playlist = Playlist(
                     id = item.id,
-                    name = item.name,
+                    name = item.title,
                     songs = setOf(item.copy())
                 )
                 sharedPlaylistViewModel?.setMode(SelectionMode.SONG)

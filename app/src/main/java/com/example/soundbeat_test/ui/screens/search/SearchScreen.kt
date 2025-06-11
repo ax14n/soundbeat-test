@@ -156,7 +156,7 @@ fun SearchScreen(
                     albumList = list
                 ) { album ->
                     val playlist = Playlist(
-                        id = 1, name = album.name, songs = setOf(album)
+                        id = 1, name = album.title, songs = setOf(album)
                     )
                     sharedPlaylistViewModel?.updatePlaylist(playlist)
 

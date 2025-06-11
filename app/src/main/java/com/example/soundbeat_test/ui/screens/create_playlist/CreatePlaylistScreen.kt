@@ -171,7 +171,7 @@ fun SongsListBox(
                 items(albums.toList()) { album ->
                     AlbumCard(album) {
                         val url: String = playerViewModel?.createSongUrl(album) ?: ""
-                        playerViewModel?.loadAndPlayHLS(url, album.name, album.author)
+                        playerViewModel?.loadAndPlayHLS(album)
                     }
                 }
             }

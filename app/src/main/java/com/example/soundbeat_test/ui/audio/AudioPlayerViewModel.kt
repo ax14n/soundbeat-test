@@ -1,9 +1,10 @@
 package com.example.soundbeat_test.ui.audio
 
-import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Context.MODE_PRIVATE
 import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -11,9 +12,13 @@ import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.example.soundbeat_test.data.Album
-import com.example.soundbeat_test.network.URL_BASE
+import com.example.soundbeat_test.network.ServerConfig
+import com.example.soundbeat_test.network.addSongToFavorites
+import com.example.soundbeat_test.network.isFavorite
+import com.example.soundbeat_test.network.removeSongFromFavorites
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.net.URLEncoder
 
 /**
@@ -27,18 +32,10 @@ class AudioPlayerViewModel(
 ) : AndroidViewModel(application) {
 
     /**
-     * ExoPlayer requiere un `Context` para su inicialización. En lugar de usar el
-     * `ViewModel` estándar, que no proporciona acceso al `Context`, se utiliza
-     * `AndroidViewModel(application)`. Esto permite acceder al `Context` a través
-     * del método `getApplication()`, necesario para construir y configurar el ExoPlayer.
-     */
-    @SuppressLint("StaticFieldLeak")
-    private val context = getApplication<Application>().applicationContext
-
-    /**
      * ExoPlayer utilizado para la reproducción de audio.
      */
-    private val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build()
+    private val exoPlayer: ExoPlayer =
+        ExoPlayer.Builder(getApplication<Application>().applicationContext).build()
 
     /**
      * Estado que indica si el audio está siendo reproducido.
@@ -62,8 +59,23 @@ class AudioPlayerViewModel(
     val lastIndex: StateFlow<Int> = _lastIndex
 
     private val _reproducerIsShowing = MutableStateFlow<Boolean>(false)
-
     val reproducerIsShowing: StateFlow<Boolean> = _reproducerIsShowing
+
+    /**
+     * Almacena si la canción que actualmente está sonando se encuentra en favoritos.
+     */
+    private val _isMarkedAsFavorite = MutableStateFlow<Boolean>(false)
+
+    /**
+     * Muestra si la canción que se encuentra actualmente sonando está en favoritos.
+     */
+    val isMarkedAsFavorite: StateFlow<Boolean> = _isMarkedAsFavorite
+
+    /**
+     * Lista de albumes temporales. Las canciones que son cargadas son almacenadas aquí para
+     * facilitar la obtención de datos para agregaras a favoritos o a alguna playlist del usuario.
+     */
+    private val _temporalAlbumList = MutableStateFlow<Set<Album>>(emptySet())
 
     fun showPlayerVisibility() {
         _reproducerIsShowing.value = true
@@ -82,13 +94,28 @@ class AudioPlayerViewModel(
             _isPlaying.value = isPlaying
         }
 
+        @OptIn(UnstableApi::class)
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             _currentMediaItem.value = mediaItem
             _currentIndex.value = exoPlayer.currentMediaItemIndex
+            Log.d("AudioPlayerViewModele", "Current index: ${_currentIndex.value}")
+
+            viewModelScope.launch {
+                val prefs =
+                    getApplication<Application>().getSharedPreferences("UserInfo", MODE_PRIVATE)
+                val email = prefs.getString("email", "ERROR")
+                val result = isFavorite(
+                    email = email!!,
+                    album = _temporalAlbumList.value.toList()[_currentIndex.value]
+                )
+                _isMarkedAsFavorite.value = (result == "true")
+            }
 
             val nextIndex = exoPlayer.currentMediaItemIndex + 1
+            Log.d("AudioPlayerViewModele", "Next index: $nextIndex")
             val nextItem = exoPlayer.getMediaItemAt(nextIndex)
             _nextMediaItem.value = nextItem
+
         }
 
     }
@@ -109,10 +136,12 @@ class AudioPlayerViewModel(
      * @param artist (Opcional) Nombre del autor o artista.
      */
     @OptIn(UnstableApi::class)
-    fun loadAndPlayHLS(url: String, title: String, artist: String? = null) {
-        Log.d("AudioPlayerViewModel", "url: $url")
-        val mediaItem = MediaItem.Builder().setUri(url).setMediaMetadata(
-            MediaMetadata.Builder().setTitle(title).setArtist(artist ?: "Autor desconocido").build()
+    fun loadAndPlayHLS(album: Album) {
+        _temporalAlbumList.value = setOf<Album>(album)
+        Log.d("AudioPlayerViewModel", "url: $album.url")
+        val mediaItem = MediaItem.Builder().setUri(album.url).setMediaMetadata(
+            MediaMetadata.Builder().setTitle(album.title)
+                .setArtist(album.title ?: "Autor desconocido").build()
         ).build()
 
         exoPlayer.setMediaItem(mediaItem)
@@ -135,8 +164,8 @@ class AudioPlayerViewModel(
     @OptIn(UnstableApi::class)
     fun createSongUrl(album: Album): String {
         val result = if (!album.isLocal) {
-            val encodedName = URLEncoder.encode(album.name.trim() + ".m3u8", "UTF-8")
-            val url = "$URL_BASE/media/$encodedName"
+            val encodedName = URLEncoder.encode(album.title.trim() + ".m3u8", "UTF-8")
+            val url = "${ServerConfig.getBaseUrl()}/media/$encodedName"
             return url
         } else {
             album.url
@@ -160,13 +189,14 @@ class AudioPlayerViewModel(
      */
     @OptIn(UnstableApi::class)
     fun loadPlaylist(albums: List<Album>) {
+        _temporalAlbumList.value = albums.toSet()
         val mediaItems = albums.map { album ->
             val uri = createSongUrl(album)
-            Log.d("AudioPlayerViewModel", "${album.name} : $uri")
+            Log.d("AudioPlayerViewModel", "${album.title} : $uri")
 
             MediaItem.Builder().setUri(uri).setMediaMetadata(
-                MediaMetadata.Builder().setTitle(album.name).setArtist(
-                    album.author ?: "Autor desconocido"
+                MediaMetadata.Builder().setTitle(album.title).setArtist(
+                    album.author
                 ).build()
             ).build()
         }
@@ -219,8 +249,32 @@ class AudioPlayerViewModel(
      * como favorita, lo cual puede implicar persistencia en base de datos local
      * o sincronización con un servidor.
      */
-    fun addToFavorites() {
-        // TODO("Not implemented yet.")
+    private fun addToFavorites() {
+        viewModelScope.launch {
+            val prefs = getApplication<Application>().getSharedPreferences("UserInfo", MODE_PRIVATE)
+            val email = prefs.getString("email", "ERROR")
+            if (email != "OFFLINE" && email != "ERROR") {
+                val album = _temporalAlbumList.value.toList()[_currentIndex.value]
+                addSongToFavorites(
+                    email = email!!, album = album
+                )
+                _isMarkedAsFavorite.value = true
+            }
+        }
+    }
+
+    private fun removeFromFavorites() {
+        viewModelScope.launch {
+            val prefs = getApplication<Application>().getSharedPreferences("UserInfo", MODE_PRIVATE)
+            val email = prefs.getString("email", "ERROR")
+            if (email != "OFFLINE" && email != "ERROR") {
+                val album = _temporalAlbumList.value.toList()[_currentIndex.value]
+                removeSongFromFavorites(
+                    email = email!!, album = album
+                )
+                _isMarkedAsFavorite.value = false
+            }
+        }
     }
 
     /**
@@ -232,6 +286,12 @@ class AudioPlayerViewModel(
      */
     fun saveTrack() {
         // TODO("Not implemented yet.")
+    }
+
+    @OptIn(UnstableApi::class)
+    fun alternateFavoriteSong() {
+        _isMarkedAsFavorite.value = !_isMarkedAsFavorite.value
+        if (_isMarkedAsFavorite.value) addToFavorites() else removeFromFavorites()
     }
 
 

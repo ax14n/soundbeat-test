@@ -118,7 +118,7 @@ class PlaylistScreenViewModel(
             ).getSongsForPlaylist(playlistId).map { song ->
                 Album(
                     id = song.songId,
-                    name = song.title,
+                    title = song.title,
                     author = song.artist,
                     url = song.url,
                     duration = song.duration.toDouble(),
