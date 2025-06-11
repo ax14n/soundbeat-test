@@ -50,8 +50,8 @@ private suspend fun makeApiRequest(
         connection.disconnect()
         return@withContext response.trim()
     } catch (e: Exception) {
-        Log.e("API_REQUEST", "Error en la petición: ${e.message}", e)
-        throw e
+        Log.e("API_REQUEST", "${e.message}")
+        ""
     }
 }
 
