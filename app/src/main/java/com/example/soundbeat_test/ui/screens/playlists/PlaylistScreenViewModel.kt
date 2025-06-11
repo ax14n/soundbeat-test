@@ -3,12 +3,16 @@ package com.example.soundbeat_test.ui.screens.playlists
 import android.app.Application
 import android.content.Context
 import android.widget.Toast
+import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.util.Log
+import androidx.media3.common.util.UnstableApi
 import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.local.room.DatabaseProvider.getPlaylistDao
 import com.example.soundbeat_test.local.room.DatabaseProvider.getPlaylistSongDao
+import com.example.soundbeat_test.network.getFavoriteSongs
 import com.example.soundbeat_test.network.getPlaylistSongs
 import com.example.soundbeat_test.network.getUserPlaylists
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +42,9 @@ class PlaylistScreenViewModel(
 
     private val _remotePlaylistError = MutableStateFlow<String?>(null)
     val remotePlaylistError: StateFlow<String?> = _remotePlaylistError
+
+    private val _favoritePlaylist = MutableStateFlow<Playlist?>(null)
+    val favoritePlaylist: StateFlow<Playlist?> = _favoritePlaylist
 
     private val email = getSavedEmail()
 
@@ -126,6 +133,24 @@ class PlaylistScreenViewModel(
                 )
             }
             _songs.value = songs
+        }
+    }
+
+    @OptIn(UnstableApi::class)
+    fun obtainFavoriteSongs() {
+        viewModelScope.launch {
+            val email = getSavedEmail()
+            val result = getFavoriteSongs(email.orEmpty())
+
+            if (result.isSuccess) {
+                Log.d("PlaylistScreenViewModel", "HOLA")
+                _favoritePlaylist.value = result.getOrNull()
+            } else {
+                _remotePlaylistError.value =
+                    result.exceptionOrNull()?.message ?: "Error desconocido"
+                Toast.makeText(getApplication(), _remotePlaylistError.value, Toast.LENGTH_SHORT)
+                    .show()
+            }
         }
     }
 

@@ -71,6 +71,7 @@ fun PlaylistScreen(
 
                 if (updatedEmail != "OFFLINE") {
                     playlistScreenViewModel.obtainRemoteUserPlaylists()
+                    playlistScreenViewModel.obtainFavoriteSongs()
                 }
                 playlistScreenViewModel.obtainLocalUserPlaylists()
             }
@@ -88,6 +89,7 @@ fun PlaylistScreen(
 
     val localPlaylists = playlistScreenViewModel.localUserPlaylist.collectAsState().value
 
+    val favoritePlaylist = playlistScreenViewModel.favoritePlaylist.collectAsState().value
 
     val scrollState = rememberScrollState()
 
@@ -114,7 +116,23 @@ fun PlaylistScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     TopLargeBottomRowGifLayout(
-                        bigImageOnClick = {  /* TODO("Not yet implemented") */ },
+                        bigImageOnClick = {
+                            Log.d(
+                                "PlaylistScreen",
+                                "Favoritos: ${favoritePlaylist != null}"
+                            )
+                            sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
+                            sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.REMOTES)
+
+
+                            sharedPlaylistViewModel.updatePlaylist(favoritePlaylist!!)
+                            Log.d(
+                                "PlaylistScreen",
+                                "${sharedPlaylistViewModel.selectedPlaylist.value}"
+                            )
+                            navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
+                            Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
+                        },
                         leftImageOnClick = {
                             navHostController?.navigate("PLAYLIST_CREATOR/${CreationMode.OFFLINE_PLAYLIST.name}")
                         },

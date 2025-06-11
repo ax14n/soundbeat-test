@@ -36,6 +36,8 @@ private suspend fun makeApiRequest(
         }
 
         val responseCode = connection.responseCode
+        Log.d("API_REQUEST", "Código de estado: $responseCode")
+
         val response = if (responseCode == HttpURLConnection.HTTP_OK) {
             connection.inputStream.bufferedReader().readText()
         } else {
@@ -43,10 +45,13 @@ private suspend fun makeApiRequest(
                 ?: "Error desconocido: $responseCode"
         }
 
+        Log.d("API_REQUEST", "Respuesta del servidor: $response")
+
         connection.disconnect()
         return@withContext response.trim()
     } catch (e: Exception) {
-        "Error de conexión: ${e.localizedMessage}"
+        Log.e("API_REQUEST", "Error en la petición: ${e.message}", e)
+        throw e
     }
 }
 
@@ -134,11 +139,13 @@ suspend fun isFavorite(email: String, album: Album): String {
             )
         }&songId=${album.id}"
         Log.d(
-            "API", "trying receive if song with id ${album.id} in $email favorite songs. URL: $url"
+            "API",
+            "trying receive if song with id ${album.id} in $email favorite songs. URL: $url"
         )
         val result = makeApiRequest(url)
         Log.d(
-            "API", "${album.id} in $email favorite songs? ${if (result == "true") "YES" else "NO"} "
+            "API",
+            "${album.id} in $email favorite songs? ${if (result == "true") "YES" else "NO"} "
         )
         return result
     }
@@ -217,8 +224,7 @@ suspend fun getUserInfo(email: String): Result<Map<String, Any>> {
 suspend fun getUserPlaylists(email: String): Result<List<Playlist>> {
     val url = "${ServerConfig.getBaseUrl()}/api/userPlaylists?email=${
         URLEncoder.encode(
-            email.trim(),
-            "UTF-8"
+            email.trim(), "UTF-8"
         )
     }"
     val response = makeApiRequest(url)
@@ -289,6 +295,67 @@ suspend fun getPlaylistSongs(playlistId: Int): Result<List<Album>> {
 /**
  * Obtiene la lista de canciones disponibles desde el servidor, filtradas por género si se proporciona.
  */
+suspend fun getFavoriteSongs(email: String): Result<Playlist> {
+    val url = "${ServerConfig.getBaseUrl()}/api/favorites/getFavorites?email=${
+        URLEncoder.encode(
+            email.trim(), "UTF-8"
+        )
+    }"
+    val response = makeApiRequest(url)
+
+    return try {
+        val jsonResponse = JSONArray(response)
+
+        val songList = List(jsonResponse.length()) { index ->
+            val id = jsonResponse.getJSONObject(index).getInt("songId")
+            val title = jsonResponse.getJSONObject(index).getString("title")
+            val artist = jsonResponse.getJSONObject(index).getString("artist")
+            val duration = jsonResponse.getJSONObject(index).getDouble("duration")
+            val url = jsonResponse.getJSONObject(index).getString("url")
+            val rawGenres = jsonResponse.getJSONObject(index).optJSONArray("genres")
+            val genres = mutableListOf<String>()
+
+            if (rawGenres != null && rawGenres.length() > 0) {
+                for (i in 0 until rawGenres.length()) {
+                    genres.add(rawGenres.getString(i))
+                }
+            } else {
+                genres.add("OTHER")
+            }
+
+            Album(
+                id = id,
+                title = title,
+                author = artist,
+                duration = duration,
+                url = url,
+                genre = genres
+            )
+        }
+
+        val playlist = Playlist(
+            id = -1, name = "Favorites", songs = songList.toSet()
+        )
+
+        Result.success(playlist)
+    } catch (jsonException: JSONException) {
+        Log.e(
+            "API",
+            "error while parsing playlist songs json: ${jsonException.message}",
+            jsonException
+        )
+        Result.failure(jsonException)
+    } catch (exception: Exception) {
+        Log.e(
+            "API", "error while fetching playlist songs: ${exception.message}", exception
+        )
+        Result.failure(exception)
+    }
+}
+
+/**
+ * Obtiene la lista de canciones disponibles desde el servidor, filtradas por género si se proporciona.
+ */
 suspend fun getServerSongs(genre: String = "null"): Result<List<Album>> {
     val url = "${ServerConfig.getBaseUrl()}/api/songs?genre=${
         URLEncoder.encode(
@@ -353,7 +420,11 @@ suspend fun getServerSongs(genre: String = "null"): Result<List<Album>> {
  * @param songs: Colección de canciones que se agregarán a la playlist.
  * @param name: Nombre de la playlist a crear o modificar.
  */
-suspend fun createPlaylist(playlistName: String, userEmail: String, songsId: List<Int>): String {
+suspend fun createPlaylist(
+    playlistName: String,
+    userEmail: String,
+    songsId: List<Int>
+): String {
     val url = "${ServerConfig.getBaseUrl()}/api/playlists/createPlaylist"
 
     val jsonBody = JSONObject().apply {
