@@ -127,6 +127,7 @@ fun PlaylistScreen(
             Column(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surface)
+                    .fillMaxWidth()
                     .padding(10.dp)
             ) {
                 Text("Your remote playlists!")
@@ -154,6 +155,7 @@ fun PlaylistScreen(
             Column(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surface)
+                    .fillMaxWidth()
                     .padding(10.dp)
             ) {
                 Text("Based in what you heard!")
@@ -163,6 +165,7 @@ fun PlaylistScreen(
             Column(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surface)
+                    .fillMaxWidth()
                     .padding(10.dp)
             ) {
                 Text("Here are some auto-generated rock playlist created using your local songs!")

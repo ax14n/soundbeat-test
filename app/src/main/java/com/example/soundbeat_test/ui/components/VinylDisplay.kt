@@ -136,7 +136,7 @@ fun PlayerControls(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.secondaryContainer)
             .padding(8.dp), verticalAlignment = Alignment.CenterVertically
     ) {
         AlbumCover()
