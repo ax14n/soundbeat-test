@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.navigation.ROUTES
-import com.example.soundbeat_test.ui.components.FavoritePlaylist
 import com.example.soundbeat_test.ui.components.UserImage
 
 /**
@@ -51,7 +51,7 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFE3E3E3))
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -65,18 +65,17 @@ fun ProfileScreen(
 
             userInfo != null -> {
                 val name = userInfo?.get("username")?.toString() ?: "[Sin nombre]"
-                Text(name)
+                Text(name, color = MaterialTheme.colorScheme.onBackground)
             }
         }
         Spacer(modifier = Modifier.padding(vertical = 10.dp))
 
         OutlinedCard(
-            modifier = Modifier
-                .background(Color(0xFFE8E8E8))
-                .fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 10.dp
+            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
             )
         ) {
             Column(
@@ -85,7 +84,6 @@ fun ProfileScreen(
                     .padding(vertical = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                FavoriteSongsSection()
                 StatsSection()
             }
         }
@@ -117,15 +115,6 @@ private fun StatsSection() {
 private fun SectionTitle(title: String) {
     Text(title)
     Spacer(modifier = Modifier.padding(vertical = 5.dp))
-}
-
-@Composable
-private fun FavoriteSongsSection() {
-    SectionTitle("Your special playlist")
-    FavoritePlaylist() {
-        Log.d("ProfileScreen", "user wanna see his favorite songs")
-    }
-    Spacer(modifier = Modifier.padding(vertical = 10.dp))
 }
 
 

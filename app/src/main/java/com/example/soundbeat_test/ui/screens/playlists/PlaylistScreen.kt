@@ -2,6 +2,7 @@ package com.example.soundbeat_test.ui.screens.playlists
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,12 +13,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -48,6 +51,7 @@ fun PlaylistScreen(
     playlistScreenViewModel: PlaylistScreenViewModel,
     sharedPlaylistViewModel: SharedPlaylistViewModel
 ) {
+
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -87,23 +91,44 @@ fun PlaylistScreen(
 
     val scrollState = rememberScrollState()
 
+    Column(
+        modifier = Modifier.padding(7.dp), verticalArrangement = Arrangement.spacedBy(15.dp)
+    ) {
+
         Column(
             modifier = Modifier
                 .verticalScroll(scrollState)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
-            TopLargeBottomRowGifLayout(
-                bigImageOnClick = {  /* TODO("Not yet implemented") */ },
-                leftImageOnClick = {
-                    navHostController?.navigate("PLAYLIST_CREATOR/${CreationMode.OFFLINE_PLAYLIST.name}")
-                },
-                rightImageOnClick = {
-                    navHostController?.navigate("PLAYLIST_CREATOR/${CreationMode.ONLINE_PLAYLIST.name}")
-                })
+            Card(
+                shape = RoundedCornerShape(10.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(5.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    TopLargeBottomRowGifLayout(
+                        bigImageOnClick = {  /* TODO("Not yet implemented") */ },
+                        leftImageOnClick = {
+                            navHostController?.navigate("PLAYLIST_CREATOR/${CreationMode.OFFLINE_PLAYLIST.name}")
+                        },
+                        rightImageOnClick = {
+                            navHostController?.navigate("PLAYLIST_CREATOR/${CreationMode.ONLINE_PLAYLIST.name}")
+                        })
+                }
+            }
+
             Column(
-                modifier = Modifier.padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(15.dp)
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface)
+                    .fillMaxWidth()
+                    .padding(10.dp)
             ) {
                 Text("Your remote playlists!")
                 showRemoteUserPlaylists(
@@ -113,21 +138,41 @@ fun PlaylistScreen(
                     sharedPlaylistViewModel,
                     navHostController
                 )
+            }
 
+            Column(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface)
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
                 Text("Your local playlists!")
                 showLocalUserPlaylists(
                     localPlaylists, sharedPlaylistViewModel, navHostController
                 )
+            }
 
+            Column(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface)
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
                 Text("Based in what you heard!")
                 ComingSoonMessage()
+            }
 
+            Column(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface)
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
                 Text("Here are some auto-generated rock playlist created using your local songs!")
                 ComingSoonMessage()
-
             }
         }
-
+    }
 
 
 }

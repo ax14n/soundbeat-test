@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -84,9 +85,8 @@ fun AlbumCard(album: Album = Album.AlbumExample, onClickedAlbumCover: () -> Unit
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFF0F0F0), shape = RoundedCornerShape(8.dp))
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(8.dp), verticalAlignment = Alignment.CenterVertically
     ) {
         AlbumCover() {
             onClickedAlbumCover()
@@ -136,9 +136,8 @@ fun PlayerControls(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFF0F0F0), shape = RoundedCornerShape(8.dp))
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .padding(8.dp), verticalAlignment = Alignment.CenterVertically
     ) {
         AlbumCover()
         Spacer(modifier = Modifier.width(12.dp))
@@ -169,8 +168,7 @@ fun PlayerControls(
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 maxLines = 1,
-                modifier = Modifier
-                    .basicMarquee()
+                modifier = Modifier.basicMarquee()
             )
         }
     }

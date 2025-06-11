@@ -17,6 +17,8 @@ import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -90,7 +92,7 @@ fun SelectedPlaylistScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFE3E3E3))
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -169,18 +171,26 @@ fun SelectedPlaylistScreen(
                 )
             }
 
-            VinylList(
-                albumList = reproduce
-            ) { album ->
-                album.url = audioPlayerViewModel.createSongUrl(album).toString()
-                audioPlayerViewModel.loadAndPlayHLS(
-                    album
-                )
-                Log.d("SelectedPlaylistScreen", "Started playing ${album.title} by ${album.author}")
+            OutlinedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+            ) {
+                VinylList(
+                    albumList = reproduce
+                ) { album ->
+                    album.url = audioPlayerViewModel.createSongUrl(album).toString()
+                    audioPlayerViewModel.loadAndPlayHLS(
+                        album
+                    )
+                    Log.d(
+                        "SelectedPlaylistScreen",
+                        "Started playing ${album.title} by ${album.author}"
+                    )
+                }
+
             }
-
         }
-
     }
 }
 

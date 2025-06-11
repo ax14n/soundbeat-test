@@ -105,7 +105,7 @@ fun MusicPlayerDropdownMenu(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF026374))
+                    .background(MaterialTheme.colorScheme.primary)
                     .padding(horizontal = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(30.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically

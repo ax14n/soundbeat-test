@@ -9,14 +9,19 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import coil.compose.SubcomposeAsyncImage
 import coil.decode.GifDecoder
@@ -24,9 +29,9 @@ import coil.request.ImageRequest
 import java.io.File
 
 private val urlsList: List<String> = listOf(
-    "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExdm9xZXBtZWtmY2VqczB1eXFlOWdsMWVtcGd6NWRhdm5laDkydDVrNSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/0PhpEWpqHZzm5tTcLM/giphy.gif",
-    "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExNms3bHUyejNkeXMxOG8xcjFrbDhtZDFzdG5oemx6cjQ2ODdhZ2hueCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/jObP9cWJTF0Pb7UjuA/giphy.gif",
-    "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaHAzbmFneWk2d2ZxZ3Y2bjUyczhkbGNjcXppdWQxdDBiN2k0ZXB3MiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3ohryiYkE0DVwdLAys/giphy.gif"
+    "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExMzBkcnRlcDZ6dmd0Mmo3NWUxYWxvZW14N2kyc3psenhhc2FrbHdzNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/g1nJGgc9wgWw1prhuX/giphy.gif",
+    "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExd3Ywc2I0cWR1emdtZjJvY2RpMXo0bnJyZXBqYzZsemQwZTQxbnpyOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/byP3o3dVJD03GiR0S2/giphy.gif",
+    "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHpyd29iMHVweWRlNGZ0NTMxYWZkeHhjcmM4OHUwYmZpYXRuODNveSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/jN9S0faVsUUfdaY50J/giphy.gif"
 )
 
 @Preview(showSystemUi = true)
@@ -89,20 +94,35 @@ fun TopLargeBottomRowGifLayout(
     }, rightImageOnClick: () -> Unit = { println("Se ha presionado la imagen de la derecha") }
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text("Create or inspect your playlists!")
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
                 .padding(10.dp)
         ) {
-            ImageGif(
-                imageSource = urls[0], modifier = Modifier.fillMaxWidth()
+            Box(
+                modifier = Modifier.weight(1f) // Ocupa la mitad del ancho disponible
             ) {
-                bigImageOnClick()
+                ImageGif(
+                    imageSource = urls[0],
+                    modifier = Modifier
+                        .fillMaxHeight() // Se ajusta a la altura del Row
+                ) {
+                    bigImageOnClick()
+                }
+                Text(
+                    "Favorite songs!",
+                    fontSize = 50.sp,
+                    modifier = Modifier.offset(x = 68.dp, y = 30.dp),
+                    color = Color.White
+                )
             }
         }
+        Text("Select a mode for create a playlist!")
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -110,22 +130,41 @@ fun TopLargeBottomRowGifLayout(
                 .padding(10.dp),
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            ImageGif(
-                imageSource = urls[1],
-                modifier = Modifier
-                    .weight(1f) // Ocupa la mitad del ancho disponible
-                    .fillMaxHeight() // Se ajusta a la altura del Row
-            ) {
-                leftImageOnClick()
-            }
 
-            ImageGif(
-                imageSource = urls[2],
-                modifier = Modifier
-                    .weight(1f) // También ocupa la mitad del ancho disponible
-                    .fillMaxHeight() // Se ajusta a la altura del Row
+            Box(
+                modifier = Modifier.weight(1f) // Ocupa la mitad del ancho disponible
+
             ) {
-                rightImageOnClick()
+                ImageGif(
+                    imageSource = urls[1],
+                    modifier = Modifier
+                        .fillMaxHeight() // Se ajusta a la altura del Row
+                ) {
+                    leftImageOnClick()
+                }
+                Text(
+                    "Local mode",
+                    fontSize = 40.sp,
+                    modifier = Modifier.offset(x = 14.dp, y = 40.dp),
+                    color = Color.White
+                )
+            }
+            Box(
+                modifier = Modifier.weight(1f) // Ocupa la mitad del ancho disponible
+            ) {
+                ImageGif(
+                    imageSource = urls[2],
+                    modifier = Modifier
+                        .fillMaxHeight() // Se ajusta a la altura del Row
+                ) {
+                    rightImageOnClick()
+                }
+                Text(
+                    "Remote mode",
+                    fontSize = 40.sp,
+                    modifier = Modifier.offset(x = 45.dp, y = 30.dp),
+                    color = Color.White
+                )
             }
         }
     }
