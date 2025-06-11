@@ -77,6 +77,9 @@ class AudioPlayerViewModel(
      */
     private val _temporalAlbumList = MutableStateFlow<Set<Album>>(emptySet())
 
+    private val _isLocal = MutableStateFlow<Boolean>(false)
+    val isLocal: StateFlow<Boolean> = _isLocal
+
     fun showPlayerVisibility() {
         _reproducerIsShowing.value = true
     }
@@ -138,6 +141,7 @@ class AudioPlayerViewModel(
     @OptIn(UnstableApi::class)
     fun loadAndPlayHLS(album: Album) {
         _temporalAlbumList.value = setOf<Album>(album)
+        _isLocal.value = album.isLocal
         Log.d("AudioPlayerViewModel", "url: $album.url")
         val mediaItem = MediaItem.Builder().setUri(album.url).setMediaMetadata(
             MediaMetadata.Builder().setTitle(album.title)
@@ -190,6 +194,8 @@ class AudioPlayerViewModel(
     @OptIn(UnstableApi::class)
     fun loadPlaylist(albums: List<Album>) {
         _temporalAlbumList.value = albums.toSet()
+        _isLocal.value = albums[0].isLocal
+
         val mediaItems = albums.map { album ->
             val uri = createSongUrl(album)
             Log.d("AudioPlayerViewModel", "${album.title} : $uri")

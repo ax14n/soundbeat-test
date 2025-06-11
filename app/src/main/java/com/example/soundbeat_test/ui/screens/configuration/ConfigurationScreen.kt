@@ -1,10 +1,12 @@
 package com.example.soundbeat_test.ui.screens.configuration
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -49,10 +51,13 @@ fun ConfigurationScreen(
     navHostController: NavHostController? = null,
     configurationViewModel: ConfigurationViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("UserInfo", Context.MODE_PRIVATE) }
+    val email = remember { mutableStateOf(prefs.getString("email", "OFFLINE")) }
+
     val activeDialog = remember { mutableStateOf<String?>(null) }
     val temporalBuffer = remember { mutableStateOf("") }
 
-    val context = LocalContext.current
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
             uri?.let {
@@ -67,6 +72,8 @@ fun ConfigurationScreen(
         }
 
     dialogHandler(
+        context = context,
+        prefs = prefs,
         activeDialog = activeDialog,
         temporalBuffer = temporalBuffer,
         configurationViewModel = configurationViewModel,
@@ -152,40 +159,74 @@ fun ConfigurationScreen(
 
 @Composable
 private fun dialogHandler(
+    context: Context,
+    prefs: SharedPreferences,
     activeDialog: MutableState<String?>,
     temporalBuffer: MutableState<String>,
     configurationViewModel: ConfigurationViewModel,
     navHostController: NavHostController?
 ) {
     when (activeDialog.value) {
-        "username" -> TextInputDialog(
-            title = "Change your account username!",
-            initialText = temporalBuffer.value,
-            onDismissRequest = { activeDialog.value = null },
-            onConfirm = { input ->
-                temporalBuffer.value = input
-                configurationViewModel.changeUsername(input)
-                activeDialog.value = null
-            })
+        "username" -> {
+            val email = prefs.getString("email", "OFFLINE")
 
-        "email" -> TextInputDialog(
-            title = "Change your account email!",
-            initialText = temporalBuffer.value,
-            onDismissRequest = { activeDialog.value = null },
-            onConfirm = { input ->
-                temporalBuffer.value = input
-                configurationViewModel.changeEmail(input)
-                activeDialog.value = null
-            })
+            if (email == "OFFLINE") {
+                Toast.makeText(
+                    context, "You're in OFFLINE MODE", Toast.LENGTH_SHORT
+                ).show()
+            } else {
 
-        "password" -> TextInputDialog(
-            title = "Change your account password!",
-            initialText = "",
-            onDismissRequest = { activeDialog.value = null },
-            onConfirm = { input ->
-                configurationViewModel.changePassword(input)
-                activeDialog.value = null
-            })
+                TextInputDialog(
+                    title = "Change your account username!",
+                    initialText = temporalBuffer.value,
+                    onDismissRequest = { activeDialog.value = null },
+                    onConfirm = { input ->
+                        temporalBuffer.value = input
+                        configurationViewModel.changeUsername(input)
+                        activeDialog.value = null
+                    })
+            }
+        }
+
+        "email" -> {
+
+            val email = prefs.getString("email", "OFFLINE")
+
+            if (email == "OFFLINE") {
+                Toast.makeText(
+                    context, "You're in OFFLINE MODE", Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                TextInputDialog(
+                    title = "Change your account email!",
+                    initialText = temporalBuffer.value,
+                    onDismissRequest = { activeDialog.value = null },
+                    onConfirm = { input ->
+                        temporalBuffer.value = input
+                        configurationViewModel.changeEmail(input)
+                        activeDialog.value = null
+                    })
+            }
+        }
+
+        "password" -> {
+            val email = prefs.getString("email", "OFFLINE")
+
+            if (email == "OFFLINE") {
+                Toast.makeText(
+                    context, "You're in OFFLINE MODE", Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                TextInputDialog(
+                    title = "Change your account password!",
+                    initialText = "",
+                    onDismissRequest = { activeDialog.value = null },
+                    onConfirm = { input ->
+                        configurationViewModel.changePassword(input)
+                        activeDialog.value = null
+                    })
+            }
+        }
 
         "logout" -> SimpleAlertDialog(
             dialogTitle = "Log out of your account?",

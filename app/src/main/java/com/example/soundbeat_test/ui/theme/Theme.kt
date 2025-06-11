@@ -25,7 +25,7 @@ private val DarkColorScheme = darkColorScheme(
     background = Color(0xFF121212),        // Fondo negro industrial
     onBackground = Color(0xFFE0E0E0),      // Texto claro sobre fondo negro
 
-    surface = Color(0xFF1E1E1E),
+    surface = Color(0xFF2A2929),
     onSurface = Color(0xFFEFEFEF),
 
     primaryContainer = Color(0xFFFFBB88),

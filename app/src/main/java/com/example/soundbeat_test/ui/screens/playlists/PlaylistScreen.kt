@@ -120,7 +120,7 @@ fun PlaylistScreen(
 
                         if (email != "OFFLINE") {
                             Log.d(
-                                "PlaylistScreen", "Favoritos: ${favoritePlaylist != null}"
+                                "PlaylistScreen", "Favorites: ${favoritePlaylist != null}"
                             )
                             sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
                             sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.REMOTES)
@@ -135,7 +135,7 @@ fun PlaylistScreen(
                             Log.d("PlaylistScreen", "Navigating to: SELECTED PLAYLIST")
                         } else {
                             Toast.makeText(
-                                context, "You're in offline mode", Toast.LENGTH_SHORT
+                                context, "You're in OFFLINE MODE", Toast.LENGTH_SHORT
                             ).show()
                         }
                     }, leftImageOnClick = {
@@ -145,7 +145,7 @@ fun PlaylistScreen(
                             navHostController?.navigate("PLAYLIST_CREATOR/${CreationMode.ONLINE_PLAYLIST.name}")
                         } else {
                             Toast.makeText(
-                                context, "You're in offline mode", Toast.LENGTH_SHORT
+                                context, "You're in OFFLINE MODE", Toast.LENGTH_SHORT
                             ).show()
                         }
                     })
