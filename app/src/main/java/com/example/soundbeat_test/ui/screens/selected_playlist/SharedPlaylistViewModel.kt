@@ -30,7 +30,7 @@ enum class SelectionMode {
  * Indica la procedencia de las canciones.
  */
 enum class SongSource {
-    LOCALS, REMOTES
+    LOCALS, REMOTES, FAVORITES
 }
 
 /**

@@ -84,6 +84,10 @@ fun SelectedPlaylistScreen(
                     playlistScreenViewModel.obtainRemotePlaylistSongs(playlist?.id ?: -1)
                 }
             }
+
+            SongSource.FAVORITES -> {
+                Log.d("SelectedPlaylistScreen", "Playlist ID: ${playlist?.id}")
+            }
         }
     }
 
@@ -93,8 +97,7 @@ fun SelectedPlaylistScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
             Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
@@ -114,6 +117,10 @@ fun SelectedPlaylistScreen(
 
                                 SongSource.REMOTES -> {
                                     sharedPlaylistViewModel.deleteRemotePlaylist(playlist)
+                                }
+
+                                SongSource.FAVORITES -> {
+                                    "No puedes eliminar las canciones favoritas."
                                 }
                             }
                             navHostController?.navigate(ROUTES.HOME) {
