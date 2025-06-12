@@ -88,14 +88,20 @@ fun AlbumHorizontalList(
  */
 @Preview
 @Composable
-fun AlbumCard(album: Album = Album.AlbumExample, onClickedAlbumCover: () -> Unit = {}) {
+fun AlbumCard(
+    album: Album = Album.AlbumExample,
+    modifier: Modifier = Modifier,
+    onClickedAlbumCover: () -> Unit = {}
+) {
     var isMarqueeOn by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
+            .then(modifier)
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
-            .padding(8.dp), verticalAlignment = Alignment.CenterVertically
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         AlbumCover() {
             onClickedAlbumCover()

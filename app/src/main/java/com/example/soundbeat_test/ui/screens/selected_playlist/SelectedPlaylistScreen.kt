@@ -272,7 +272,11 @@ fun SelectedPlaylistScreen(
                 }
             }
             VinylList(
-                albumList = reproduce
+                albumList = reproduce,
+                removeButton = isEditionMode,
+                onDeleteSong = {
+
+                },
             ) { album ->
                 val modifiedAlbum = Album(
                     id = album.id,

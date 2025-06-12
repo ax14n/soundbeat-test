@@ -3,12 +3,14 @@ package com.example.soundbeat_test.ui.screens.search
 import android.content.Context
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,7 +18,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MusicOff
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -287,15 +291,38 @@ fun DropdownFiltersMenu(
  */
 @Composable
 fun VinylList(
-    albumList: List<Album>, onClickedAlbumCover: (Album) -> Unit
+    albumList: List<Album>,
+    removeButton: Boolean = false,
+    onDeleteSong: (Album) -> Unit = {},
+    onClickedAlbumCover: (Album) -> Unit,
 ) {
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(10.dp)
     ) {
         items(albumList) { song ->
-            AlbumCard(song) {
-                onClickedAlbumCover(song)
+            Row {
+                AlbumCard(song, modifier = Modifier.weight(1f)) {
+                    onClickedAlbumCover(song)
+                }
+                if (removeButton) {
+                    IconButton(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .weight(0.1f)
+                            .align(Alignment.CenterVertically)
+                            .border(
+                                width = 0.5.dp, color = Color.Red, shape = RoundedCornerShape(8.dp)
+                            ), onClick = {
+                            onDeleteSong(song)
+                        }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Eliminar canción",
+                            tint = Color.Red // O el color que prefieras
+                        )
+                    }
+                }
             }
         }
     }
