@@ -134,6 +134,7 @@ fun CreatePlaylistScreen(
     }
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 fun SongsListBox(
     albums: List<Album>,
@@ -156,7 +157,8 @@ fun SongsListBox(
             )
             Button(
                 onClick = {
-                    navController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${playlistOrigin}/${false}") {
+                    Log.d("CreatePlaylistScreen", "$playlistOrigin")
+                    navController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/$playlistOrigin/${false}") {
                         launchSingleTop = true
                     }
                 },

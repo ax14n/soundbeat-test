@@ -45,6 +45,7 @@ import com.example.soundbeat_test.ui.screens.search.SearchInteractionMode
 import com.example.soundbeat_test.ui.screens.search.SearchScreen
 import com.example.soundbeat_test.ui.screens.selected_playlist.SelectedPlaylistScreen
 import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
+import com.example.soundbeat_test.ui.screens.selected_playlist.SongSource
 import com.example.soundbeat_test.ui.theme.SoundBeat_TestTheme
 
 /**
@@ -159,7 +160,7 @@ fun AppNavigation(
         }
         composable("SEARCH/{mode}/{procedence}/{edit}") { backStackEntry ->
             val modeArg = backStackEntry.arguments?.getString("mode")
-            val originArg = backStackEntry.arguments?.getString("precedence")
+            val originArg = backStackEntry.arguments?.getString("procedence")
             val editArg = backStackEntry.arguments?.getString("edit")
 
             val onClickInteraction = try {
@@ -198,6 +199,9 @@ fun AppNavigation(
             } catch (_: IllegalArgumentException) {
                 PlaylistOrigin.OFFLINE_PLAYLIST
             }
+            Log.d("MainActivity", "${playlistOrigin.name}")
+
+            sharedPlaylistViewModel?.setSongsSource(songsSource = SongSource.REMOTES)
             CreatePlaylistScreen(
                 navController = navController,
                 playerViewModel = audioPlayerViewModel!!,

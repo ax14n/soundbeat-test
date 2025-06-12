@@ -249,7 +249,13 @@ fun SelectedPlaylistScreen(
                         shape = RectangleShape,
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                        onClick = {},
+                        onClick = {
+                            if (songsSource == SongSource.LOCALS) {
+                                
+                            } else if (songsSource == SongSource.REMOTES) {
+
+                            }
+                        },
                     ) {
                         Text("Apply Changes")
                     }
