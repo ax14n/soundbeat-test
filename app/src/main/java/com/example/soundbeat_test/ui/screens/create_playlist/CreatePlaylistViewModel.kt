@@ -149,24 +149,24 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
                     playlistId = 0
                 )
 
-                Log.d("PlaylistCreation", "Insertando playlist: $playlist")
+                Log.d("PlaylistCreation", "adding playlist: $playlist")
                 val playlistId = localPlaylistDb.insert(playlist)?.toInt()
 
-                Log.d("PlaylistCreation", "ID de playlist creada: $playlistId")
+                Log.d("PlaylistCreation", "created playlist id: $playlistId")
 
-                Log.d("PlaylistCreation", "Canciones iterar: ${_songs.value.size}")
+                Log.d("PlaylistCreation", "songs list size to iterate: ${_songs.value.size}")
                 for (album in _songs.value) {
-                    Log.d("PlaylistCreation", "Insertando canción: $album")
+                    Log.d("PlaylistCreation", "adding song: $album")
                     val existing = localSongDb.getSongByTitleAndArtist(album.title, album.author)
 
                     val songId = existing?.songId ?: localSongDb.insert(album.toSong()).toInt()
 
-                    Log.d("PlaylistCreation", "ID de canción insertada: $songId")
+                    Log.d("PlaylistCreation", "inserted song id: $songId")
 
                     val playlistSong = PlaylistSong(
                         playlist_id = playlistId!!, song_id = songId
                     )
-                    Log.d("PlaylistCreation", "Insertando relación Playlist-Song: $playlistSong")
+                    Log.d("PlaylistCreation", "inserting Playlist-Song relation: $playlistSong")
 
                     localPlaylistSongDb?.insert(playlistSong)
                 }

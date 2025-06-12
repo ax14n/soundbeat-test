@@ -7,9 +7,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import com.example.soundbeat_test.data.Album
+import com.example.soundbeat_test.data.Album.Companion.toSong
 import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.data.Playlist.Companion.toEntity
 import com.example.soundbeat_test.local.room.DatabaseProvider
+import com.example.soundbeat_test.local.room.DatabaseProvider.getPlaylistSongDao
+import com.example.soundbeat_test.local.room.DatabaseProvider.getSongDao
+import com.example.soundbeat_test.local.room.entities.PlaylistSong
 import com.example.soundbeat_test.local.room.repositories.PlaylistRepository
 import com.example.soundbeat_test.network.addSongsToRemotePlaylist
 import com.example.soundbeat_test.network.deletePlaylist
@@ -213,7 +217,7 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
     }
 
     /**
-     * Agrega una o varias canciones a una playlist.
+     * Agrega una o varias canciones a una playlist remota.
      * @param playlistId: Identificador de la playlist.
      * @param songIds: Colección que contiene los identificadores de las canciones a agregar.
      */
@@ -224,6 +228,36 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
             addSongsToRemotePlaylist(
                 playlistId = playlistId!!, albums = stagedSongs.toList()
             )
+        }
+        _stagedSongs.value = emptySet<Album>()
+    }
+
+    private val localPlaylistSongDb = getPlaylistSongDao(application.applicationContext)
+    private val localSongDb = getSongDao(application.applicationContext)
+
+    /**
+     * Agrega una o varias canciones a una playlist.
+     * @param playlistId: Identificador de la playlist.
+     * @param songIds: Colección que contiene los identificadores de las canciones a agregar.
+     */
+    fun addSongsToExistentLocalPlaylist() {
+        viewModelScope.launch {
+            val playlistId = _selectedPlaylist.value?.id
+            val stagedSongs = _stagedSongs.value
+            for (album in stagedSongs) {
+                val existence = localSongDb.getSongByTitleAndArtist(album!!.title, album.author)
+
+                val songId = existence?.songId ?: localSongDb.insert(album.toSong()).toInt()
+
+                Log.d("PlaylistCreation", "inserted song id: $songId")
+
+                val playlistSong = album?.let {
+                    PlaylistSong(
+                        playlist_id = playlistId!!, song_id = songId
+                    )
+                }
+                localPlaylistSongDb.insert(playlistSong!!)
+            }
         }
         _stagedSongs.value = emptySet<Album>()
     }

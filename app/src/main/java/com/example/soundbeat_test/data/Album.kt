@@ -19,7 +19,7 @@ import com.example.soundbeat_test.network.ServerConfig
  * @property isLocal Si la canción es local (true) o remota (false)
  */
 data class Album(
-    val id: Int = -1,
+    val id: Int = 0,
     val title: String = "Unknown",
     val author: String = "Unknown",
     var genre: List<String> = listOf<String>(),
@@ -72,7 +72,7 @@ data class Album(
          */
         fun Album.toSong(): Song {
             return Song(
-                songId = this.id,
+                songId = 0,
                 title = this.title,
                 artist = this.author,
                 duration = (this.duration * 60).toInt(),
