@@ -8,7 +8,7 @@
 
 Podemos definir SoundBeat como una aplicación de streaming de música desarrollada en Kotlin con Jetpack Compose para Android. El sistema incluye un servidor propio que transmite canciones en tiempo real mediante HLS (HTTP Live Streaming), y una app móvil que permite a los usuarios escuchar música sin interrupciones.
 
-También ofrece funciones como la creación de playlists personalizadas, combinando canciones locales y remotas. Es un proyecto completo que integra trabajo con redes, multimedia, bases de datos locales (SQLite) y una interfaz moderna y reactiva, aprovechando el stack actual de desarrollo en Android.
+También ofrece funciones como la creación de playlists personalizadas, combinando canciones locales y remotas. Es un proyecto completo que integra trabajo con redes, multimedia, bases de datos locales (Room) y una interfaz moderna y reactiva, aprovechando el stack actual de desarrollo en Android.
 
 ## Diagrama de pantallas de SoundBeat!
 
