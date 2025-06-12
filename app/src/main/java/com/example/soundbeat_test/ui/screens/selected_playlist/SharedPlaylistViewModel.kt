@@ -82,6 +82,7 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
      * cuando hay elementos que pueden ser playlists u otras entidades.
      */
     private val _isPlaylist = MutableStateFlow<SelectionMode>(SelectionMode.SONG)
+    val isPlaylist: StateFlow<SelectionMode> = _isPlaylist
 
     /**
      * Flujo público de solo lectura que expone si el elemento seleccionado es una playlist.

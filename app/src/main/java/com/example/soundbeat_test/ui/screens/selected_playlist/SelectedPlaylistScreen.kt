@@ -66,6 +66,7 @@ fun SelectedPlaylistScreen(
     val screenMode = sharedPlaylistViewModel.mode.collectAsState().value
     val songsSource = sharedPlaylistViewModel.songsSource.collectAsState().value
     val isEditionMode = sharedPlaylistViewModel.isEditionMode.collectAsState().value
+    val isPlaylist = sharedPlaylistViewModel.isPlaylist.collectAsState().value
 
     val songs = playlistScreenViewModel.songs.collectAsState().value
 
@@ -180,23 +181,24 @@ fun SelectedPlaylistScreen(
                 )
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Switch(
-                    checked = isEditionMode, onCheckedChange = {
-                        sharedPlaylistViewModel.onSwitchToggle()
-                    })
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = if (isEditionMode) "Activated" else "Deactivated",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Spacer(modifier = Modifier.width(20.dp))
-                Text(
-                    text = "Edit your playlists!",
-                    style = MaterialTheme.typography.bodyLarge
-                )
+            if (isPlaylist == SelectionMode.PLAYLIST) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Switch(
+                        checked = isEditionMode, onCheckedChange = {
+                            sharedPlaylistViewModel.onSwitchToggle()
+                        })
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = if (isEditionMode) "Activated" else "Deactivated",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Spacer(modifier = Modifier.width(20.dp))
+                    Text(
+                        text = "Edit your playlists!", style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
             OutlinedCard(
                 modifier = Modifier
