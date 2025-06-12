@@ -44,6 +44,10 @@ import com.example.soundbeat_test.ui.screens.create_playlist.PlaylistOrigin
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreenViewModel
 import com.example.soundbeat_test.ui.screens.search.SearchInteractionMode
 import com.example.soundbeat_test.ui.screens.search.VinylList
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Composable que representa la pantalla de una playlist seleccionada.
@@ -250,11 +254,16 @@ fun SelectedPlaylistScreen(
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                         onClick = {
-                            if (songsSource == SongSource.LOCALS) {
-
-                            } else if (songsSource == SongSource.REMOTES) {
-                                sharedPlaylistViewModel.addSongsToExistentRemotePlaylist()
+                            CoroutineScope(Dispatchers.Main).launch {
+                                if (songsSource == SongSource.LOCALS) {
+                                    sharedPlaylistViewModel.addSongsToExistentLocalPlaylist()
+                                } else if (songsSource == SongSource.REMOTES) {
+                                    sharedPlaylistViewModel.addSongsToExistentRemotePlaylist()
+                                }
+                                // La UI se actualizaba antes de la inserción, así que lo atrasé 50ms
+                                delay(50)
                                 sharedPlaylistViewModel.setEditableMode(false)
+
                             }
                         },
                     ) {
