@@ -59,6 +59,7 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
     /**
      * Agrega una canción a la lista de canciones.
      */
+    @OptIn(UnstableApi::class)
     fun addSong(album: Album) {
         Log.d("PlaylistCreation", "adding $album")
         _songs.value = _songs.value + album
@@ -67,6 +68,7 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
     /**
      * Remueve una canción almacenada y seleccionada dentro de la lista de canciones.
      */
+    @OptIn(UnstableApi::class)
     fun removeSong(album: Album) {
         Log.d("PlaylistCreation", "removing $album")
         _songs.value = _songs.value - album

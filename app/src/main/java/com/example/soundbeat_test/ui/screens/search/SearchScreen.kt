@@ -174,8 +174,6 @@ fun SearchScreen(
                         sharedPlaylistViewModel?.updatePlaylist(playlist)
                     } else {
                         sharedPlaylistViewModel?.addSongToSharedSongs(album)
-                        Log.d("PRUEBA", sharedPlaylist?.songs.toString())
-                        sharedPlaylistViewModel?.alternateRefresh()
                     }
 
                     when (searchInteractionMode) {

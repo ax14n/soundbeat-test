@@ -251,9 +251,10 @@ fun SelectedPlaylistScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                         onClick = {
                             if (songsSource == SongSource.LOCALS) {
-                                
-                            } else if (songsSource == SongSource.REMOTES) {
 
+                            } else if (songsSource == SongSource.REMOTES) {
+                                sharedPlaylistViewModel.addSongsToExistentRemotePlaylist()
+                                sharedPlaylistViewModel.setEditableMode(false)
                             }
                         },
                     ) {

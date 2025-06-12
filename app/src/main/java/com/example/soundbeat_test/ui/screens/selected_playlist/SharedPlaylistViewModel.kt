@@ -3,6 +3,7 @@ package com.example.soundbeat_test.ui.screens.selected_playlist
 import android.app.Application
 import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import com.example.soundbeat_test.data.Album
@@ -10,6 +11,7 @@ import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.data.Playlist.Companion.toEntity
 import com.example.soundbeat_test.local.room.DatabaseProvider
 import com.example.soundbeat_test.local.room.repositories.PlaylistRepository
+import com.example.soundbeat_test.network.addSongsToRemotePlaylist
 import com.example.soundbeat_test.network.deletePlaylist
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -100,13 +102,17 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
 
     val shouldRefresh: StateFlow<Boolean> = _shouldRefresh
 
-    fun setRefreshStatus(status: Boolean) {
-        _shouldRefresh.value = status
-    }
+    /**
+     * Las canciones agregadas para actualizar una playlist serán almacenadas aquí. Al confirmar
+     * los cambios se usará para agregarlas a la respectiva playlist.
+     */
+    private val _stagedSongs = MutableStateFlow<Set<Album?>>(emptySet())
 
-    fun alternateRefresh() {
-        _shouldRefresh.value = !_shouldRefresh.value
-    }
+    /**
+     * Flujo público de solo lectura que muestra las canciones en el area de stage. Serán agregadas
+     * a la playlist una vez confirmados los cambios.
+     */
+    val stagedSongs: StateFlow<Set<Album?>> = _stagedSongs
 
     /**
      * Actualiza la playlist seleccionada para compartirla entre pantallas.
@@ -137,9 +143,9 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
         if (currentPlaylist != null) {
             val updatedSongs = currentPlaylist.songs + album
             _selectedPlaylist.value = currentPlaylist.copy(songs = updatedSongs)
+            _stagedSongs.value = updatedSongs
             android.util.Log.d(
-                "SharedPlaylistViewModel",
-                "final list of songs: ${_selectedPlaylist.value}"
+                "SharedPlaylistViewModel", "final songs list: ${_selectedPlaylist.value}"
             )
         }
     }
@@ -150,9 +156,9 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
         if (currentPlaylist != null) {
             val updatedSongs = currentPlaylist.songs - album
             _selectedPlaylist.value = currentPlaylist.copy(songs = updatedSongs)
+            _stagedSongs.value = updatedSongs
             android.util.Log.d(
-                "SharedPlaylistViewModel",
-                "final list of songs: ${_selectedPlaylist.value}"
+                "SharedPlaylistViewModel", "final songs list: ${_selectedPlaylist.value}"
             )
         }
     }
@@ -204,6 +210,22 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
             val repository = PlaylistRepository(dao)
             repository.delete(playlist.toEntity())
         }
+    }
+
+    /**
+     * Agrega una o varias canciones a una playlist.
+     * @param playlistId: Identificador de la playlist.
+     * @param songIds: Colección que contiene los identificadores de las canciones a agregar.
+     */
+    fun addSongsToExistentRemotePlaylist() {
+        val playlistId = _selectedPlaylist.value?.id
+        val stagedSongs = _stagedSongs.value
+        viewModelScope.launch {
+            addSongsToRemotePlaylist(
+                playlistId = playlistId!!, albums = stagedSongs.toList()
+            )
+        }
+        _stagedSongs.value = emptySet<Album>()
     }
 
     /**
