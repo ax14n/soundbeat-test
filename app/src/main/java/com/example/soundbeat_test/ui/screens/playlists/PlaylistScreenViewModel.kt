@@ -74,12 +74,12 @@ class PlaylistScreenViewModel(
                     val playlists = result.getOrNull()
                     _remoteUserPlaylists.value = playlists ?: emptyList()
                 } else {
-                    val error = result.exceptionOrNull()?.message ?: "Error desconocido"
+                    val error = result.exceptionOrNull()?.message ?: "Unknown error"
                     _remotePlaylistError.value = error
                 }
             }
         } else {
-            _remotePlaylistError.value = "No se encontró el email del usuario."
+            _remotePlaylistError.value = "User email not founded."
             Toast.makeText(context, "${remotePlaylistError.value}", Toast.LENGTH_SHORT).show()
         }
     }
@@ -112,7 +112,7 @@ class PlaylistScreenViewModel(
                 _songs.value = result.getOrDefault(emptyList())
             } else {
                 _remotePlaylistError.value =
-                    result.exceptionOrNull()?.message ?: "Error desconocido"
+                    result.exceptionOrNull()?.message ?: "Unknown error"
                 Toast.makeText(context, "$remotePlaylistError", Toast.LENGTH_SHORT).show()
             }
         }
@@ -132,7 +132,9 @@ class PlaylistScreenViewModel(
                     isLocal = true
                 )
             }
-            _songs.value = songs
+            songs.forEach {
+                addSongToInternalSongs(it)
+            }
         }
     }
 
@@ -143,15 +145,32 @@ class PlaylistScreenViewModel(
             val result = getFavoriteSongs(email.orEmpty())
 
             if (result.isSuccess) {
-                Log.d("PlaylistScreenViewModel", "HOLA")
                 _favoritePlaylist.value = result.getOrNull()
             } else {
                 _remotePlaylistError.value =
-                    result.exceptionOrNull()?.message ?: "Error desconocido"
+                    result.exceptionOrNull()?.message ?: "Unknown error"
                 Toast.makeText(getApplication(), _remotePlaylistError.value, Toast.LENGTH_SHORT)
                     .show()
             }
         }
+    }
+
+    fun addSongToInternalSongs(album: Album) {
+        val storedSongs = _songs.value
+        Log.d("PRUEBA", "original songs: ${_songs.value}")
+        if (storedSongs != null) {
+            val updatedSongs = storedSongs + album
+            _songs.value = updatedSongs
+            Log.d("PRUEBA", "updated final songs: ${_songs.value}")
+        }
+    }
+
+    fun removeSongFromInternalSongs(album: Album) {
+        _songs.value.minus<Album>(album)
+    }
+
+    fun cleanInternalSongs() {
+        _songs.value = emptyList<Album>()
     }
 
     /**

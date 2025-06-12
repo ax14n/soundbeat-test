@@ -43,10 +43,9 @@ fun CreatePlaylistScreen(
     createPlaylistViewModel: CreatePlaylistViewModel,
     playerViewModel: AudioPlayerViewModel,
     sharedPlaylistViewModel: SharedPlaylistViewModel,
-    creationMode: CreationMode
+    playlistOrigin: PlaylistOrigin
 ) {
-    val sharedPlaylist = sharedPlaylistViewModel.selectedPlaylist.collectAsState()
-    val receivedPlaylist = sharedPlaylist?.value
+    val receivedPlaylist = sharedPlaylistViewModel.selectedPlaylist.collectAsState().value
 
     LaunchedEffect(receivedPlaylist?.songs?.lastOrNull()) {
         if (receivedPlaylist?.songs?.isNotEmpty() == true) {
@@ -73,7 +72,7 @@ fun CreatePlaylistScreen(
                 .background(Color(0xFFFF5722)),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = "mode: $creationMode", color = Color.White, fontStyle = FontStyle.Italic)
+            Text(text = "mode: $playlistOrigin", color = Color.White, fontStyle = FontStyle.Italic)
         }
 
         Spacer(modifier = Modifier.height(2.dp))
@@ -99,7 +98,7 @@ fun CreatePlaylistScreen(
             }
             Button(
                 onClick = {
-                    createPlaylistViewModel.createPlaylist(creationMode)
+                    createPlaylistViewModel.createPlaylist(playlistOrigin)
                     navController.navigate(ROUTES.HOME) {
                         popUpTo(ROUTES.HOME) { inclusive = true }
                     }
@@ -127,18 +126,21 @@ fun CreatePlaylistScreen(
         Spacer(modifier = Modifier.height(2.dp))
 
         SongsListBox(
-            albums = songsSet?.toList() ?: emptyList(),
+            albums = songsSet.toList() ?: emptyList(),
             playerViewModel = playerViewModel,
             navController = navController,
-            creationMode = creationMode
+            playlistOrigin = playlistOrigin
         )
     }
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 fun SongsListBox(
-    albums: List<Album>, playerViewModel: AudioPlayerViewModel?, navController: NavHostController?,
-    creationMode: CreationMode
+    albums: List<Album>,
+    playerViewModel: AudioPlayerViewModel?,
+    navController: NavHostController?,
+    playlistOrigin: PlaylistOrigin
 ) {
     OutlinedCard(
         modifier = Modifier
@@ -155,7 +157,8 @@ fun SongsListBox(
             )
             Button(
                 onClick = {
-                    navController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${creationMode}") {
+                    Log.d("CreatePlaylistScreen", "$playlistOrigin")
+                    navController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/$playlistOrigin/${false}") {
                         launchSingleTop = true
                     }
                 },
@@ -170,7 +173,7 @@ fun SongsListBox(
             ) {
                 items(albums.toList()) { album ->
                     AlbumCard(album) {
-                        val url: String = playerViewModel?.createSongUrl(album) ?: ""
+//                        val url: String = playerViewModel?.createSongUrl(album) ?: ""
                         playerViewModel?.loadAndPlayHLS(album)
                     }
                 }

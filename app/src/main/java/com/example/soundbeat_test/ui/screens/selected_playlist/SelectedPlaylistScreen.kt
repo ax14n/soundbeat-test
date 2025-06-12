@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteForever
@@ -19,6 +20,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -33,10 +36,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.soundbeat_test.R
+import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.audio.AudioPlayerViewModel
 import com.example.soundbeat_test.ui.components.UserImage
+import com.example.soundbeat_test.ui.screens.create_playlist.PlaylistOrigin
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreenViewModel
+import com.example.soundbeat_test.ui.screens.search.SearchInteractionMode
 import com.example.soundbeat_test.ui.screens.search.VinylList
 
 /**
@@ -60,39 +66,57 @@ fun SelectedPlaylistScreen(
     audioPlayerViewModel: AudioPlayerViewModel,
     playlistScreenViewModel: PlaylistScreenViewModel
 ) {
-    val playlist = sharedPlaylistViewModel.selectedPlaylist.collectAsState().value
+    val sharedPlaylist = sharedPlaylistViewModel.selectedPlaylist.collectAsState().value
     val screenMode = sharedPlaylistViewModel.mode.collectAsState().value
-    val songSource = sharedPlaylistViewModel.songsSource.collectAsState().value
+    val songsSource = sharedPlaylistViewModel.songsSource.collectAsState().value
+    val isEditionMode = sharedPlaylistViewModel.isEditionMode.collectAsState().value
+    val isPlaylist = sharedPlaylistViewModel.isPlaylist.collectAsState().value
+    val shouldRefresh = sharedPlaylistViewModel.shouldRefresh.collectAsState().value
+
     val songs = playlistScreenViewModel.songs.collectAsState().value
 
-    val songsSource = sharedPlaylistViewModel.songsSource.collectAsState().value
-
-    LaunchedEffect(songSource, playlist?.id) {
-        when (songSource) {
-            SongSource.LOCALS -> {
-                playlist.let {
-                    Log.d("SelectedPlaylistScreen", "Playlist ID: ${playlist?.id}")
-                    Log.d("SelectedPlaylistScreen", "Playlist canciones:  ${playlist?.songs}")
-                    playlistScreenViewModel.obtainLocalPlaylistSongs(playlist?.id ?: -1)
+    LaunchedEffect(isEditionMode) {
+        Log.d("SelectedPlaylistScreen", "shared playlist: $sharedPlaylist")
+        Log.d("SelectedPlaylistScreen", "edit mode: $isEditionMode")
+        Log.d("SelectedPlaylistScreen", "songsSource: $songsSource")
+        if (!isEditionMode) {
+            playlistScreenViewModel.cleanInternalSongs()
+            when (songsSource) {
+                SongSource.LOCALS -> {
+                    Log.d("SelectedPlaylistScreen", "Playlist ID: ${sharedPlaylist?.id}")
+                    Log.d(
+                        "SelectedPlaylistScreen", "Playlist songs: ${sharedPlaylist?.songs}"
+                    )
+                    playlistScreenViewModel.obtainLocalPlaylistSongs(sharedPlaylist?.id ?: -1)
+                    Log.d("SelectedPlaylistScreen", "local songs size: ${songs.size}")
                 }
-            }
 
-            SongSource.REMOTES -> {
-                playlist.let {
-                    Log.d("SelectedPlaylistScreen", "Playlist ID: ${playlist?.id}")
-                    Log.d("SelectedPlaylistScreen", "playlist's songs:  ${playlist?.songs}")
-                    playlistScreenViewModel.obtainRemotePlaylistSongs(playlist?.id ?: -1)
+                SongSource.REMOTES -> {
+                    Log.d("SelectedPlaylistScreen", "Playlist ID: ${sharedPlaylist?.id}")
+                    Log.d(
+                        "SelectedPlaylistScreen", "playlist's songs:  ${sharedPlaylist?.songs}"
+                    )
+                    playlistScreenViewModel.obtainRemotePlaylistSongs(sharedPlaylist?.id ?: -1)
+                    Log.d("SelectedPlaylistScreen", "remote size: ${songs.size}")
                 }
-            }
 
-            SongSource.FAVORITES -> {
-                Log.d("SelectedPlaylistScreen", "Playlist ID: ${playlist?.id}")
+                SongSource.REMOTES_FAVORITES -> {
+                    Log.d("SelectedPlaylistScreen", "Playlist ID: ${sharedPlaylist?.id}")
+                    Log.d("SelectedPlaylistScreen", "favorites size: ${songs.size}")
+                }
             }
         }
     }
 
-    val reproduce = if (playlist?.songs?.toList()!!.isEmpty()) songs else playlist.songs.toList()
+    val lastSong = sharedPlaylist?.songs?.lastOrNull()
 
+    LaunchedEffect(lastSong) {
+        if (lastSong != null) {
+            Log.d("SelectedPlaylistScreen", "Añadiendo última canción: $lastSong")
+            playlistScreenViewModel.addSongToInternalSongs(lastSong)
+        }
+    }
+    val reproduce = songs
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -112,14 +136,14 @@ fun SelectedPlaylistScreen(
                         .clickable(onClick = {
                             when (songsSource) {
                                 SongSource.LOCALS -> {
-                                    sharedPlaylistViewModel.deleteLocalPlaylist(playlist)
+                                    sharedPlaylistViewModel.deleteLocalPlaylist(sharedPlaylist!!)
                                 }
 
                                 SongSource.REMOTES -> {
-                                    sharedPlaylistViewModel.deleteRemotePlaylist(playlist)
+                                    sharedPlaylistViewModel.deleteRemotePlaylist(sharedPlaylist!!)
                                 }
 
-                                SongSource.FAVORITES -> {
+                                SongSource.REMOTES_FAVORITES -> {
                                     "No puedes eliminar las canciones favoritas."
                                 }
                             }
@@ -134,6 +158,8 @@ fun SelectedPlaylistScreen(
                 contentDescription = "Go back",
                 modifier = Modifier
                     .clickable(onClick = {
+                        sharedPlaylistViewModel.setEditableMode(false)
+                        playlistScreenViewModel.cleanInternalSongs()
                         navHostController?.navigate(ROUTES.HOME) {
                             popUpTo(ROUTES.HOME) { inclusive = true }
                         }
@@ -146,57 +172,116 @@ fun SelectedPlaylistScreen(
 
         UserImage()
 
-        playlist.let {
+        Text(
+            text = sharedPlaylist?.name ?: "Unsigned",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 12.dp),
+            fontFamily = FontFamily.Monospace
+        )
+        Text(
+            text = "id = " + sharedPlaylist?.id.toString(),
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 12.dp),
+            fontFamily = FontFamily.Monospace
+        )
 
+        Spacer(Modifier.padding(top = 10.dp))
+
+        Button(
+            onClick = {
+                audioPlayerViewModel.loadPlaylist(reproduce)
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             Text(
-                text = playlist?.name ?: "Unsigned",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 12.dp),
-                fontFamily = FontFamily.Monospace
+                text = "REPRODUCE VINYLS", fontWeight = FontWeight.Bold
             )
-            Text(
-                text = "id = " + playlist?.id.toString(),
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 12.dp),
-                fontFamily = FontFamily.Monospace
-            )
+        }
 
-            Spacer(Modifier.padding(top = 10.dp))
-
-            Button(
-                onClick = {
-                    audioPlayerViewModel.loadPlaylist(reproduce)
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth(),
+        if (isPlaylist == SelectionMode.PLAYLIST) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Switch(
+                    checked = isEditionMode, onCheckedChange = {
+                        sharedPlaylistViewModel.onSwitchToggle()
+                    })
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "REPRODUCE VINYLS", fontWeight = FontWeight.Bold
+                    text = if (isEditionMode) "Activated" else "Deactivated",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.width(20.dp))
+                Text(
+                    text = "Edit your playlists!", style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp)
+        ) {
+            if (isEditionMode) {
+                val origin = when (songsSource) {
+                    SongSource.LOCALS -> PlaylistOrigin.OFFLINE_PLAYLIST
+                    SongSource.REMOTES -> PlaylistOrigin.ONLINE_PLAYLIST
+                    else -> {}
+                }
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        shape = RectangleShape,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                        onClick = {
+                            navHostController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${origin}/${true}") {
+                                launchSingleTop = true
+                            }
+                        },
+                    ) {
+                        Text("+")
+                    }
+                    Button(
+                        shape = RectangleShape,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                        onClick = {
+                            if (songsSource == SongSource.LOCALS) {
+
+                            } else if (songsSource == SongSource.REMOTES) {
+                                sharedPlaylistViewModel.addSongsToExistentRemotePlaylist()
+                                sharedPlaylistViewModel.setEditableMode(false)
+                            }
+                        },
+                    ) {
+                        Text("Apply Changes")
+                    }
+                }
+            }
+            VinylList(
+                albumList = reproduce
+            ) { album ->
+                val modifiedAlbum = Album(
+                    id = album.id,
+                    title = album.title,
+                    author = album.author,
+                    genre = album.genre,
+                    url = audioPlayerViewModel.createSongUrl(album).toString(),
+                    duration = album.duration,
+                    isLocal = album.isLocal
+                )
+                audioPlayerViewModel.loadAndPlayHLS(
+                    modifiedAlbum
+                )
+                Log.d(
+                    "SelectedPlaylistScreen", "Started playing ${album.title} by ${album.author}"
                 )
             }
 
-            OutlinedCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-            ) {
-                VinylList(
-                    albumList = reproduce
-                ) { album ->
-                    album.url = audioPlayerViewModel.createSongUrl(album).toString()
-                    audioPlayerViewModel.loadAndPlayHLS(
-                        album
-                    )
-                    Log.d(
-                        "SelectedPlaylistScreen",
-                        "Started playing ${album.title} by ${album.author}"
-                    )
-                }
-
-            }
         }
     }
 }

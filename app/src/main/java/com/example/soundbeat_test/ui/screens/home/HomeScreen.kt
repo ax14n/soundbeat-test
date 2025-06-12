@@ -47,6 +47,7 @@ import com.example.soundbeat_test.ui.components.AlbumHorizontalList
 import com.example.soundbeat_test.ui.components.ImageGif
 import com.example.soundbeat_test.ui.screens.selected_playlist.SelectionMode
 import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
+import com.example.soundbeat_test.ui.screens.selected_playlist.SongSource
 
 @Preview(showSystemUi = true)
 @Composable
@@ -208,7 +209,7 @@ fun ListSongs(
     AlbumHorizontalList(songsList) { item ->
         when (item) {
             is Playlist -> {
-                sharedPlaylistViewModel?.setMode(SelectionMode.PLAYLIST)
+                sharedPlaylistViewModel?.setSelectionMode(SelectionMode.PLAYLIST)
                 sharedPlaylistViewModel?.updatePlaylist(item)
                 navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
             }
@@ -217,7 +218,11 @@ fun ListSongs(
                 val playlist = Playlist(
                     id = item.id, name = item.title, songs = setOf(item.copy())
                 )
-                sharedPlaylistViewModel?.setMode(SelectionMode.SONG)
+
+                val songSource = if (item.isLocal) SongSource.LOCALS else SongSource.REMOTES
+
+                sharedPlaylistViewModel?.setSongsSource(songSource)
+                sharedPlaylistViewModel?.setSelectionMode(SelectionMode.SONG)
                 sharedPlaylistViewModel?.updatePlaylist(playlist)
                 navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
             }

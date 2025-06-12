@@ -41,7 +41,7 @@ import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumHorizontalList
 import com.example.soundbeat_test.ui.components.TopLargeBottomRowGifLayout
-import com.example.soundbeat_test.ui.screens.create_playlist.CreationMode
+import com.example.soundbeat_test.ui.screens.create_playlist.PlaylistOrigin
 import com.example.soundbeat_test.ui.screens.selected_playlist.SelectionMode
 import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
 import com.example.soundbeat_test.ui.screens.selected_playlist.SongSource
@@ -122,7 +122,7 @@ fun PlaylistScreen(
                             Log.d(
                                 "PlaylistScreen", "Favorites: ${favoritePlaylist != null}"
                             )
-                            sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
+                            sharedPlaylistViewModel.setSelectionMode(selectionMode = SelectionMode.PLAYLIST)
                             sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.REMOTES)
 
 
@@ -139,10 +139,10 @@ fun PlaylistScreen(
                             ).show()
                         }
                     }, leftImageOnClick = {
-                        navHostController?.navigate("PLAYLIST_CREATOR/${CreationMode.OFFLINE_PLAYLIST.name}")
+                        navHostController?.navigate("PLAYLIST_CREATOR/${PlaylistOrigin.OFFLINE_PLAYLIST.name}")
                     }, rightImageOnClick = {
                         if (email != "OFFLINE") {
-                            navHostController?.navigate("PLAYLIST_CREATOR/${CreationMode.ONLINE_PLAYLIST.name}")
+                            navHostController?.navigate("PLAYLIST_CREATOR/${PlaylistOrigin.ONLINE_PLAYLIST.name}")
                         } else {
                             Toast.makeText(
                                 context, "You're in OFFLINE MODE", Toast.LENGTH_SHORT
@@ -220,7 +220,7 @@ private fun showLocalUserPlaylists(
     } else {
         AlbumHorizontalList(list = localPlaylists) { item ->
             if (item is Playlist) {
-                sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
+                sharedPlaylistViewModel.setSelectionMode(selectionMode = SelectionMode.PLAYLIST)
                 sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.LOCALS)
                 Log.d("PlaylistScreen", "Playlist: ${item.id} - ${item.name}")
                 sharedPlaylistViewModel.updatePlaylist(item)
@@ -264,7 +264,7 @@ private fun showRemoteUserPlaylists(
             list = remotePlaylists
         ) { item ->
             if (item is Playlist) {
-                sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
+                sharedPlaylistViewModel.setSelectionMode(selectionMode = SelectionMode.PLAYLIST)
                 sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.REMOTES)
                 sharedPlaylistViewModel.updatePlaylist(item)
                 Log.d("PlaylistScreen", "Playlist: ${item.id} - ${item.name}")

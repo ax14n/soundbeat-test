@@ -36,7 +36,7 @@ import com.example.soundbeat_test.ui.screens.auth.RegisterScreen
 import com.example.soundbeat_test.ui.screens.configuration.ConfigurationScreen
 import com.example.soundbeat_test.ui.screens.create_playlist.CreatePlaylistScreen
 import com.example.soundbeat_test.ui.screens.create_playlist.CreatePlaylistViewModel
-import com.example.soundbeat_test.ui.screens.create_playlist.CreationMode
+import com.example.soundbeat_test.ui.screens.create_playlist.PlaylistOrigin
 import com.example.soundbeat_test.ui.screens.home.HomeScreen
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreen
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreenViewModel
@@ -45,6 +45,7 @@ import com.example.soundbeat_test.ui.screens.search.SearchInteractionMode
 import com.example.soundbeat_test.ui.screens.search.SearchScreen
 import com.example.soundbeat_test.ui.screens.selected_playlist.SelectedPlaylistScreen
 import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
+import com.example.soundbeat_test.ui.screens.selected_playlist.SongSource
 import com.example.soundbeat_test.ui.theme.SoundBeat_TestTheme
 
 /**
@@ -157,47 +158,56 @@ fun AppNavigation(
                 playlistScreenViewModel = playlistScreenViewModel!!
             )
         }
-        composable("SEARCH/{mode}/{origin}") { backStackEntry ->
+        composable("SEARCH/{mode}/{procedence}/{edit}") { backStackEntry ->
             val modeArg = backStackEntry.arguments?.getString("mode")
-            val originArg = backStackEntry.arguments?.getString("origin")
+            val originArg = backStackEntry.arguments?.getString("procedence")
+            val editArg = backStackEntry.arguments?.getString("edit")
 
-            val searchInteractionMode = try {
+            val onClickInteraction = try {
                 SearchInteractionMode.valueOf(
                     modeArg ?: SearchInteractionMode.REPRODUCE_ON_SELECT.name
                 )
             } catch (_: IllegalArgumentException) {
                 SearchInteractionMode.REPRODUCE_ON_SELECT
             }
+            Log.d("MainActivity", "${onClickInteraction.name}")
 
-            val searchOrigin = try {
-                CreationMode.valueOf(originArg ?: "null")
+            val procedence = try {
+                PlaylistOrigin.valueOf(originArg ?: "null")
             } catch (_: IllegalArgumentException) {
-                CreationMode.OFFLINE_PLAYLIST
+                PlaylistOrigin.OFFLINE_PLAYLIST
             }
-            Log.d("MainActivity", "${searchOrigin.name}")
+            Log.d("MainActivity", "${procedence.name}")
+
+            val edit = editArg?.toBooleanStrictOrNull() == true
+            Log.d("MainActivity", "$edit")
 
             SearchScreen(
                 navHostController = navController,
                 sharedPlaylistViewModel = sharedPlaylistViewModel!!,
-                searchInteractionMode = searchInteractionMode,
-                creationMode = searchOrigin
+                searchInteractionMode = onClickInteraction,
+                procedence = procedence,
+                editMode = edit
             )
         }
         composable("PLAYLIST_CREATOR/{mode}") { backStackEntry ->
             val modeArg = backStackEntry.arguments?.getString("mode")
-            val creationMode = try {
-                CreationMode.valueOf(
-                    modeArg ?: CreationMode.OFFLINE_PLAYLIST.name
+            val playlistOrigin = try {
+                PlaylistOrigin.valueOf(
+                    modeArg ?: PlaylistOrigin.OFFLINE_PLAYLIST.name
                 )
-            } catch (e: IllegalArgumentException) {
-                CreationMode.OFFLINE_PLAYLIST
+            } catch (_: IllegalArgumentException) {
+                PlaylistOrigin.OFFLINE_PLAYLIST
             }
+            Log.d("MainActivity", "${playlistOrigin.name}")
+
+            sharedPlaylistViewModel?.setSongsSource(songsSource = SongSource.REMOTES)
             CreatePlaylistScreen(
                 navController = navController,
                 playerViewModel = audioPlayerViewModel!!,
                 sharedPlaylistViewModel = sharedPlaylistViewModel!!,
                 createPlaylistViewModel = createPlaylistViewModel,
-                creationMode = creationMode
+                playlistOrigin = playlistOrigin
             )
         }
     }

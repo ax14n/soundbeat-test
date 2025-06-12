@@ -3,12 +3,15 @@ package com.example.soundbeat_test.ui.screens.selected_playlist
 import android.app.Application
 import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
+import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.data.Playlist.Companion.toEntity
 import com.example.soundbeat_test.local.room.DatabaseProvider
 import com.example.soundbeat_test.local.room.repositories.PlaylistRepository
+import com.example.soundbeat_test.network.addSongsToRemotePlaylist
 import com.example.soundbeat_test.network.deletePlaylist
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +33,7 @@ enum class SelectionMode {
  * Indica la procedencia de las canciones.
  */
 enum class SongSource {
-    LOCALS, REMOTES, FAVORITES
+    LOCALS, REMOTES, REMOTES_FAVORITES
 }
 
 /**
@@ -44,6 +47,9 @@ enum class SongSource {
  * de objetos complejos como `Playlist`.
  */
 class SharedPlaylistViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val _isEditionMode = MutableStateFlow<Boolean>(false)
+    val isEditionMode: StateFlow<Boolean> = _isEditionMode
 
     /**
      * Flujo interno que contiene la playlist actualmente seleccionada.
@@ -79,6 +85,7 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
      * cuando hay elementos que pueden ser playlists u otras entidades.
      */
     private val _isPlaylist = MutableStateFlow<SelectionMode>(SelectionMode.SONG)
+    val isPlaylist: StateFlow<SelectionMode> = _isPlaylist
 
     /**
      * Flujo público de solo lectura que expone si el elemento seleccionado es una playlist.
@@ -86,6 +93,26 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
      * Este valor puede usarse para condicionar comportamiento o interfaz según el tipo de selección.
      */
     val mode: StateFlow<SelectionMode> = _isPlaylist
+
+    /**
+     * Indica si actualizar las listas de canciones que se muestran por pantalla. Pensado como
+     * solución al problema de que al volver desde la pantalla de búsqueda, no se actualizaban.
+     */
+    private val _shouldRefresh = MutableStateFlow<Boolean>(false)
+
+    val shouldRefresh: StateFlow<Boolean> = _shouldRefresh
+
+    /**
+     * Las canciones agregadas para actualizar una playlist serán almacenadas aquí. Al confirmar
+     * los cambios se usará para agregarlas a la respectiva playlist.
+     */
+    private val _stagedSongs = MutableStateFlow<Set<Album?>>(emptySet())
+
+    /**
+     * Flujo público de solo lectura que muestra las canciones en el area de stage. Serán agregadas
+     * a la playlist una vez confirmados los cambios.
+     */
+    val stagedSongs: StateFlow<Set<Album?>> = _stagedSongs
 
     /**
      * Actualiza la playlist seleccionada para compartirla entre pantallas.
@@ -110,6 +137,32 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
         _selectedPlaylist.value = null
     }
 
+    fun addSongToSharedSongs(album: Album) {
+        android.util.Log.d("SharedPlaylistViewModel", "adding to the temporal list: $album")
+        val currentPlaylist = _selectedPlaylist.value
+        if (currentPlaylist != null) {
+            val updatedSongs = currentPlaylist.songs + album
+            _selectedPlaylist.value = currentPlaylist.copy(songs = updatedSongs)
+            _stagedSongs.value = updatedSongs
+            android.util.Log.d(
+                "SharedPlaylistViewModel", "final songs list: ${_selectedPlaylist.value}"
+            )
+        }
+    }
+
+    fun removeSongToSharedSongs(album: Album) {
+        android.util.Log.d("SharedPlaylistViewModel", "removing to the temporal list: $album")
+        val currentPlaylist = _selectedPlaylist.value
+        if (currentPlaylist != null) {
+            val updatedSongs = currentPlaylist.songs - album
+            _selectedPlaylist.value = currentPlaylist.copy(songs = updatedSongs)
+            _stagedSongs.value = updatedSongs
+            android.util.Log.d(
+                "SharedPlaylistViewModel", "final songs list: ${_selectedPlaylist.value}"
+            )
+        }
+    }
+
     /**
      * Establece el modo de selección actual.
      *
@@ -119,7 +172,7 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
      *
      * @param selectionMode El modo de selección deseado, ya sea [SelectionMode.SONG] o [SelectionMode.PLAYLIST].
      */
-    fun setMode(selectionMode: SelectionMode) {
+    fun setSelectionMode(selectionMode: SelectionMode) {
         _isPlaylist.value = selectionMode
     }
 
@@ -157,6 +210,33 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
             val repository = PlaylistRepository(dao)
             repository.delete(playlist.toEntity())
         }
+    }
+
+    /**
+     * Agrega una o varias canciones a una playlist.
+     * @param playlistId: Identificador de la playlist.
+     * @param songIds: Colección que contiene los identificadores de las canciones a agregar.
+     */
+    fun addSongsToExistentRemotePlaylist() {
+        val playlistId = _selectedPlaylist.value?.id
+        val stagedSongs = _stagedSongs.value
+        viewModelScope.launch {
+            addSongsToRemotePlaylist(
+                playlistId = playlistId!!, albums = stagedSongs.toList()
+            )
+        }
+        _stagedSongs.value = emptySet<Album>()
+    }
+
+    /**
+     * Si se interactua con el switch se cambiara al modo edición o se desactivará.
+     */
+    fun onSwitchToggle() {
+        _isEditionMode.value = !_isEditionMode.value
+    }
+
+    fun setEditableMode(status: Boolean) {
+        _isEditionMode.value = status
     }
 
 }

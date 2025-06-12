@@ -139,13 +139,11 @@ suspend fun isFavorite(email: String, album: Album): String {
             )
         }&songId=${album.id}"
         Log.d(
-            "API",
-            "trying receive if song with id ${album.id} in $email favorite songs. URL: $url"
+            "API", "trying receive if song with id ${album.id} in $email favorite songs. URL: $url"
         )
         val result = makeApiRequest(url)
         Log.d(
-            "API",
-            "${album.id} in $email favorite songs? ${if (result == "true") "YES" else "NO"} "
+            "API", "${album.id} in $email favorite songs? ${if (result == "true") "YES" else "NO"} "
         )
         return result
     }
@@ -421,9 +419,7 @@ suspend fun getServerSongs(genre: String = "null"): Result<List<Album>> {
  * @param name: Nombre de la playlist a crear o modificar.
  */
 suspend fun createPlaylist(
-    playlistName: String,
-    userEmail: String,
-    songsId: List<Int>
+    playlistName: String, userEmail: String, songsId: List<Int>
 ): String {
     val url = "${ServerConfig.getBaseUrl()}/api/playlists/createPlaylist"
 
@@ -455,14 +451,17 @@ suspend fun deletePlaylist(id: Int): String {
 /**
  * Agrega una o varias canciones a una playlist.
  * @param playlistId: Identificador de la playlist.
- * @param songIds: Colección que contiene los identificadores de las canciones a agregar.
+ * @param albums: Colección que contiene los identificadores de las canciones a agregar.
  */
-suspend fun addSongsToPlaylist(playlistId: Int, songIds: List<Int>): String {
+suspend fun addSongsToRemotePlaylist(playlistId: Int, albums: List<Album?>): String {
+    val songsId = albums.map { it?.id }
     val jsonBody = JSONObject().apply {
         put("playlist_id", playlistId)
-        put("song_ids", JSONArray(songIds))
+        put("song_ids", JSONArray(songsId))
     }
-
+    Log.d(
+        "API", "trying add songs to an existent playlist. new ids: $songsId"
+    )
     val url = "${ServerConfig.getBaseUrl()}/api/playlists/add-songs"
     return makeApiRequest(url, method = "POST", jsonBody = jsonBody)
 }
