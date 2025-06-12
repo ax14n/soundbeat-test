@@ -208,7 +208,7 @@ fun ListSongs(
     AlbumHorizontalList(songsList) { item ->
         when (item) {
             is Playlist -> {
-                sharedPlaylistViewModel?.setMode(SelectionMode.PLAYLIST)
+                sharedPlaylistViewModel?.setSelectionMode(SelectionMode.PLAYLIST)
                 sharedPlaylistViewModel?.updatePlaylist(item)
                 navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
             }
@@ -217,7 +217,7 @@ fun ListSongs(
                 val playlist = Playlist(
                     id = item.id, name = item.title, songs = setOf(item.copy())
                 )
-                sharedPlaylistViewModel?.setMode(SelectionMode.SONG)
+                sharedPlaylistViewModel?.setSelectionMode(SelectionMode.SONG)
                 sharedPlaylistViewModel?.updatePlaylist(playlist)
                 navHostController?.navigate(ROUTES.SELECTED_PLAYLIST)
             }

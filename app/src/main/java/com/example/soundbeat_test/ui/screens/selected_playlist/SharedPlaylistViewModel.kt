@@ -30,7 +30,7 @@ enum class SelectionMode {
  * Indica la procedencia de las canciones.
  */
 enum class SongSource {
-    LOCALS, REMOTES, FAVORITES
+    LOCALS, REMOTES, REMOTES_FAVORITES
 }
 
 /**
@@ -44,6 +44,9 @@ enum class SongSource {
  * de objetos complejos como `Playlist`.
  */
 class SharedPlaylistViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val _isEditionMode = MutableStateFlow<Boolean>(false)
+    val isEditionMode: StateFlow<Boolean> = _isEditionMode
 
     /**
      * Flujo interno que contiene la playlist actualmente seleccionada.
@@ -119,7 +122,7 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
      *
      * @param selectionMode El modo de selección deseado, ya sea [SelectionMode.SONG] o [SelectionMode.PLAYLIST].
      */
-    fun setMode(selectionMode: SelectionMode) {
+    fun setSelectionMode(selectionMode: SelectionMode) {
         _isPlaylist.value = selectionMode
     }
 
@@ -157,6 +160,13 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
             val repository = PlaylistRepository(dao)
             repository.delete(playlist.toEntity())
         }
+    }
+
+    /**
+     * Si se interactua con el switch se cambiara al modo edición o se desactivará.
+     */
+    fun onSwitchToggle() {
+        _isEditionMode.value = !_isEditionMode.value
     }
 
 }

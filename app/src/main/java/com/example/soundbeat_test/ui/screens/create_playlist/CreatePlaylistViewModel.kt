@@ -94,10 +94,12 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
         when (creationMode) {
             CreationMode.ONLINE_PLAYLIST -> {
                 createRemotePlaylist()
+                clearSongsList()
             }
 
             CreationMode.OFFLINE_PLAYLIST -> {
                 createLocalPlaylist()
+                clearSongsList()
             }
         }
     }

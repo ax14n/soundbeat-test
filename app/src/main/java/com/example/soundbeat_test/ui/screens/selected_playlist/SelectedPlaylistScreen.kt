@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteForever
@@ -19,6 +20,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,13 +64,13 @@ fun SelectedPlaylistScreen(
 ) {
     val playlist = sharedPlaylistViewModel.selectedPlaylist.collectAsState().value
     val screenMode = sharedPlaylistViewModel.mode.collectAsState().value
-    val songSource = sharedPlaylistViewModel.songsSource.collectAsState().value
+    val songsSource = sharedPlaylistViewModel.songsSource.collectAsState().value
+    val isEditionMode = sharedPlaylistViewModel.isEditionMode.collectAsState().value
+
     val songs = playlistScreenViewModel.songs.collectAsState().value
 
-    val songsSource = sharedPlaylistViewModel.songsSource.collectAsState().value
-
-    LaunchedEffect(songSource, playlist?.id) {
-        when (songSource) {
+    LaunchedEffect(songsSource, playlist?.id) {
+        when (songsSource) {
             SongSource.LOCALS -> {
                 playlist.let {
                     Log.d("SelectedPlaylistScreen", "Playlist ID: ${playlist?.id}")
@@ -85,7 +87,7 @@ fun SelectedPlaylistScreen(
                 }
             }
 
-            SongSource.FAVORITES -> {
+            SongSource.REMOTES_FAVORITES -> {
                 Log.d("SelectedPlaylistScreen", "Playlist ID: ${playlist?.id}")
             }
         }
@@ -119,7 +121,7 @@ fun SelectedPlaylistScreen(
                                     sharedPlaylistViewModel.deleteRemotePlaylist(playlist)
                                 }
 
-                                SongSource.FAVORITES -> {
+                                SongSource.REMOTES_FAVORITES -> {
                                     "No puedes eliminar las canciones favoritas."
                                 }
                             }
@@ -178,6 +180,24 @@ fun SelectedPlaylistScreen(
                 )
             }
 
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Switch(
+                    checked = isEditionMode, onCheckedChange = {
+                        sharedPlaylistViewModel.onSwitchToggle()
+                    })
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (isEditionMode) "Activated" else "Deactivated",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.width(20.dp))
+                Text(
+                    text = "Edit your playlists!",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
             OutlinedCard(
                 modifier = Modifier
                     .fillMaxWidth()

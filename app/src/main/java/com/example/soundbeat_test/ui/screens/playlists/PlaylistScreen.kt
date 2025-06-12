@@ -122,7 +122,7 @@ fun PlaylistScreen(
                             Log.d(
                                 "PlaylistScreen", "Favorites: ${favoritePlaylist != null}"
                             )
-                            sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
+                            sharedPlaylistViewModel.setSelectionMode(selectionMode = SelectionMode.PLAYLIST)
                             sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.REMOTES)
 
 
@@ -220,7 +220,7 @@ private fun showLocalUserPlaylists(
     } else {
         AlbumHorizontalList(list = localPlaylists) { item ->
             if (item is Playlist) {
-                sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
+                sharedPlaylistViewModel.setSelectionMode(selectionMode = SelectionMode.PLAYLIST)
                 sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.LOCALS)
                 Log.d("PlaylistScreen", "Playlist: ${item.id} - ${item.name}")
                 sharedPlaylistViewModel.updatePlaylist(item)
@@ -264,7 +264,7 @@ private fun showRemoteUserPlaylists(
             list = remotePlaylists
         ) { item ->
             if (item is Playlist) {
-                sharedPlaylistViewModel.setMode(selectionMode = SelectionMode.PLAYLIST)
+                sharedPlaylistViewModel.setSelectionMode(selectionMode = SelectionMode.PLAYLIST)
                 sharedPlaylistViewModel.setSongsSource(songsSource = SongSource.REMOTES)
                 sharedPlaylistViewModel.updatePlaylist(item)
                 Log.d("PlaylistScreen", "Playlist: ${item.id} - ${item.name}")
