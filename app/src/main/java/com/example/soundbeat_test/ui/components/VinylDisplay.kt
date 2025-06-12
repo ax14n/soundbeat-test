@@ -24,6 +24,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,10 +68,6 @@ fun AlbumHorizontalList(
                 is Playlist -> {
                     PlaylistItem(playlist = item, onPressedCover = { onPressedCover(item) })
                 }
-
-                else -> {
-                    Text("Tipo desconocido")
-                }
             }
         }
     }
@@ -82,6 +82,8 @@ fun AlbumHorizontalList(
 @Preview
 @Composable
 fun AlbumCard(album: Album = Album.AlbumExample, onClickedAlbumCover: () -> Unit = {}) {
+    var isMarqueeOn by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -93,17 +95,24 @@ fun AlbumCard(album: Album = Album.AlbumExample, onClickedAlbumCover: () -> Unit
         }
         Spacer(modifier = Modifier.width(12.dp))
 
+
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .clickable { isMarqueeOn = !isMarqueeOn }
         ) {
             Text(
-                text = album.title, fontWeight = FontWeight.Bold, fontSize = 16.sp, maxLines = 1
+                modifier = if (isMarqueeOn) Modifier.basicMarquee() else Modifier,
+                text = album.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                maxLines = 1
             )
             Text(
                 text = "by ${album.author}",
                 fontSize = 13.sp,
                 color = Color.DarkGray,
-                modifier = Modifier.padding(bottom = 4.dp)
+                modifier = if (isMarqueeOn) Modifier.basicMarquee() else Modifier
             )
 
             LazyRow(
