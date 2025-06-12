@@ -36,7 +36,7 @@ import com.example.soundbeat_test.ui.screens.auth.RegisterScreen
 import com.example.soundbeat_test.ui.screens.configuration.ConfigurationScreen
 import com.example.soundbeat_test.ui.screens.create_playlist.CreatePlaylistScreen
 import com.example.soundbeat_test.ui.screens.create_playlist.CreatePlaylistViewModel
-import com.example.soundbeat_test.ui.screens.create_playlist.CreationMode
+import com.example.soundbeat_test.ui.screens.create_playlist.PlaylistOrigin
 import com.example.soundbeat_test.ui.screens.home.HomeScreen
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreen
 import com.example.soundbeat_test.ui.screens.playlists.PlaylistScreenViewModel
@@ -170,9 +170,9 @@ fun AppNavigation(
             }
 
             val searchOrigin = try {
-                CreationMode.valueOf(originArg ?: "null")
+                PlaylistOrigin.valueOf(originArg ?: "null")
             } catch (_: IllegalArgumentException) {
-                CreationMode.OFFLINE_PLAYLIST
+                PlaylistOrigin.OFFLINE_PLAYLIST
             }
             Log.d("MainActivity", "${searchOrigin.name}")
 
@@ -180,24 +180,24 @@ fun AppNavigation(
                 navHostController = navController,
                 sharedPlaylistViewModel = sharedPlaylistViewModel!!,
                 searchInteractionMode = searchInteractionMode,
-                creationMode = searchOrigin
+                playlistOrigin = searchOrigin
             )
         }
         composable("PLAYLIST_CREATOR/{mode}") { backStackEntry ->
             val modeArg = backStackEntry.arguments?.getString("mode")
-            val creationMode = try {
-                CreationMode.valueOf(
-                    modeArg ?: CreationMode.OFFLINE_PLAYLIST.name
+            val playlistOrigin = try {
+                PlaylistOrigin.valueOf(
+                    modeArg ?: PlaylistOrigin.OFFLINE_PLAYLIST.name
                 )
             } catch (e: IllegalArgumentException) {
-                CreationMode.OFFLINE_PLAYLIST
+                PlaylistOrigin.OFFLINE_PLAYLIST
             }
             CreatePlaylistScreen(
                 navController = navController,
                 playerViewModel = audioPlayerViewModel!!,
                 sharedPlaylistViewModel = sharedPlaylistViewModel!!,
                 createPlaylistViewModel = createPlaylistViewModel,
-                creationMode = creationMode
+                playlistOrigin = playlistOrigin
             )
         }
     }

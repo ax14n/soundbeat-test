@@ -43,7 +43,7 @@ fun CreatePlaylistScreen(
     createPlaylistViewModel: CreatePlaylistViewModel,
     playerViewModel: AudioPlayerViewModel,
     sharedPlaylistViewModel: SharedPlaylistViewModel,
-    creationMode: CreationMode
+    playlistOrigin: PlaylistOrigin
 ) {
     val sharedPlaylist = sharedPlaylistViewModel.selectedPlaylist.collectAsState()
     val receivedPlaylist = sharedPlaylist?.value
@@ -73,7 +73,7 @@ fun CreatePlaylistScreen(
                 .background(Color(0xFFFF5722)),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = "mode: $creationMode", color = Color.White, fontStyle = FontStyle.Italic)
+            Text(text = "mode: $playlistOrigin", color = Color.White, fontStyle = FontStyle.Italic)
         }
 
         Spacer(modifier = Modifier.height(2.dp))
@@ -99,7 +99,7 @@ fun CreatePlaylistScreen(
             }
             Button(
                 onClick = {
-                    createPlaylistViewModel.createPlaylist(creationMode)
+                    createPlaylistViewModel.createPlaylist(playlistOrigin)
                     navController.navigate(ROUTES.HOME) {
                         popUpTo(ROUTES.HOME) { inclusive = true }
                     }
@@ -130,7 +130,7 @@ fun CreatePlaylistScreen(
             albums = songsSet?.toList() ?: emptyList(),
             playerViewModel = playerViewModel,
             navController = navController,
-            creationMode = creationMode
+            playlistOrigin = playlistOrigin
         )
     }
 }
@@ -138,7 +138,7 @@ fun CreatePlaylistScreen(
 @Composable
 fun SongsListBox(
     albums: List<Album>, playerViewModel: AudioPlayerViewModel?, navController: NavHostController?,
-    creationMode: CreationMode
+    playlistOrigin: PlaylistOrigin
 ) {
     OutlinedCard(
         modifier = Modifier
@@ -155,7 +155,7 @@ fun SongsListBox(
             )
             Button(
                 onClick = {
-                    navController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${creationMode}") {
+                    navController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${playlistOrigin}") {
                         launchSingleTop = true
                     }
                 },

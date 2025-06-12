@@ -47,7 +47,7 @@ import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.navigation.ROUTES
 import com.example.soundbeat_test.ui.components.AlbumCard
-import com.example.soundbeat_test.ui.screens.create_playlist.CreationMode
+import com.example.soundbeat_test.ui.screens.create_playlist.PlaylistOrigin
 import com.example.soundbeat_test.ui.screens.search.SearchInteractionMode.APPEND_TO_PLAYLIST
 import com.example.soundbeat_test.ui.screens.search.SearchInteractionMode.REPRODUCE_ON_SELECT
 import com.example.soundbeat_test.ui.screens.selected_playlist.SharedPlaylistViewModel
@@ -82,7 +82,7 @@ fun SearchScreen(
     searchScreenViewModel: SearchScreenViewModel = viewModel(),
     sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
     searchInteractionMode: SearchInteractionMode = REPRODUCE_ON_SELECT,
-    creationMode: CreationMode? = null
+    playlistOrigin: PlaylistOrigin? = null
 ) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("UserInfo", Context.MODE_PRIVATE) }
@@ -92,7 +92,7 @@ fun SearchScreen(
         }
     }.value
 
-    if (creationMode == null) {
+    if (playlistOrigin == null) {
         searchScreenViewModel.fillSongsList()
     }
 
@@ -105,18 +105,20 @@ fun SearchScreen(
     val isFilterVisible = searchScreenViewModel.isFilterVisible.collectAsState().value
     val selectedGenres = searchScreenViewModel.selectedGenres.collectAsState().value
 
-    val hideSwitch = creationMode != null || email == "OFFLINE"
+    val hideSwitch = playlistOrigin != null || email == "OFFLINE"
 
-    LaunchedEffect(key1 = creationMode) {
+    val isEditionMode = sharedPlaylistViewModel?.isEditionMode?.collectAsState()?.value
+
+    LaunchedEffect(key1 = playlistOrigin) {
         Log.d(
             "SearchScreen",
-            "search screen opened from a creation playlist screen. creation mode: $creationMode"
+            "search screen opened from a creation playlist screen. creation mode: $playlistOrigin"
         )
 
         if (hideSwitch) {
             searchScreenViewModel.switchHidden()
 
-            if (creationMode == CreationMode.ONLINE_PLAYLIST) {
+            if (playlistOrigin == PlaylistOrigin.ONLINE_PLAYLIST) {
                 searchScreenViewModel.setSearchMode(SearchMode.REMOTE)
             } else {
                 searchScreenViewModel.setSearchMode(SearchMode.LOCAL)
@@ -181,7 +183,7 @@ fun SearchScreen(
                         }
 
                         APPEND_TO_PLAYLIST -> {
-                            navHostController.navigate("PLAYLIST_CREATOR/${creationMode?.name}") {
+                            navHostController.navigate("PLAYLIST_CREATOR/${playlistOrigin?.name}") {
                                 popUpTo(ROUTES.SEARCH) { inclusive = true }
                             }
                         }

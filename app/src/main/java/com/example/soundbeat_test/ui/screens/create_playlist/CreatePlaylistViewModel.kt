@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
  * Modos internos que usa el ViewModel para identificar si se debe crear una playlist localmente
  * o remotamente.
  */
-enum class CreationMode {
+enum class PlaylistOrigin {
     OFFLINE_PLAYLIST, ONLINE_PLAYLIST
 }
 
@@ -86,18 +86,18 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
 
     /**
      * Crea una Playlist remota o local definida por parámetro.
-     * @param creationMode: Modo de creación de la Playlist.
-     * @see CreationMode
+     * @param playlistOrigin: Modo de creación de la Playlist.
+     * @see PlaylistOrigin
      */
     @OptIn(UnstableApi::class)
-    fun createPlaylist(creationMode: CreationMode) {
-        when (creationMode) {
-            CreationMode.ONLINE_PLAYLIST -> {
+    fun createPlaylist(playlistOrigin: PlaylistOrigin) {
+        when (playlistOrigin) {
+            PlaylistOrigin.ONLINE_PLAYLIST -> {
                 createRemotePlaylist()
                 clearSongsList()
             }
 
-            CreationMode.OFFLINE_PLAYLIST -> {
+            PlaylistOrigin.OFFLINE_PLAYLIST -> {
                 createLocalPlaylist()
                 clearSongsList()
             }

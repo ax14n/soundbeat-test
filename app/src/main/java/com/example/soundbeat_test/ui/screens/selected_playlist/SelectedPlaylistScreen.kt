@@ -28,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -205,6 +206,26 @@ fun SelectedPlaylistScreen(
                     .fillMaxWidth()
                     .padding(vertical = 16.dp)
             ) {
+                if (isEditionMode) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Button(
+                            shape = RectangleShape,
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                            onClick = {},
+                        ) {
+                            Text("+")
+                        }
+                        Button(
+                            shape = RectangleShape,
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                            onClick = {},
+                        ) {
+                            Text("Apply Changes")
+                        }
+                    }
+                }
                 VinylList(
                     albumList = reproduce
                 ) { album ->
