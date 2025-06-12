@@ -75,11 +75,12 @@ fun SelectedPlaylistScreen(
 
     val songs = playlistScreenViewModel.songs.collectAsState().value
 
-    LaunchedEffect(songsSource, sharedPlaylist?.id) {
+    LaunchedEffect(isEditionMode) {
         Log.d("SelectedPlaylistScreen", "shared playlist: $sharedPlaylist")
         Log.d("SelectedPlaylistScreen", "edit mode: $isEditionMode")
         Log.d("SelectedPlaylistScreen", "songsSource: $songsSource")
         if (!isEditionMode) {
+            playlistScreenViewModel.cleanInternalSongs()
             when (songsSource) {
                 SongSource.LOCALS -> {
                     Log.d("SelectedPlaylistScreen", "Playlist ID: ${sharedPlaylist?.id}")
@@ -104,27 +105,18 @@ fun SelectedPlaylistScreen(
                     Log.d("SelectedPlaylistScreen", "favorites size: ${songs.size}")
                 }
             }
-        } else {
-            if (sharedPlaylist?.songs?.isNotEmpty() == true) {
-                Log.d("PRUEBA", "llegó ${sharedPlaylist.songs}")
-                sharedPlaylist.songs.last().let {
-                    playlistScreenViewModel.addSongToInternalSongs(
-                        album = it
-                    )
-                }
-
-            }
         }
     }
 
-    val reproduce =
-        if (sharedPlaylist?.songs?.toList()!!.isEmpty()) songs else sharedPlaylist.songs.toList()
+    val lastSong = sharedPlaylist?.songs?.lastOrNull()
 
-
-    Log.d(
-        "SelectedPlaylistScreen", "sharedPlaylist is empty: ${sharedPlaylist?.songs?.isEmpty()}"
-    )
-
+    LaunchedEffect(lastSong) {
+        if (lastSong != null) {
+            Log.d("SelectedPlaylistScreen", "Añadiendo última canción: $lastSong")
+            playlistScreenViewModel.addSongToInternalSongs(lastSong)
+        }
+    }
+    val reproduce = songs
     Column(
         modifier = Modifier
             .fillMaxSize()
