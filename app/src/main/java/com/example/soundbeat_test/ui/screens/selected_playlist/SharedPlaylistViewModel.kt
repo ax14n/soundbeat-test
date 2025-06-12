@@ -100,6 +100,10 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
 
     val shouldRefresh: StateFlow<Boolean> = _shouldRefresh
 
+    fun setRefreshStatus(status: Boolean) {
+        _shouldRefresh.value = status
+    }
+
     fun alternateRefresh() {
         _shouldRefresh.value = !_shouldRefresh.value
     }
@@ -128,19 +132,28 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun addSongToSharedSongs(album: Album) {
+        android.util.Log.d("SharedPlaylistViewModel", "adding to the temporal list: $album")
         val currentPlaylist = _selectedPlaylist.value
         if (currentPlaylist != null) {
             val updatedSongs = currentPlaylist.songs + album
             _selectedPlaylist.value = currentPlaylist.copy(songs = updatedSongs)
-            android.util.Log.d("PRUEBA2", "songs: ${_selectedPlaylist.value}")
+            android.util.Log.d(
+                "SharedPlaylistViewModel",
+                "final list of songs: ${_selectedPlaylist.value}"
+            )
         }
     }
 
     fun removeSongToSharedSongs(album: Album) {
+        android.util.Log.d("SharedPlaylistViewModel", "removing to the temporal list: $album")
         val currentPlaylist = _selectedPlaylist.value
         if (currentPlaylist != null) {
             val updatedSongs = currentPlaylist.songs - album
             _selectedPlaylist.value = currentPlaylist.copy(songs = updatedSongs)
+            android.util.Log.d(
+                "SharedPlaylistViewModel",
+                "final list of songs: ${_selectedPlaylist.value}"
+            )
         }
     }
 
@@ -198,6 +211,10 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
      */
     fun onSwitchToggle() {
         _isEditionMode.value = !_isEditionMode.value
+    }
+
+    fun setEditableMode(status: Boolean) {
+        _isEditionMode.value = status
     }
 
 }

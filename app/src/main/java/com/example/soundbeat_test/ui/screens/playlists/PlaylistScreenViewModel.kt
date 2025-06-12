@@ -132,7 +132,9 @@ class PlaylistScreenViewModel(
                     isLocal = true
                 )
             }
-            _songs.value = songs
+            songs.forEach {
+                addSongToInternalSongs(it)
+            }
         }
     }
 
@@ -154,7 +156,6 @@ class PlaylistScreenViewModel(
         }
     }
 
-
     fun addSongToInternalSongs(album: Album) {
         val storedSongs = _songs.value
         if (storedSongs != null) {
@@ -166,6 +167,10 @@ class PlaylistScreenViewModel(
 
     fun removeSongFromInternalSongs(album: Album) {
         _songs.value.minus<Album>(album)
+    }
+
+    fun cleanInternalSongs() {
+        _songs.value = emptyList<Album>()
     }
 
     /**

@@ -295,7 +295,7 @@ fun VinylList(
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(10.dp)
     ) {
-        items(albumList, key = { it.id }) { song ->
+        items(albumList) { song ->
             AlbumCard(song) {
                 onClickedAlbumCover(song)
             }

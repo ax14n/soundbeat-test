@@ -126,7 +126,7 @@ fun CreatePlaylistScreen(
         Spacer(modifier = Modifier.height(2.dp))
 
         SongsListBox(
-            albums = songsSet?.toList() ?: emptyList(),
+            albums = songsSet.toList() ?: emptyList(),
             playerViewModel = playerViewModel,
             navController = navController,
             playlistOrigin = playlistOrigin
@@ -171,7 +171,7 @@ fun SongsListBox(
             ) {
                 items(albums.toList()) { album ->
                     AlbumCard(album) {
-                        val url: String = playerViewModel?.createSongUrl(album) ?: ""
+//                        val url: String = playerViewModel?.createSongUrl(album) ?: ""
                         playerViewModel?.loadAndPlayHLS(album)
                     }
                 }

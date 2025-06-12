@@ -59,7 +59,14 @@ fun AlbumHorizontalList(
     ), onPressedCover: (Any) -> Unit = {}
 ) {
     LazyRow {
-        items(list) { item ->
+        items(
+            items = list, key = { item ->
+                when (item) {
+                    is Album -> "album_${item.id}"
+                    is Playlist -> "playlist_${item.id}"
+                    else -> item.hashCode()
+                }
+            }) { item ->
             when (item) {
                 is Album -> {
                     AlbumItem(album = item, onPressedCover = { onPressedCover(item) })
@@ -99,8 +106,7 @@ fun AlbumCard(album: Album = Album.AlbumExample, onClickedAlbumCover: () -> Unit
         Column(
             modifier = Modifier
                 .weight(1f)
-                .clickable { isMarqueeOn = !isMarqueeOn }
-        ) {
+                .clickable { isMarqueeOn = !isMarqueeOn }) {
             Text(
                 modifier = if (isMarqueeOn) Modifier.basicMarquee() else Modifier,
                 text = album.title,

@@ -60,6 +60,7 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
      * Agrega una canción a la lista de canciones.
      */
     fun addSong(album: Album) {
+        Log.d("PlaylistCreation", "adding $album")
         _songs.value = _songs.value + album
     }
 
@@ -67,6 +68,7 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
      * Remueve una canción almacenada y seleccionada dentro de la lista de canciones.
      */
     fun removeSong(album: Album) {
+        Log.d("PlaylistCreation", "removing $album")
         _songs.value = _songs.value - album
     }
 
@@ -91,15 +93,14 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
      */
     @OptIn(UnstableApi::class)
     fun createPlaylist(playlistOrigin: PlaylistOrigin) {
+        Log.d("PlaylistCreation", "creating playlist. origin:  $playlistOrigin")
         when (playlistOrigin) {
             PlaylistOrigin.ONLINE_PLAYLIST -> {
                 createRemotePlaylist()
-                clearSongsList()
             }
 
             PlaylistOrigin.OFFLINE_PLAYLIST -> {
                 createLocalPlaylist()
-                clearSongsList()
             }
         }
     }
@@ -126,6 +127,7 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
             } else {
                 Log.e("createPlaylist", "No se encontró el email en SharedPreferences")
             }
+            clearSongsList()
         }
     }
 
@@ -140,12 +142,13 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
             try {
                 Log.d("PlaylistCreation", "Inicio de creación de playlist local")
                 val playlist = Playlist(
-                    name = playlistName.value, createdAt = System.currentTimeMillis(),
+                    name = playlistName.value,
+                    createdAt = System.currentTimeMillis(),
                     playlistId = 0
                 )
 
                 Log.d("PlaylistCreation", "Insertando playlist: $playlist")
-                val playlistId = localPlaylistDb?.insert(playlist)?.toInt()
+                val playlistId = localPlaylistDb.insert(playlist)?.toInt()
 
                 Log.d("PlaylistCreation", "ID de playlist creada: $playlistId")
 
@@ -159,13 +162,14 @@ class CreatePlaylistViewModel(application: Application) : AndroidViewModel(appli
                     Log.d("PlaylistCreation", "ID de canción insertada: $songId")
 
                     val playlistSong = PlaylistSong(
-                        playlist_id = playlistId!!, song_id = songId!!
+                        playlist_id = playlistId!!, song_id = songId
                     )
                     Log.d("PlaylistCreation", "Insertando relación Playlist-Song: $playlistSong")
 
                     localPlaylistSongDb?.insert(playlistSong)
                 }
                 Log.d("PlaylistCreation", "Creación de playlist local finalizada correctamente")
+                clearSongsList()
             } catch (e: Exception) {
                 Log.e("PlaylistCreation", "Error al crear la playlist local", e)
             }

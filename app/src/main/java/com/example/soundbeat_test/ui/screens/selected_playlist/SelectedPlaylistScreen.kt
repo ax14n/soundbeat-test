@@ -75,36 +75,37 @@ fun SelectedPlaylistScreen(
 
     val songs = playlistScreenViewModel.songs.collectAsState().value
 
-    LaunchedEffect(songsSource, sharedPlaylist?.songs?.lastOrNull(), shouldRefresh) {
+    LaunchedEffect(songsSource, sharedPlaylist?.id) {
+        Log.d("SelectedPlaylistScreen", "shared playlist: $sharedPlaylist")
         Log.d("SelectedPlaylistScreen", "edit mode: $isEditionMode")
+        Log.d("SelectedPlaylistScreen", "songsSource: $songsSource")
         if (!isEditionMode) {
             when (songsSource) {
                 SongSource.LOCALS -> {
-                    sharedPlaylist.let {
-                        Log.d("SelectedPlaylistScreen", "Playlist ID: ${sharedPlaylist?.id}")
-                        Log.d(
-                            "SelectedPlaylistScreen", "Playlist canciones: ${sharedPlaylist?.songs}"
-                        )
-                        playlistScreenViewModel.obtainLocalPlaylistSongs(sharedPlaylist?.id ?: -1)
-                    }
+                    Log.d("SelectedPlaylistScreen", "Playlist ID: ${sharedPlaylist?.id}")
+                    Log.d(
+                        "SelectedPlaylistScreen", "Playlist songs: ${sharedPlaylist?.songs}"
+                    )
+                    playlistScreenViewModel.obtainLocalPlaylistSongs(sharedPlaylist?.id ?: -1)
+                    Log.d("SelectedPlaylistScreen", "local songs size: ${songs.size}")
                 }
 
                 SongSource.REMOTES -> {
-                    sharedPlaylist.let {
-                        Log.d("SelectedPlaylistScreen", "Playlist ID: ${sharedPlaylist?.id}")
-                        Log.d(
-                            "SelectedPlaylistScreen", "playlist's songs:  ${sharedPlaylist?.songs}"
-                        )
-                        playlistScreenViewModel.obtainRemotePlaylistSongs(sharedPlaylist?.id ?: -1)
-                    }
+                    Log.d("SelectedPlaylistScreen", "Playlist ID: ${sharedPlaylist?.id}")
+                    Log.d(
+                        "SelectedPlaylistScreen", "playlist's songs:  ${sharedPlaylist?.songs}"
+                    )
+                    playlistScreenViewModel.obtainRemotePlaylistSongs(sharedPlaylist?.id ?: -1)
+                    Log.d("SelectedPlaylistScreen", "remote size: ${songs.size}")
                 }
 
                 SongSource.REMOTES_FAVORITES -> {
                     Log.d("SelectedPlaylistScreen", "Playlist ID: ${sharedPlaylist?.id}")
+                    Log.d("SelectedPlaylistScreen", "favorites size: ${songs.size}")
                 }
             }
         } else {
-            if (sharedPlaylist!!.songs.isNotEmpty()) {
+            if (sharedPlaylist?.songs?.isNotEmpty() == true) {
                 Log.d("PRUEBA", "llegó ${sharedPlaylist.songs}")
                 sharedPlaylist.songs.last().let {
                     playlistScreenViewModel.addSongToInternalSongs(
@@ -116,10 +117,13 @@ fun SelectedPlaylistScreen(
         }
     }
 
+    val reproduce =
+        if (sharedPlaylist?.songs?.toList()!!.isEmpty()) songs else sharedPlaylist.songs.toList()
+
+
     Log.d(
         "SelectedPlaylistScreen", "sharedPlaylist is empty: ${sharedPlaylist?.songs?.isEmpty()}"
     )
-    val reproduce = songs
 
     Column(
         modifier = Modifier
@@ -162,6 +166,8 @@ fun SelectedPlaylistScreen(
                 contentDescription = "Go back",
                 modifier = Modifier
                     .clickable(onClick = {
+                        sharedPlaylistViewModel.setEditableMode(false)
+                        playlistScreenViewModel.cleanInternalSongs()
                         navHostController?.navigate(ROUTES.HOME) {
                             popUpTo(ROUTES.HOME) { inclusive = true }
                         }
@@ -174,113 +180,109 @@ fun SelectedPlaylistScreen(
 
         UserImage()
 
-        sharedPlaylist.let {
+        Text(
+            text = sharedPlaylist?.name ?: "Unsigned",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 12.dp),
+            fontFamily = FontFamily.Monospace
+        )
+        Text(
+            text = "id = " + sharedPlaylist?.id.toString(),
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 12.dp),
+            fontFamily = FontFamily.Monospace
+        )
 
+        Spacer(Modifier.padding(top = 10.dp))
+
+        Button(
+            onClick = {
+                audioPlayerViewModel.loadPlaylist(reproduce)
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             Text(
-                text = sharedPlaylist?.name ?: "Unsigned",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 12.dp),
-                fontFamily = FontFamily.Monospace
+                text = "REPRODUCE VINYLS", fontWeight = FontWeight.Bold
             )
-            Text(
-                text = "id = " + sharedPlaylist?.id.toString(),
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 12.dp),
-                fontFamily = FontFamily.Monospace
-            )
+        }
 
-            Spacer(Modifier.padding(top = 10.dp))
-
-            Button(
-                onClick = {
-                    audioPlayerViewModel.loadPlaylist(reproduce)
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth(),
+        if (isPlaylist == SelectionMode.PLAYLIST) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Switch(
+                    checked = isEditionMode, onCheckedChange = {
+                        sharedPlaylistViewModel.onSwitchToggle()
+                    })
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "REPRODUCE VINYLS", fontWeight = FontWeight.Bold
+                    text = if (isEditionMode) "Activated" else "Deactivated",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.width(20.dp))
+                Text(
+                    text = "Edit your playlists!", style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp)
+        ) {
+            if (isEditionMode) {
+                val origin = when (songsSource) {
+                    SongSource.LOCALS -> PlaylistOrigin.OFFLINE_PLAYLIST
+                    SongSource.REMOTES -> PlaylistOrigin.ONLINE_PLAYLIST
+                    else -> {}
+                }
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        shape = RectangleShape,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                        onClick = {
+                            navHostController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${origin}/${true}") {
+                                launchSingleTop = true
+                            }
+                        },
+                    ) {
+                        Text("+")
+                    }
+                    Button(
+                        shape = RectangleShape,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                        onClick = {},
+                    ) {
+                        Text("Apply Changes")
+                    }
+                }
+            }
+            VinylList(
+                albumList = reproduce
+            ) { album ->
+                val modifiedAlbum = Album(
+                    id = album.id,
+                    title = album.title,
+                    author = album.author,
+                    genre = album.genre,
+                    url = audioPlayerViewModel.createSongUrl(album).toString(),
+                    duration = album.duration,
+                    isLocal = album.isLocal
+                )
+                audioPlayerViewModel.loadAndPlayHLS(
+                    modifiedAlbum
+                )
+                Log.d(
+                    "SelectedPlaylistScreen", "Started playing ${album.title} by ${album.author}"
                 )
             }
 
-            if (isPlaylist == SelectionMode.PLAYLIST) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Switch(
-                        checked = isEditionMode, onCheckedChange = {
-                            sharedPlaylistViewModel.onSwitchToggle()
-                        })
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = if (isEditionMode) "Activated" else "Deactivated",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Spacer(modifier = Modifier.width(20.dp))
-                    Text(
-                        text = "Edit your playlists!", style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-            }
-            OutlinedCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-            ) {
-                if (isEditionMode) {
-                    val origin = when (songsSource) {
-                        SongSource.LOCALS -> PlaylistOrigin.OFFLINE_PLAYLIST
-                        SongSource.REMOTES -> PlaylistOrigin.ONLINE_PLAYLIST
-                        else -> {}
-                    }
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Button(
-                            shape = RectangleShape,
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                            onClick = {
-                                navHostController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${origin}/${true}") {
-                                    launchSingleTop = true
-                                }
-                            },
-                        ) {
-                            Text("+")
-                        }
-                        Button(
-                            shape = RectangleShape,
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                            onClick = {},
-                        ) {
-                            Text("Apply Changes")
-                        }
-                    }
-                }
-                VinylList(
-                    albumList = reproduce
-                ) { album ->
-                    val modifiedAlbum = Album(
-                        id = album.id,
-                        title = album.title,
-                        author = album.author,
-                        genre = album.genre,
-                        url = audioPlayerViewModel.createSongUrl(album).toString(),
-                        duration = album.duration,
-                        isLocal = album.isLocal
-                    )
-                    audioPlayerViewModel.loadAndPlayHLS(
-                        modifiedAlbum
-                    )
-                    Log.d(
-                        "SelectedPlaylistScreen",
-                        "Started playing ${album.title} by ${album.author}"
-                    )
-                }
-
-            }
         }
     }
 }
