@@ -82,7 +82,8 @@ fun SearchScreen(
     searchScreenViewModel: SearchScreenViewModel = viewModel(),
     sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
     searchInteractionMode: SearchInteractionMode = REPRODUCE_ON_SELECT,
-    playlistOrigin: PlaylistOrigin? = null
+    procedence: PlaylistOrigin? = null,
+    editMode: Boolean = false
 ) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("UserInfo", Context.MODE_PRIVATE) }
@@ -92,33 +93,29 @@ fun SearchScreen(
         }
     }.value
 
-    if (playlistOrigin == null) {
+    if (procedence == null) {
         searchScreenViewModel.fillSongsList()
     }
 
-    val queryState = searchScreenViewModel.textFieldText.collectAsState()
-    val listState = searchScreenViewModel.albumList.collectAsState()
-
-    val query = queryState.value
-    val list = listState.value
+    val query = searchScreenViewModel.textFieldText.collectAsState().value
+    val list = searchScreenViewModel.albumList.collectAsState().value
 
     val isFilterVisible = searchScreenViewModel.isFilterVisible.collectAsState().value
     val selectedGenres = searchScreenViewModel.selectedGenres.collectAsState().value
 
-    val hideSwitch = playlistOrigin != null || email == "OFFLINE"
+    val hideSwitch = procedence != null || email == "OFFLINE"
+    val sharedPlaylist = sharedPlaylistViewModel?.selectedPlaylist?.collectAsState()?.value
 
-    val isEditionMode = sharedPlaylistViewModel?.isEditionMode?.collectAsState()?.value
-
-    LaunchedEffect(key1 = playlistOrigin) {
+    LaunchedEffect(key1 = procedence) {
         Log.d(
             "SearchScreen",
-            "search screen opened from a creation playlist screen. creation mode: $playlistOrigin"
+            "search screen opened from a creation playlist screen. creation mode: $procedence"
         )
 
         if (hideSwitch) {
             searchScreenViewModel.switchHidden()
 
-            if (playlistOrigin == PlaylistOrigin.ONLINE_PLAYLIST) {
+            if (procedence == PlaylistOrigin.ONLINE_PLAYLIST) {
                 searchScreenViewModel.setSearchMode(SearchMode.REMOTE)
             } else {
                 searchScreenViewModel.setSearchMode(SearchMode.LOCAL)
@@ -162,7 +159,7 @@ fun SearchScreen(
 
         }
 
-        if (listState.value.isEmpty()) {
+        if (list.isEmpty()) {
             NoSongsFoundMessage()
         } else {
 
@@ -173,7 +170,13 @@ fun SearchScreen(
                     val playlist = Playlist(
                         id = 1, name = album.title, songs = setOf(album)
                     )
-                    sharedPlaylistViewModel?.updatePlaylist(playlist)
+                    if (!editMode) {
+                        sharedPlaylistViewModel?.updatePlaylist(playlist)
+                    } else {
+                        sharedPlaylistViewModel?.addSongToSharedSongs(album)
+                        Log.d("PRUEBA", sharedPlaylist?.songs.toString())
+                        sharedPlaylistViewModel?.alternateRefresh()
+                    }
 
                     when (searchInteractionMode) {
                         REPRODUCE_ON_SELECT -> {
@@ -183,8 +186,14 @@ fun SearchScreen(
                         }
 
                         APPEND_TO_PLAYLIST -> {
-                            navHostController.navigate("PLAYLIST_CREATOR/${playlistOrigin?.name}") {
-                                popUpTo(ROUTES.SEARCH) { inclusive = true }
+                            if (!editMode) {
+                                navHostController.navigate("PLAYLIST_CREATOR/${procedence?.name}") {
+                                    popUpTo(ROUTES.SEARCH) { inclusive = true }
+                                }
+                            } else {
+                                navHostController.navigate(ROUTES.SELECTED_PLAYLIST) {
+                                    popUpTo(ROUTES.SEARCH) { inclusive = true }
+                                }
                             }
                         }
                     }

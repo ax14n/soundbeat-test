@@ -5,6 +5,7 @@ import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
+import com.example.soundbeat_test.data.Album
 import com.example.soundbeat_test.data.Playlist
 import com.example.soundbeat_test.data.Playlist.Companion.toEntity
 import com.example.soundbeat_test.local.room.DatabaseProvider
@@ -92,6 +93,18 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
     val mode: StateFlow<SelectionMode> = _isPlaylist
 
     /**
+     * Indica si actualizar las listas de canciones que se muestran por pantalla. Pensado como
+     * solución al problema de que al volver desde la pantalla de búsqueda, no se actualizaban.
+     */
+    private val _shouldRefresh = MutableStateFlow<Boolean>(false)
+
+    val shouldRefresh: StateFlow<Boolean> = _shouldRefresh
+
+    fun alternateRefresh() {
+        _shouldRefresh.value = !_shouldRefresh.value
+    }
+
+    /**
      * Actualiza la playlist seleccionada para compartirla entre pantallas.
      *
      * Este método se utiliza cuando el usuario selecciona una playlist que se quiere
@@ -112,6 +125,23 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
      */
     fun clearPlaylist() {
         _selectedPlaylist.value = null
+    }
+
+    fun addSongToSharedSongs(album: Album) {
+        val currentPlaylist = _selectedPlaylist.value
+        if (currentPlaylist != null) {
+            val updatedSongs = currentPlaylist.songs + album
+            _selectedPlaylist.value = currentPlaylist.copy(songs = updatedSongs)
+            android.util.Log.d("PRUEBA2", "songs: ${_selectedPlaylist.value}")
+        }
+    }
+
+    fun removeSongToSharedSongs(album: Album) {
+        val currentPlaylist = _selectedPlaylist.value
+        if (currentPlaylist != null) {
+            val updatedSongs = currentPlaylist.songs - album
+            _selectedPlaylist.value = currentPlaylist.copy(songs = updatedSongs)
+        }
     }
 
     /**

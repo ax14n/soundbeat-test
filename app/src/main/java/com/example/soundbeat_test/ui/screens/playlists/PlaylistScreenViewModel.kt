@@ -154,6 +154,20 @@ class PlaylistScreenViewModel(
         }
     }
 
+
+    fun addSongToInternalSongs(album: Album) {
+        val storedSongs = _songs.value
+        if (storedSongs != null) {
+            val updatedSongs = storedSongs + album
+            _songs.value = updatedSongs
+            android.util.Log.d("PRUEBA2", "actualizado songs: ${_songs.value}")
+        }
+    }
+
+    fun removeSongFromInternalSongs(album: Album) {
+        _songs.value.minus<Album>(album)
+    }
+
     /**
      * Recupera el correo electrónico almacenado en `SharedPreferences`.
      *

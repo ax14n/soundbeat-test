@@ -45,8 +45,7 @@ fun CreatePlaylistScreen(
     sharedPlaylistViewModel: SharedPlaylistViewModel,
     playlistOrigin: PlaylistOrigin
 ) {
-    val sharedPlaylist = sharedPlaylistViewModel.selectedPlaylist.collectAsState()
-    val receivedPlaylist = sharedPlaylist?.value
+    val receivedPlaylist = sharedPlaylistViewModel.selectedPlaylist.collectAsState().value
 
     LaunchedEffect(receivedPlaylist?.songs?.lastOrNull()) {
         if (receivedPlaylist?.songs?.isNotEmpty() == true) {
@@ -137,7 +136,9 @@ fun CreatePlaylistScreen(
 
 @Composable
 fun SongsListBox(
-    albums: List<Album>, playerViewModel: AudioPlayerViewModel?, navController: NavHostController?,
+    albums: List<Album>,
+    playerViewModel: AudioPlayerViewModel?,
+    navController: NavHostController?,
     playlistOrigin: PlaylistOrigin
 ) {
     OutlinedCard(
@@ -155,7 +156,7 @@ fun SongsListBox(
             )
             Button(
                 onClick = {
-                    navController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${playlistOrigin}") {
+                    navController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${playlistOrigin}/${false}") {
                         launchSingleTop = true
                     }
                 },

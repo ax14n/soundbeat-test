@@ -157,30 +157,36 @@ fun AppNavigation(
                 playlistScreenViewModel = playlistScreenViewModel!!
             )
         }
-        composable("SEARCH/{mode}/{origin}") { backStackEntry ->
+        composable("SEARCH/{mode}/{procedence}/{edit}") { backStackEntry ->
             val modeArg = backStackEntry.arguments?.getString("mode")
-            val originArg = backStackEntry.arguments?.getString("origin")
+            val originArg = backStackEntry.arguments?.getString("precedence")
+            val editArg = backStackEntry.arguments?.getString("edit")
 
-            val searchInteractionMode = try {
+            val onClickInteraction = try {
                 SearchInteractionMode.valueOf(
                     modeArg ?: SearchInteractionMode.REPRODUCE_ON_SELECT.name
                 )
             } catch (_: IllegalArgumentException) {
                 SearchInteractionMode.REPRODUCE_ON_SELECT
             }
+            Log.d("MainActivity", "${onClickInteraction.name}")
 
-            val searchOrigin = try {
+            val procedence = try {
                 PlaylistOrigin.valueOf(originArg ?: "null")
             } catch (_: IllegalArgumentException) {
                 PlaylistOrigin.OFFLINE_PLAYLIST
             }
-            Log.d("MainActivity", "${searchOrigin.name}")
+            Log.d("MainActivity", "${procedence.name}")
+
+            val edit = editArg?.toBooleanStrictOrNull() == true
+            Log.d("MainActivity", "$edit")
 
             SearchScreen(
                 navHostController = navController,
                 sharedPlaylistViewModel = sharedPlaylistViewModel!!,
-                searchInteractionMode = searchInteractionMode,
-                playlistOrigin = searchOrigin
+                searchInteractionMode = onClickInteraction,
+                procedence = procedence,
+                editMode = edit
             )
         }
         composable("PLAYLIST_CREATOR/{mode}") { backStackEntry ->
@@ -189,7 +195,7 @@ fun AppNavigation(
                 PlaylistOrigin.valueOf(
                     modeArg ?: PlaylistOrigin.OFFLINE_PLAYLIST.name
                 )
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 PlaylistOrigin.OFFLINE_PLAYLIST
             }
             CreatePlaylistScreen(
