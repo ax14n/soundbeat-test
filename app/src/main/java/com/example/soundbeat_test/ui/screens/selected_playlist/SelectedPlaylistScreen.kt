@@ -275,7 +275,7 @@ fun SelectedPlaylistScreen(
                                     if (insertStagedSongs.isNotEmpty()) sharedPlaylistViewModel.addSongsToExistentRemotePlaylist() else sharedPlaylistViewModel.deleteSongsFromExistentRemotePlaylist()
                                 }
                                 // La UI se actualizaba antes de la inserción, así que lo atrasé 50ms
-                                delay(50)
+                                delay(150)
                                 sharedPlaylistViewModel.setEditableMode(false)
                             }
 

@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MusicOff
 import androidx.compose.material3.ElevatedButton
@@ -35,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -296,11 +298,14 @@ fun VinylList(
     onDeleteSong: (Album) -> Unit = {},
     onClickedAlbumCover: (Album) -> Unit,
 ) {
-
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(10.dp)
     ) {
         items(albumList) { song ->
+
+            val isStaged = remember { mutableStateOf(false) }
+            val icon = if (isStaged.value) Icons.Default.Cancel else Icons.Default.Delete
+
             Row {
                 AlbumCard(song, modifier = Modifier.weight(1f)) {
                     onClickedAlbumCover(song)
@@ -314,12 +319,11 @@ fun VinylList(
                             .border(
                                 width = 0.5.dp, color = Color.Red, shape = RoundedCornerShape(8.dp)
                             ), onClick = {
+                            isStaged.value = !isStaged.value
                             onDeleteSong(song)
                         }) {
                         Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Eliminar canción",
-                            tint = Color.Red // O el color que prefieras
+                            imageVector = icon, contentDescription = "Delete song", tint = Color.Red
                         )
                     }
                 }
