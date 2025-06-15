@@ -16,6 +16,7 @@ import com.example.soundbeat_test.network.ServerConfig
 import com.example.soundbeat_test.network.addSongToFavorites
 import com.example.soundbeat_test.network.isFavorite
 import com.example.soundbeat_test.network.removeSongFromFavorites
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -36,6 +37,7 @@ class AudioPlayerViewModel(
      */
     private val exoPlayer: ExoPlayer =
         ExoPlayer.Builder(getApplication<Application>().applicationContext).build()
+
 
     /**
      * Estado que indica si el audio está siendo reproducido.
@@ -60,6 +62,12 @@ class AudioPlayerViewModel(
 
     private val _reproducerIsShowing = MutableStateFlow<Boolean>(false)
     val reproducerIsShowing: StateFlow<Boolean> = _reproducerIsShowing
+
+    private val _currentPosition = MutableStateFlow(0L)
+    val currentPosition: StateFlow<Long> = _currentPosition
+
+    val duration: Long
+        get() = exoPlayer.duration
 
     /**
      * Almacena si la canción que actualmente está sonando se encuentra en favoritos.
@@ -108,8 +116,7 @@ class AudioPlayerViewModel(
                     getApplication<Application>().getSharedPreferences("UserInfo", MODE_PRIVATE)
                 val email = prefs.getString("email", "ERROR")
                 val result = isFavorite(
-                    email = email!!,
-                    album = _temporalAlbumList.value.toList()[_currentIndex.value]
+                    email = email!!, album = _temporalAlbumList.value.toList()[_currentIndex.value]
                 )
                 _isMarkedAsFavorite.value = (result == "true")
             }
@@ -125,6 +132,12 @@ class AudioPlayerViewModel(
 
     init {
         exoPlayer.addListener(listener)
+        viewModelScope.launch {
+            while (true) {
+                _currentPosition.value = exoPlayer.currentPosition
+                delay(500L)
+            }
+        }
     }
 
     /**
