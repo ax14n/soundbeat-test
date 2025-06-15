@@ -110,7 +110,6 @@ fun SearchScreen(
     val selectedGenres = searchScreenViewModel.selectedGenres.collectAsState().value
 
     val hideSwitch = procedence != null || email == "OFFLINE"
-    val sharedPlaylist = sharedPlaylistViewModel?.selectedPlaylist?.collectAsState()?.value
 
     LaunchedEffect(key1 = procedence) {
         Log.d(

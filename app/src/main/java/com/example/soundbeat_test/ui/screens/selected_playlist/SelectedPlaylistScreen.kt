@@ -91,7 +91,6 @@ fun SelectedPlaylistScreen(
         Log.d("SelectedPlaylistScreen", "edit mode: $isEditionMode")
         Log.d("SelectedPlaylistScreen", "songsSource: $songsSource")
         if (!isEditionMode) {
-            playlistScreenViewModel.cleanInternalSongs()
             when (songsSource) {
                 SongSource.LOCALS -> {
                     Log.d("SelectedPlaylistScreen", "Playlist ID: ${sharedPlaylist?.id}")
@@ -201,7 +200,7 @@ fun SelectedPlaylistScreen(
 
         Button(
             onClick = {
-                audioPlayerViewModel.loadPlaylist(reproduce)
+                audioPlayerViewModel.loadPlaylist(reproduce.toList())
             },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
             shape = RoundedCornerShape(12.dp),
@@ -286,7 +285,7 @@ fun SelectedPlaylistScreen(
                 }
             }
             VinylList(
-                albumList = reproduce,
+                albumList = reproduce.toList(),
                 removeButton = isEditionMode,
                 onDeleteSong = {
                     if (insertStagedSongs.isNotEmpty()) {

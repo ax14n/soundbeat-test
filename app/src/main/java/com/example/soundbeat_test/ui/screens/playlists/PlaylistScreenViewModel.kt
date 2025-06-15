@@ -37,8 +37,8 @@ class PlaylistScreenViewModel(
     private val _localUserPlaylist = MutableStateFlow<List<Playlist>>(emptyList())
     val localUserPlaylist: StateFlow<List<Playlist>> = _localUserPlaylist
 
-    private val _songs = MutableStateFlow<List<Album>>(emptyList<Album>())
-    val songs: StateFlow<List<Album>> = _songs
+    private val _songs = MutableStateFlow<Set<Album>>(emptySet<Album>())
+    val songs: StateFlow<Set<Album>> = _songs
 
     private val _remotePlaylistError = MutableStateFlow<String?>(null)
     val remotePlaylistError: StateFlow<String?> = _remotePlaylistError
@@ -109,7 +109,7 @@ class PlaylistScreenViewModel(
         viewModelScope.launch {
             val result = getPlaylistSongs(playlistId)
             if (result.isSuccess) {
-                _songs.value = result.getOrDefault(emptyList())
+                _songs.value = result.getOrDefault(emptyList()).toSet()
             } else {
                 _remotePlaylistError.value =
                     result.exceptionOrNull()?.message ?: "Unknown error"
@@ -155,6 +155,7 @@ class PlaylistScreenViewModel(
         }
     }
 
+    @OptIn(UnstableApi::class)
     fun addSongToInternalSongs(album: Album) {
         val storedSongs = _songs.value
         Log.d("PRUEBA", "original songs: ${_songs.value}")
@@ -170,7 +171,7 @@ class PlaylistScreenViewModel(
     }
 
     fun cleanInternalSongs() {
-        _songs.value = emptyList<Album>()
+        _songs.value = emptySet<Album>()
     }
 
     /**
