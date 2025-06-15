@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
@@ -219,9 +218,7 @@ fun MusicPlayerControls(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaybackSlider(
-    position: Long,
-    duration: Long,
-    onSeek: (Long) -> Unit
+    position: Long, duration: Long, onSeek: (Long) -> Unit
 ) {
     var sliderPosition by remember { mutableFloatStateOf(position.toFloat()) }
 
@@ -260,9 +257,9 @@ fun PlaybackSlider(
                         Modifier
                             .fillMaxWidth(fraction)
                             .align(Alignment.CenterStart)
-                            .height(6.dp)
+                            .height(3.dp)
                             .padding(end = 0.dp)
-                            .background(Color.Yellow, CircleShape)
+                            .background(MaterialTheme.colorScheme.secondary, CircleShape)
                     )
                     Box(
                         Modifier
