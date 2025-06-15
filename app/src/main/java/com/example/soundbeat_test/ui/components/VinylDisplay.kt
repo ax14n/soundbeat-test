@@ -22,9 +22,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -152,7 +155,7 @@ fun PlayerControls(
     author: String = "Unknown",
     nextTrack: String = "Unknown",
     index: Int = 1,
-    len: Int = index
+    len: Int = index,
 ) {
     Row(
         modifier = Modifier
@@ -194,6 +197,7 @@ fun PlayerControls(
         }
     }
 }
+
 
 /**
  * Ítem compacto de álbum para usar en listas horizontales o vistas resumidas.
