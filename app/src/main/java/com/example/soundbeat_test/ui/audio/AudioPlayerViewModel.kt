@@ -269,6 +269,9 @@ class AudioPlayerViewModel(
         }
     }
 
+    /**
+     * Elimina una cancion de favoritos.
+     */
     private fun removeFromFavorites() {
         viewModelScope.launch {
             val prefs = getApplication<Application>().getSharedPreferences("UserInfo", MODE_PRIVATE)
@@ -294,6 +297,10 @@ class AudioPlayerViewModel(
         // TODO("Not implemented yet.")
     }
 
+    /**
+     * Cambia el estado a su estado contrario para indicar si a una persona le gusta una canción o
+     * deja de gustarle. Las canciones favoritas son almacenadas en una tabla aparte a las playlists.
+     */
     @OptIn(UnstableApi::class)
     fun alternateFavoriteSong() {
         _isMarkedAsFavorite.value = !_isMarkedAsFavorite.value

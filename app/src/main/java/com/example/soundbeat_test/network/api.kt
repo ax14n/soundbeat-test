@@ -471,10 +471,11 @@ suspend fun addSongsToRemotePlaylist(playlistId: Int, albums: List<Album?>): Str
  * @param playlistId: Identificador de la playlist.
  * @param songIds: Colección que contiene los identificadores de las canciones a eliminar.
  * */
-suspend fun deleteSongsFromPlaylist(playlistId: Int, songIds: List<Int>): String {
+suspend fun deleteSongsFromPlaylist(playlistId: Int, albums: List<Album?>): String {
+    val songsId = albums.map { it?.id }
     val jsonBody = JSONObject().apply {
         put("playlist_id", playlistId)
-        put("song_ids", JSONArray(songIds))
+        put("song_ids", JSONArray(songsId))
     }
 
     val url = "${ServerConfig.getBaseUrl()}/api/playlists/delete-songs"
