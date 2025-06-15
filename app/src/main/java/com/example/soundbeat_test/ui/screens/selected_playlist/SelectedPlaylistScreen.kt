@@ -1,6 +1,8 @@
 package com.example.soundbeat_test.ui.screens.selected_playlist
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -70,12 +73,16 @@ fun SelectedPlaylistScreen(
     audioPlayerViewModel: AudioPlayerViewModel,
     playlistScreenViewModel: PlaylistScreenViewModel
 ) {
+    val context: Context = LocalContext.current
+
     val sharedPlaylist = sharedPlaylistViewModel.selectedPlaylist.collectAsState().value
     val screenMode = sharedPlaylistViewModel.mode.collectAsState().value
     val songsSource = sharedPlaylistViewModel.songsSource.collectAsState().value
     val isEditionMode = sharedPlaylistViewModel.isEditionMode.collectAsState().value
     val isPlaylist = sharedPlaylistViewModel.isPlaylist.collectAsState().value
-    val shouldRefresh = sharedPlaylistViewModel.shouldRefresh.collectAsState().value
+
+    val insertStagedSongs = sharedPlaylistViewModel.insertStagedSongs.collectAsState().value
+    val removeStagedSongs = sharedPlaylistViewModel.removeStagedSongs.collectAsState().value
 
     val songs = playlistScreenViewModel.songs.collectAsState().value
 
@@ -116,7 +123,7 @@ fun SelectedPlaylistScreen(
 
     LaunchedEffect(lastSong) {
         if (lastSong != null) {
-            Log.d("SelectedPlaylistScreen", "Añadiendo última canción: $lastSong")
+            Log.d("SelectedPlaylistScreen", "adding last song: $lastSong")
             playlistScreenViewModel.addSongToInternalSongs(lastSong)
         }
     }
@@ -148,7 +155,6 @@ fun SelectedPlaylistScreen(
                                 }
 
                                 SongSource.REMOTES_FAVORITES -> {
-                                    "No puedes eliminar las canciones favoritas."
                                 }
                             }
                             navHostController?.navigate(ROUTES.HOME) {
@@ -242,29 +248,37 @@ fun SelectedPlaylistScreen(
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                         onClick = {
-                            navHostController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${origin}/${true}") {
-                                launchSingleTop = true
+                            if (removeStagedSongs.isNotEmpty()) {
+                                Toast.makeText(
+                                    context,
+                                    "Apply deletions before proceeding.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                navHostController?.navigate("SEARCH/${SearchInteractionMode.APPEND_TO_PLAYLIST.name}/${origin}/${true}") {
+                                    launchSingleTop = true
+                                }
                             }
                         },
                     ) {
                         Text("+")
                     }
                     Button(
-                        shape = RectangleShape,
                         modifier = Modifier.weight(1f),
+                        shape = RectangleShape,
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                         onClick = {
                             CoroutineScope(Dispatchers.Main).launch {
                                 if (songsSource == SongSource.LOCALS) {
-                                    sharedPlaylistViewModel.addSongsToExistentLocalPlaylist()
+                                    if (insertStagedSongs.isNotEmpty()) sharedPlaylistViewModel.addSongsToExistentLocalPlaylist() else sharedPlaylistViewModel.deleteSongsFromExistentLocalePlaylist()
                                 } else if (songsSource == SongSource.REMOTES) {
-                                    sharedPlaylistViewModel.addSongsToExistentRemotePlaylist()
+                                    if (insertStagedSongs.isNotEmpty()) sharedPlaylistViewModel.addSongsToExistentRemotePlaylist() else sharedPlaylistViewModel.deleteSongsFromExistentRemotePlaylist()
                                 }
                                 // La UI se actualizaba antes de la inserción, así que lo atrasé 50ms
-                                delay(50)
+                                delay(150)
                                 sharedPlaylistViewModel.setEditableMode(false)
-
                             }
+
                         },
                     ) {
                         Text("Apply Changes")
@@ -272,7 +286,23 @@ fun SelectedPlaylistScreen(
                 }
             }
             VinylList(
-                albumList = reproduce
+                albumList = reproduce,
+                removeButton = isEditionMode,
+                onDeleteSong = {
+                    if (insertStagedSongs.isNotEmpty()) {
+                        Toast.makeText(
+                            context, "Apply additions before proceeding.", Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        if (it !in removeStagedSongs) {
+                            sharedPlaylistViewModel.addToRemoveStagedSong(it)
+                            Log.d("SelectedPlaylistScreen", "adding album to delete stage zone")
+                        } else {
+                            sharedPlaylistViewModel.removeFromRemoveStagedSong(it)
+                            Log.d("SelectedPlaylistScreen", "removing album from delete stage zone")
+                        }
+                    }
+                },
             ) { album ->
                 val modifiedAlbum = Album(
                     id = album.id,

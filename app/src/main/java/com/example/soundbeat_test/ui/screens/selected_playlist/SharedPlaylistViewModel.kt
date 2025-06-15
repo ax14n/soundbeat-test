@@ -17,6 +17,7 @@ import com.example.soundbeat_test.local.room.entities.PlaylistSong
 import com.example.soundbeat_test.local.room.repositories.PlaylistRepository
 import com.example.soundbeat_test.network.addSongsToRemotePlaylist
 import com.example.soundbeat_test.network.deletePlaylist
+import com.example.soundbeat_test.network.deleteSongsFromPlaylist
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -99,24 +100,14 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
     val mode: StateFlow<SelectionMode> = _isPlaylist
 
     /**
-     * Indica si actualizar las listas de canciones que se muestran por pantalla. Pensado como
-     * solución al problema de que al volver desde la pantalla de búsqueda, no se actualizaban.
-     */
-    private val _shouldRefresh = MutableStateFlow<Boolean>(false)
-
-    val shouldRefresh: StateFlow<Boolean> = _shouldRefresh
-
-    /**
      * Las canciones agregadas para actualizar una playlist serán almacenadas aquí. Al confirmar
      * los cambios se usará para agregarlas a la respectiva playlist.
      */
-    private val _stagedSongs = MutableStateFlow<Set<Album?>>(emptySet())
+    private val _insertStagedSongs = MutableStateFlow<Set<Album?>>(emptySet())
+    val insertStagedSongs: StateFlow<Set<Album?>> = _insertStagedSongs
 
-    /**
-     * Flujo público de solo lectura que muestra las canciones en el area de stage. Serán agregadas
-     * a la playlist una vez confirmados los cambios.
-     */
-    val stagedSongs: StateFlow<Set<Album?>> = _stagedSongs
+    private val _removeStagedSongs = MutableStateFlow<Set<Album?>>(emptySet())
+    val removeStagedSongs: StateFlow<Set<Album?>> = _removeStagedSongs
 
     /**
      * Actualiza la playlist seleccionada para compartirla entre pantallas.
@@ -147,20 +138,7 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
         if (currentPlaylist != null) {
             val updatedSongs = currentPlaylist.songs + album
             _selectedPlaylist.value = currentPlaylist.copy(songs = updatedSongs)
-            _stagedSongs.value = updatedSongs
-            android.util.Log.d(
-                "SharedPlaylistViewModel", "final songs list: ${_selectedPlaylist.value}"
-            )
-        }
-    }
-
-    fun removeSongToSharedSongs(album: Album) {
-        android.util.Log.d("SharedPlaylistViewModel", "removing to the temporal list: $album")
-        val currentPlaylist = _selectedPlaylist.value
-        if (currentPlaylist != null) {
-            val updatedSongs = currentPlaylist.songs - album
-            _selectedPlaylist.value = currentPlaylist.copy(songs = updatedSongs)
-            _stagedSongs.value = updatedSongs
+            _insertStagedSongs.value = updatedSongs
             android.util.Log.d(
                 "SharedPlaylistViewModel", "final songs list: ${_selectedPlaylist.value}"
             )
@@ -223,13 +201,14 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
      */
     fun addSongsToExistentRemotePlaylist() {
         val playlistId = _selectedPlaylist.value?.id
-        val stagedSongs = _stagedSongs.value
+        val stagedSongs = _insertStagedSongs.value
         viewModelScope.launch {
             addSongsToRemotePlaylist(
                 playlistId = playlistId!!, albums = stagedSongs.toList()
             )
         }
-        _stagedSongs.value = emptySet<Album>()
+        // Agregadas las canciones a la playlist, vacio la zona de stage.
+        _insertStagedSongs.value = emptySet<Album>()
     }
 
     private val localPlaylistSongDb = getPlaylistSongDao(application.applicationContext)
@@ -240,16 +219,17 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
      * @param playlistId: Identificador de la playlist.
      * @param songIds: Colección que contiene los identificadores de las canciones a agregar.
      */
+    @OptIn(UnstableApi::class)
     fun addSongsToExistentLocalPlaylist() {
         viewModelScope.launch {
             val playlistId = _selectedPlaylist.value?.id
-            val stagedSongs = _stagedSongs.value
+            val stagedSongs = _insertStagedSongs.value
             for (album in stagedSongs) {
                 val existence = localSongDb.getSongByTitleAndArtist(album!!.title, album.author)
 
                 val songId = existence?.songId ?: localSongDb.insert(album.toSong()).toInt()
 
-                Log.d("PlaylistCreation", "inserted song id: $songId")
+                Log.d("SharedPlaylistViewModel", "inserted song with id: $songId")
 
                 val playlistSong = album?.let {
                     PlaylistSong(
@@ -259,7 +239,66 @@ class SharedPlaylistViewModel(application: Application) : AndroidViewModel(appli
                 localPlaylistSongDb.insert(playlistSong!!)
             }
         }
-        _stagedSongs.value = emptySet<Album>()
+        // Agregadas las canciones a la playlist, vacio la zona de stage.
+        _insertStagedSongs.value = emptySet<Album>()
+    }
+
+    /**
+     * Elimina una o varias canciones pertenecientes a una playlist remota.
+     */
+    fun deleteSongsFromExistentRemotePlaylist() {
+        val playlistId = _selectedPlaylist.value?.id
+        val removeStagedSongs = _removeStagedSongs.value
+
+        viewModelScope.launch {
+            deleteSongsFromPlaylist(
+                playlistId = playlistId!!, albums = removeStagedSongs.toList()
+            )
+        }
+        // Removidas las canciones de la playlist, vacio la zona de stage.
+        _removeStagedSongs.value = emptySet<Album>()
+    }
+
+    /**
+     * Elimina una o varias canciones pertenecientes a una playlist local.
+     */
+    @OptIn(UnstableApi::class)
+    fun deleteSongsFromExistentLocalePlaylist() {
+        val playlistId = _selectedPlaylist.value?.id
+        val stagedSongs = _removeStagedSongs.value
+        viewModelScope.launch {
+            for (album in stagedSongs) {
+                val existence = localSongDb.getSongByTitleAndArtist(album!!.title, album.author)
+
+                val songId = existence?.songId ?: -1
+                Log.d("SharedPlaylistViewModel", "trying to delete song with id: $songId")
+
+                val playlistSong = album?.let {
+                    PlaylistSong(
+                        playlist_id = playlistId!!, song_id = songId
+                    )
+                }
+                localPlaylistSongDb.delete(playlistSong!!)
+            }
+        }
+        // Removidas las canciones de la playlist, vacio la zona de stage.
+        _removeStagedSongs.value = emptySet<Album>()
+    }
+
+    fun addToRemoveStagedSong(album: Album) {
+        _removeStagedSongs.value += album
+    }
+
+    fun addToInsertStagedSong(album: Album) {
+        _insertStagedSongs.value += album
+    }
+
+    fun removeFromInsertStagedSong(album: Album) {
+        _insertStagedSongs.value -= album
+    }
+
+    fun removeFromRemoveStagedSong(album: Album) {
+        _removeStagedSongs.value -= album
     }
 
     /**
