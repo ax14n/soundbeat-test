@@ -53,7 +53,6 @@ fun ConfigurationScreen(
 ) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("UserInfo", Context.MODE_PRIVATE) }
-    val email = remember { mutableStateOf(prefs.getString("email", "OFFLINE")) }
 
     val activeDialog = remember { mutableStateOf<String?>(null) }
     val temporalBuffer = remember { mutableStateOf("") }
@@ -144,6 +143,17 @@ fun ConfigurationScreen(
             SettingsButton("Change the app theme") {}
             SettingsButton("Change server address") {
                 activeDialog.value = "address"
+            }
+            SettingsButton(text = "Tutorial") {
+                val mode = prefs.getString("tutorial", "OFF")
+                if (mode == "OFF") {
+                    prefs.edit().putString("tutorial", "ON").apply()
+                    Toast.makeText(context, "Tutorial: ON", Toast.LENGTH_SHORT).show()
+
+                } else {
+                    prefs.edit().putString("tutorial", "OFF").apply()
+                    Toast.makeText(context, "Tutorial: OFF", Toast.LENGTH_SHORT).show()
+                }
             }
 
             Spacer(Modifier.padding(top = 10.dp))
@@ -245,7 +255,6 @@ private fun dialogHandler(
                 configurationViewModel.changeIPAddress(input)
                 activeDialog.value = null
             })
-
 
     }
 }
