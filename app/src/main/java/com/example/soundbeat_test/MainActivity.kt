@@ -81,7 +81,7 @@ class MainActivity : ComponentActivity() {
 
             val toggleTheme: () -> Unit = {
                 isDarkTheme = !isDarkTheme
-                getSharedPreferences("prefs", MODE_PRIVATE).edit()
+                getSharedPreferences("UserInfo", MODE_PRIVATE).edit()
                     .putBoolean("is_dark_theme", isDarkTheme).apply()
             }
 
