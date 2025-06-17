@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -70,7 +71,21 @@ class MainActivity : ComponentActivity() {
         LocalConfig.init(this)
         enableEdgeToEdge()
         setContent {
-            SoundBeat_TestTheme {
+            var isDarkTheme by remember {
+                mutableStateOf(
+                    getSharedPreferences("UserInfo", MODE_PRIVATE).getBoolean(
+                        "is_dark_theme", false
+                    )
+                )
+            }
+
+            val toggleTheme: () -> Unit = {
+                isDarkTheme = !isDarkTheme
+                getSharedPreferences("prefs", MODE_PRIVATE).edit()
+                    .putBoolean("is_dark_theme", isDarkTheme).apply()
+            }
+
+            SoundBeat_TestTheme(darkTheme = isDarkTheme) {
 
                 val audioPlayerViewModel: AudioPlayerViewModel = viewModel()
                 val sharedPlaylistViewModel: SharedPlaylistViewModel = viewModel()
@@ -85,7 +100,8 @@ class MainActivity : ComponentActivity() {
                                 audioPlayerViewModel = audioPlayerViewModel,
                                 sharedPlaylistViewModel = sharedPlaylistViewModel,
                                 playlistScreenViewModel = playlistScreenViewModel,
-                                createPlaylistViewModel = createPlaylistViewModel
+                                createPlaylistViewModel = createPlaylistViewModel,
+                                onToggleTheme = toggleTheme,
                             )
                         }
                     }
@@ -106,7 +122,8 @@ fun MainApp(
     audioPlayerViewModel: AudioPlayerViewModel? = null,
     sharedPlaylistViewModel: SharedPlaylistViewModel? = null,
     playlistScreenViewModel: PlaylistScreenViewModel? = null,
-    createPlaylistViewModel: CreatePlaylistViewModel
+    createPlaylistViewModel: CreatePlaylistViewModel,
+    onToggleTheme: () -> Unit
 ) {
     val navController = rememberNavController()
 
@@ -116,6 +133,7 @@ fun MainApp(
         audioPlayerViewModel = audioPlayerViewModel,
         playlistScreenViewModel = playlistScreenViewModel,
         createPlaylistViewModel = createPlaylistViewModel,
+        onToggleTheme = onToggleTheme,
     )
 }
 
@@ -132,7 +150,8 @@ fun AppNavigation(
     sharedPlaylistViewModel: SharedPlaylistViewModel?,
     audioPlayerViewModel: AudioPlayerViewModel?,
     playlistScreenViewModel: PlaylistScreenViewModel?,
-    createPlaylistViewModel: CreatePlaylistViewModel
+    createPlaylistViewModel: CreatePlaylistViewModel,
+    onToggleTheme: () -> Unit
 ) {
     NavHost(navController = navController, startDestination = ROUTES.LOGIN) {
         composable(ROUTES.LOGIN) {
@@ -159,7 +178,9 @@ fun AppNavigation(
             ProfileScreen(navController)
         }
         composable(ROUTES.SETTINGS) {
-            ConfigurationScreen(navController)
+            ConfigurationScreen(
+                navController, onToggleTheme = onToggleTheme
+            )
         }
         composable(ROUTES.SELECTED_PLAYLIST) {
             SelectedPlaylistScreen(
