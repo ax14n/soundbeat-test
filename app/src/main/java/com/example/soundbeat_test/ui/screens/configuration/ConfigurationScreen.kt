@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -45,11 +44,12 @@ import com.example.soundbeat_test.ui.components.ImageGif
 import com.example.soundbeat_test.utils.SimpleAlertDialog
 import com.example.soundbeat_test.utils.TextInputDialog
 
-@Preview(showSystemUi = true)
 @Composable
 fun ConfigurationScreen(
     navHostController: NavHostController? = null,
-    configurationViewModel: ConfigurationViewModel = viewModel()
+    configurationViewModel: ConfigurationViewModel = viewModel(),
+    isDarkTheme: Boolean = false,
+    onToggleTheme: () -> Unit
 ) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("UserInfo", Context.MODE_PRIVATE) }
@@ -140,7 +140,9 @@ fun ConfigurationScreen(
             SettingsButton("Change music directory") {
                 configurationViewModel.changeMusicDirectory(launcher)
             }
-            SettingsButton("Change the app theme") {}
+            SettingsButton("Change the app theme") {
+                onToggleTheme()
+            }
             SettingsButton("Change server address") {
                 activeDialog.value = "address"
             }
