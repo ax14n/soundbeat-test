@@ -239,14 +239,11 @@ fun MainScreen(
     var selectedIndex by remember { mutableIntStateOf(0) }
 
     var showcaseStep by remember { mutableIntStateOf(0) }
-    val modifier: Modifier = Modifier.clickable {}
 
     val context: Context = LocalContext.current
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .then(if (showcaseStep <= 3) modifier else Modifier)
+        modifier = Modifier.fillMaxSize()
     ) {
         Scaffold(bottomBar = {
             BottomNavigationBar(navItemList, selectedIndex) { selectedIndex = it }
@@ -284,15 +281,16 @@ fun MainScreen(
 
             // Tu guía
             Guide(
-                step = showcaseStep,
-                onNext = {
+                step = showcaseStep, onNext = {
                     showcaseStep++
-                },
-                context = context,
-            )
+                }, context = context
+            ) {
+                selectedIndex = it
+            }
         }
     }
 }
+
 
 /**
  * Barra de navegación inferior que permite seleccionar diferentes secciones de la aplicación.
@@ -359,13 +357,14 @@ fun Guide(
     modifier: Modifier = Modifier,
     onNext: () -> Unit,
     context: Context,
+    onIndexChange: (Int) -> Unit,
 ) {
     val prefs = remember { context.getSharedPreferences("UserInfo", Context.MODE_PRIVATE).edit() }
 
     when (step) {
         0 -> Box(modifier = modifier.fillMaxSize()) {
             Text(
-                "¡Aquí puedes ver las canciones disponibles!",
+                "¡Aquí puedes ver las canciones disponibles!\nNext ->",
                 modifier = Modifier
                     .align(Alignment.Center)
                     .padding(16.dp)
@@ -376,8 +375,9 @@ fun Guide(
         }
 
         1 -> Box(modifier = modifier.fillMaxSize()) {
+            onIndexChange(1) // Playlist
             Text(
-                "¡Aquí puedes ver las playlists locales y remotas!.",
+                "¡Aquí puedes ver las playlists locales y remotas!\nNext ->",
                 modifier = Modifier
                     .align(Alignment.Center)
                     .padding(16.dp)
@@ -388,8 +388,9 @@ fun Guide(
         }
 
         2 -> Box(modifier = modifier.fillMaxSize()) {
+            onIndexChange(2) // Search
             Text(
-                "¡Aquí puedes ver ver le búscador de canciones!",
+                "¡Aquí puedes ver el búscador de canciones!\n" + "¡Aquí podrás filtrar y buscar canciones remotas o locales!" + "\nNext ->",
                 modifier = Modifier
                     .align(Alignment.Center)
                     .padding(16.dp)
@@ -400,8 +401,9 @@ fun Guide(
         }
 
         3 -> Box(modifier = modifier.fillMaxSize()) {
+            onIndexChange(3) // Profile
             Text(
-                "¡Aquí he tu perfil!",
+                "¡Aquí he tu perfil!\n¡Clickeame para terminar la guía! ->",
                 modifier = Modifier
                     .align(Alignment.Center)
                     .padding(16.dp)
