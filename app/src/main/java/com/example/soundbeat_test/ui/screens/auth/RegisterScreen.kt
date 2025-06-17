@@ -1,5 +1,6 @@
 package com.example.soundbeat_test.ui.screens.auth
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -60,6 +61,8 @@ fun RegisterScreen(
     navHostController: NavHostController? = null, registerViewModel: RegisterViewModel = viewModel()
 ) {
     val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("UserInfo", Context.MODE_PRIVATE) }
+
 
     val message by registerViewModel.message.collectAsState()
     val isAuthenticated by registerViewModel.isAuthenticated.collectAsState()
@@ -166,6 +169,12 @@ fun RegisterScreen(
 
                 LaunchedEffect(isAuthenticated) {
                     if (isAuthenticated) {
+                        val tutorial = prefs.getString("tutorial", "OFF")
+                        if (tutorial == "OFF") {
+                            prefs.edit().putString("tutorial", "ON").apply()
+                        } else {
+                            prefs.edit().putString("tutorial", "OFF").apply()
+                        }
                         navHostController?.navigate(ROUTES.HOME) {
                             popUpTo(ROUTES.HOME) { inclusive = true }
                         }
@@ -186,13 +195,4 @@ private fun ColumnScope.onLoginClick(navHostController: NavHostController) {
     Log.d("LoginScreen", "Navigating to: LOGIN SCREEN")
 }
 
-/**
- * Maneja el clic sobre el botón "ENTER!" y navega hacia la pantalla principal (HOME) tras completar el registro.
- *
- * @param navHostController Controlador de navegación utilizado para redirigir al home.
- */
-private fun ColumnScope.onEnterClick(navHostController: NavHostController) {
-    navHostController.navigate(ROUTES.HOME)
-    Log.d("LoginScreen", "Navigating to: HOME SCREEN")
-}
 

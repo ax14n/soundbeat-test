@@ -144,14 +144,16 @@ fun ConfigurationScreen(
             SettingsButton("Change server address") {
                 activeDialog.value = "address"
             }
-            SettingsButton(text = "Activate tutorial") {
-                val tutorial = prefs.getString("tutorial", "OFF")
-                if (tutorial == "OFF") {
+            SettingsButton(text = "Tutorial") {
+                val mode = prefs.getString("tutorial", "OFF")
+                if (mode == "OFF") {
                     prefs.edit().putString("tutorial", "ON").apply()
+                    Toast.makeText(context, "Tutorial: ON", Toast.LENGTH_SHORT).show()
+
                 } else {
                     prefs.edit().putString("tutorial", "OFF").apply()
+                    Toast.makeText(context, "Tutorial: OFF", Toast.LENGTH_SHORT).show()
                 }
-                activeDialog.value = "tutorial"
             }
 
             Spacer(Modifier.padding(top = 10.dp))
@@ -253,11 +255,6 @@ private fun dialogHandler(
                 configurationViewModel.changeIPAddress(input)
                 activeDialog.value = null
             })
-
-        "tutorial" -> {
-
-        }
-
 
     }
 }
